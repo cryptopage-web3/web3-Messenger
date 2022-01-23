@@ -1,0 +1,9 @@
+services:
+  node:
+    image: node
+    command: sh -c "yarn && yarn prepare && yarn start"
+    working_dir: /app
+    volumes:
+      - ./:/app
+    ports:
+      - 1234:1234
