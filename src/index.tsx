@@ -1,12 +1,12 @@
 import { Provider } from '@self.id/framework'
 import React, { StrictMode } from 'react'
 import { render } from 'react-dom'
-import { Account } from './auth'
+import { App } from './app'
 
 render(
   <StrictMode>
     <Provider>
-      <Account />
+      <App />
     </Provider>
   </StrictMode>,
   document.getElementById('root')
