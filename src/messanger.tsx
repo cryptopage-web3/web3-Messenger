@@ -1,15 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { Box, TextInput, TextArea, Button } from 'grommet'
 import * as R from 'ramda'
-import { publish } from './peer'
+import { Messages as PeerMessages } from './peer'
 
-const channel = new BroadcastChannel('peer')
+export const channel = new BroadcastChannel('peer:messages')
 
 const useMessages = () => {
   const [messages, setMessages] = useState([])
 
   useEffect(() => {
-    channel.onmessage = ({ data }) => setMessages(R.append(data, messages))
+    const listener = ({ data }) => setMessages(R.append(data, messages))
+    channel.addEventListener('message', listener)
+
+    return () => channel.removeEventListener('message', listener)
   }, [messages, setMessages])
 
   return messages
@@ -28,17 +31,17 @@ const useHandler = () => {
   return [value, useCallback(event => setValue(event.target.value))]
 }
 
-export const Sending = () => {
+export const Sending = props => {
   const [receiver, handleReceiver] = useHandler()
   const [message, handleMessage] = useHandler()
 
   const handleSend = useCallback(
-    () => publish(receiver, message),
+    () => PeerMessages.publish(receiver, message),
     [receiver, message]
   )
 
   return (
-    <Box>
+    <Box {...props}>
       <TextInput
         placeholder="Receiver"
         value={receiver}

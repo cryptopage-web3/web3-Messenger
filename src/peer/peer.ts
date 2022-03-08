@@ -1,11 +1,11 @@
 import * as Ipfs from 'ipfs-core'
 
-const decode = data => new TextDecoder().decode(data)
-const encode = data => new TextEncoder().encode(data)
+export const decode = data => new TextDecoder().decode(data)
+export const encode = data => new TextEncoder().encode(data)
 
-let peer
+export let peer
 
-export const start = async () => {
+const start = async () => {
   peer = await Ipfs.create({
     config: {
       Addresses: {
@@ -32,18 +32,3 @@ export const start = async () => {
 }
 
 start()
-
-const channel = new BroadcastChannel('peer')
-
-export const subscribe = DID => {
-  peer.pubsub.subscribe(DID, msg => {
-    channel.postMessage(decode(msg.data))
-    console.log('receive msg: ', decode(msg.data))
-  })
-  console.log(`subscribed to ${DID}`)
-}
-
-export const publish = (DID, message) => {
-  peer.pubsub.publish(DID, encode(message))
-  console.log(`Sended to ${DID}: ${message}`)
-}

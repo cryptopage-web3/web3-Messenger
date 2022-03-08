@@ -1,20 +1,34 @@
 import React from 'react'
 import { Avatar, Connect, Name } from './profile'
-import { Box, Header, Main, Footer } from 'grommet'
+import { Box, Header, Main, Footer, Sidebar, Grid } from 'grommet'
 import { Messages, Sending } from './messanger'
+import { Contacts } from './contacts'
+import { Grommet } from 'grommet'
+
+const rows = ['auto', 'flex', '100px']
+const columns = ['auto', 'flex', 'auto']
+const areas = [
+  { name: 'header', start: [0, 0], end: [1, 0] },
+  { name: 'nav', start: [0, 1], end: [0, 2] },
+  { name: 'main', start: [1, 1], end: [1, 1] },
+  { name: 'footer', start: [1, 2], end: [1, 2] }
+]
 
 export const App = () => (
-  <Box>
-    <Header>
+  <Grid fill rows={rows} columns={columns} areas={areas}>
+    <Header gridArea="header" pad="small">
       <Avatar />
       <Name />
       <Connect />
     </Header>
-    <Main>
+    <Sidebar gridArea="nav">
+      <Contacts />
+    </Sidebar>
+    <Main gridArea="main">
       <Messages />
     </Main>
-    <Footer>
-      <Sending />
+    <Footer gridArea="footer" pad="small">
+      <Sending direction="row" fill gap="small" />
     </Footer>
-  </Box>
+  </Grid>
 )

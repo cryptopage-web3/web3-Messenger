@@ -6,10 +6,11 @@ import {
 import { Anchor, Box, Button, Heading, Paragraph, Header } from 'grommet'
 import * as R from 'ramda'
 import React, { useEffect } from 'react'
-import { subscribe } from './peer'
+import { Messages, Status } from './peer'
 
 const getName = R.path(['content', 'name'])
 const useName = () => getName(useViewerRecord('basicProfile'))
+const useCryptoAccounts = () => useViewerRecord('cryptoAccounts')
 
 const getDID = R.path([0, 'selfID', 'id'])
 const useDID = () => {
@@ -21,7 +22,10 @@ const useSubscribe = connection => {
   const did = useDID()
 
   useEffect(() => {
-    connection.status === 'connected' && did && subscribe(did)
+    if (connection.status === 'connected' && did) {
+      Messages.subscribe(did)
+      Status.publish(did)
+    }
   }, [did, connection])
 }
 
