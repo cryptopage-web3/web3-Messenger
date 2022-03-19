@@ -1,4 +1,4 @@
-import { decode, encode, peer } from './peer'
+import { decode, encode, ipfs as peer } from './peer'
 
 export const channel = new BroadcastChannel('peer:messages')
 
