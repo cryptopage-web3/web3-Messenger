@@ -1,11 +1,15 @@
 import * as Ipfs from 'ipfs-core'
+import * as Bus from '../bus'
 
 export const decode = data => new TextDecoder().decode(data)
 export const encode = data => new TextEncoder().encode(data)
 
 export let ipfs
 
-export const subscribe = (topic, fn) => {
+const subscribeCallback = message =>
+  Bus.channel.postMessage(decode(message.data))
+
+export const subscribe = (topic, fn = subscribeCallback) => {
   console.log(`! subscribe: ${topic}`)
 
   return ipfs.pubsub.subscribe(topic, msg => {
@@ -14,7 +18,7 @@ export const subscribe = (topic, fn) => {
   })
 }
 
-const publish = (topic, message) => {
+export const publish = (topic, message) => {
   console.log('publish', { topic, message })
 
   return ipfs.pubsub.publish(topic, encode(message))
@@ -107,7 +111,7 @@ const dobootstrap = async reconnect => {
       await ipfs.swarm.connect(bootstraps[i])
     } catch (e) {
       console.log('Attempt failed ', bootstraps[i])
-      //await ipfs.swarm.connect(bootstraps[i])
+      await ipfs.swarm.connect(bootstraps[i])
     }
   }
 }

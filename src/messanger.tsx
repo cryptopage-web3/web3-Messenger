@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react'
-import { Box, TextInput, TextArea, Button } from 'grommet'
+import { Box, Button, TextArea, TextInput } from 'grommet'
 import * as R from 'ramda'
-import { Messages as PeerMessages } from './peer'
+import React, { useCallback, useEffect, useState } from 'react'
+import { useDID } from './profile'
+import * as Service from './service'
 
 export const channel = new BroadcastChannel('peer:messages')
 
@@ -20,9 +21,15 @@ const useMessages = () => {
 
 export const Messages = () => (
   <ul>
-    {useMessages().map((message, index) => (
-      <li key={index}>{message}</li>
-    ))}
+    {useMessages().map((message, index) => {
+      const key = message?.date ? message.date : index
+      const text = message?.text
+        ? `${new Date(message.date).toLocaleTimeString('ru-RU')} / ${
+            message.sender
+          } -> ${message.text}`
+        : message
+      return <li key={key}>{text}</li>
+    })}
   </ul>
 )
 
@@ -31,14 +38,25 @@ const useHandler = () => {
   return [value, useCallback(event => setValue(event.target.value))]
 }
 
-export const Sending = props => {
+const usePublish = (receiver: string, text: string) => {
+  const sender = useDID()
+  return useCallback(
+    () =>
+      Service.publish({
+        type: 'message',
+        sender,
+        receiver,
+        text,
+        date: Date.now()
+      }),
+    [sender, receiver, text]
+  )
+}
+
+export const Sending = (props: any) => {
   const [receiver, handleReceiver] = useHandler()
   const [message, handleMessage] = useHandler()
-
-  const handleSend = useCallback(
-    () => PeerMessages.publish(receiver, message),
-    [receiver, message]
-  )
+  const handleSend = usePublish(receiver, message)
 
   return (
     <Box {...props}>

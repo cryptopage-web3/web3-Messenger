@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import { Box, TextInput, Button, List } from 'grommet'
 import * as R from 'ramda'
-import { Status } from './peer'
+import { Status } from './service/peer'
 
 export const channel = new BroadcastChannel('peer:status')
 
