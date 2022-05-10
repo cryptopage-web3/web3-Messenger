@@ -10,7 +10,10 @@ const useMessages = () => {
   const [messages, setMessages] = useState([])
 
   useEffect(() => {
-    const listener = ({ data }) => setMessages(R.append(data, messages))
+    const listener = ({ data }) =>
+      R.not(R.find(R.propEq('date', data.date), messages)) &&
+      setMessages(R.append(data, messages))
+
     channel.addEventListener('message', listener)
 
     return () => channel.removeEventListener('message', listener)

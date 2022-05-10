@@ -1,7 +1,7 @@
 import React from 'react'
 import { Avatar, Connect, Name } from './profile'
 import { Box, Header, Main, Footer, Sidebar, Grid } from 'grommet'
-import { Messages, Sending } from './messanger'
+import { Messages, Sending } from './messenger'
 import { Contacts } from './contacts'
 import { Grommet } from 'grommet'
 
@@ -21,9 +21,11 @@ export const App = () => (
       <Name />
       <Connect />
     </Header>
+    {/*
     <Sidebar gridArea="nav">
       <Contacts />
     </Sidebar>
+    */}
     <Main gridArea="main">
       <Messages />
     </Main>
