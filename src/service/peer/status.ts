@@ -11,7 +11,7 @@ export const publish = (DID, status = 'online') => {
   intervalID && clearInterval(intervalID)
 
   intervalID = setInterval(() => {
-    peer.pubsub.publish(getChannelName(DID), encode(status))
+    //peer.pubsub.publish(getChannelName(DID), encode(status))
     console.info(`status publish ${getChannelName(DID)}`)
   }, STATUS_INTERVAL)
 }
@@ -28,6 +28,7 @@ export const subscribe = DID => {
     }
   }, STATUS_INTERVAL * 2)
 
+  /*
   peer.pubsub.subscribe(getChannelName(DID), msg => {
     contacts = R.assocPath([DID, 'time'], Date.now(), contacts)
     channel.postMessage({ DID, status: decode(msg.data) })
@@ -37,6 +38,7 @@ export const subscribe = DID => {
       contacts
     )
   })
+  */
 
   console.log(`status subscribe ${getChannelName(DID)}`)
 }
