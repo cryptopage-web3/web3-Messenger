@@ -8,11 +8,19 @@ export const channel = new BroadcastChannel('peer:messages')
 
 const useMessages = () => {
   const [messages, setMessages] = useState([])
+  const sender = useDID()
+
+  useEffect(async () => {
+    const data = await Service.getUserMessages(sender)
+    setMessages(data)
+  }, [sender])
 
   useEffect(() => {
-    const listener = ({ data }) =>
+    const listener = ({ data }) => {
+      Service.addMessage(data)
       R.not(R.find(R.propEq('date', data.date), messages)) &&
-      setMessages(R.append(data, messages))
+        setMessages(R.append(data, messages))
+    }
 
     channel.addEventListener('message', listener)
 
@@ -43,23 +51,23 @@ const useHandler = () => {
 
 const usePublish = (receiver: string, text: string) => {
   const sender = useDID()
-  return useCallback(
-    () =>
-      Service.publish({
-        type: 'message',
-        sender,
-        receiver,
-        text,
-        date: Date.now()
-      }),
-    [sender, receiver, text]
-  )
+
+  return useCallback(() => {
+    Service.publish({
+      type: 'message',
+      sender,
+      receiver,
+      text,
+      date: Date.now()
+    })
+  }, [sender, receiver, text])
 }
 
 export const Sending = (props: any) => {
   const [receiver, handleReceiver] = useHandler()
   const [message, handleMessage] = useHandler()
   const handleSend = usePublish(receiver, message)
+  const sender = useDID()
 
   return (
     <Box {...props}>
@@ -73,7 +81,7 @@ export const Sending = (props: any) => {
         value={message}
         onChange={handleMessage}
       />
-      <Button primary label="Send" onClick={handleSend} />
+      <Button primary label="Send" onClick={handleSend} disabled={!sender} />
     </Box>
   )
 }
