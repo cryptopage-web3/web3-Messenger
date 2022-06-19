@@ -14,7 +14,6 @@ export const publish = async message => {
   try {
     Bus.channel.postMessage(message)
     server.publish(message)
-    DB.addMessage(message)
     //peer.publish(message.receiver, message.text)
     console.log('publish message', message)
   } catch (error) {
