@@ -10,7 +10,7 @@ export const subscribe = DID => {
   console.log(`message subscribe ${DID}`)
 }
 
-export const publish = async message => {
+export const publish = message => {
   try {
     Bus.channel.postMessage(message)
     server.publish(message)
@@ -23,7 +23,7 @@ export const publish = async message => {
 
 export const addMessage = async message => {
   try {
-    DB.addMessage(message)
+    return DB.addMessage(message)
   } catch (error) {
     console.log('error :>> ', error)
   }
@@ -38,6 +38,14 @@ export const getUserMessages = async DID => {
       () => R.propEq('sender', DID) || R.propEq('receiver', DID),
       messages
     )
+  } catch (error) {
+    console.log('error :>> ', error)
+  }
+}
+
+export const updateStatus = async data => {
+  try {
+    return DB.updateStatus(data)
   } catch (error) {
     console.log('error :>> ', error)
   }
