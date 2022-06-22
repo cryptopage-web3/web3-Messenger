@@ -21,11 +21,11 @@ export const App = () => (
       <Name />
       <Connect />
     </Header>
-    {/*
+
     <Sidebar gridArea="nav">
       <Contacts />
     </Sidebar>
-    */}
+
     <Main gridArea="main">
       <Messages />
     </Main>

@@ -1,5 +1,4 @@
 import { Box, Button, TextArea, TextInput } from 'grommet'
-import * as R from 'ramda'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useDID } from './profile'
 import * as Service from './service'

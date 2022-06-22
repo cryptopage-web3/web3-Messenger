@@ -11,6 +11,22 @@ export const DBConfig = {
         { name: 'text', keypath: 'text', options: { unique: false } },
         { name: 'date', keypath: 'date', options: { unique: false } }
       ]
+    },
+    {
+      store: 'contacts',
+      storeConfig: { keyPath: 'id', autoIncrement: true },
+      storeSchema: [
+        {
+          name: 'current_did',
+          keypath: 'current_did',
+          options: { unique: false }
+        },
+        {
+          name: 'contact_did',
+          keypath: 'contact_did',
+          options: { unique: true }
+        }
+      ]
     }
   ]
 }

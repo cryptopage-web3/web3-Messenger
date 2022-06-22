@@ -25,7 +25,7 @@ export const addMessage = async message => {
   try {
     return DB.addMessage(message)
   } catch (error) {
-    console.log('error :>> ', error)
+    console.log('error addMessage :>> ', error)
   }
 }
 
@@ -39,7 +39,7 @@ export const getUserMessages = async DID => {
       messages
     )
   } catch (error) {
-    console.log('error :>> ', error)
+    console.log('error getUserMessages :>> ', error)
   }
 }
 
@@ -47,6 +47,23 @@ export const updateStatus = async data => {
   try {
     return DB.updateStatus(data)
   } catch (error) {
-    console.log('error :>> ', error)
+    console.log('error updateStatus :>> ', error)
+  }
+}
+
+export const addContact = async contact => {
+  try {
+    return DB.addContact(contact)
+  } catch (error) {
+    console.log('error addContact :>> ', error)
+  }
+}
+
+export const getAllContact = async currentDid => {
+  try {
+    const contacts = await DB.getAllContacts()
+    return R.filter(R.propEq('current_did', currentDid), contacts)
+  } catch (error) {
+    console.log('error getAllContact :>> ', error)
   }
 }

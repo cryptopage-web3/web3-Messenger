@@ -9,6 +9,10 @@ type Message = {
   date: Date
 }
 
+type Contact = {
+  did: string
+}
+
 export const addMessage = async (message: Message) => {
   const { add } = useIndexedDB('messages')
 
@@ -44,5 +48,25 @@ export const updateStatus = async ({
     return update({ ...msg, status })
   } catch (error) {
     console.log('error :>> ', error)
+  }
+}
+
+export const addContact = async (contact: Contact) => {
+  const { add } = useIndexedDB('contacts')
+
+  try {
+    return add(contact)
+  } catch (error) {
+    console.log('error addContact :>> ', error)
+  }
+}
+
+export const getAllContacts = async () => {
+  const { getAll } = useIndexedDB('contacts')
+
+  try {
+    return getAll()
+  } catch (error) {
+    console.log('error getAllContacts :>> ', error)
   }
 }
