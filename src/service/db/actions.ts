@@ -55,9 +55,13 @@ export const addContact = async (contact: Contact) => {
   const { add } = useIndexedDB('contacts')
 
   try {
-    return add(contact)
+    const res = await add(contact)
+    return res
   } catch (error) {
     console.log('error addContact :>> ', error)
+    if (error?.target?.error?.name === 'ConstraintError') {
+      alert('The user is already in contacts')
+    }
   }
 }
 

@@ -29,13 +29,15 @@ export const addMessage = async message => {
   }
 }
 
-export const getUserMessages = async DID => {
-  if (!DID) return []
+export const getUserMessages = async (currentUser, activeContact) => {
+  if (!currentUser || !activeContact) return []
 
   try {
     const messages = await DB.getAllMessages()
     return R.filter(
-      () => R.propEq('sender', DID) || R.propEq('receiver', DID),
+      item =>
+        (item.receiver === activeContact && item.sender === currentUser) ||
+        (item.sender === activeContact && item.receiver === currentUser),
       messages
     )
   } catch (error) {

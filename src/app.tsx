@@ -22,7 +22,7 @@ export const App = () => (
       <Connect />
     </Header>
 
-    <Sidebar gridArea="nav">
+    <Sidebar gridArea="nav" width="medium" overflow="hidden">
       <Contacts />
     </Sidebar>
 

@@ -4,7 +4,25 @@ import { useDID } from './profile'
 import * as Service from './service'
 import { Status } from './service/types'
 
-export const channel = new BroadcastChannel('peer:messages')
+export const messagesChannel = new BroadcastChannel('peer:messages')
+export const contactsChannel = new BroadcastChannel('peer:contacts')
+
+const useActiveContact = () => {
+  const [activeContact, setActiveContact] = useState('')
+
+  const listener = async ({ data }) => {
+    data.type === 'activeContact' && setActiveContact(data.payload)
+  }
+
+  useEffect(() => {
+    contactsChannel.addEventListener('message', listener)
+    return () => {
+      contactsChannel.removeEventListener('message', listener)
+    }
+  }, [])
+
+  return activeContact
+}
 
 const publishStatusMsg = (msg, status) =>
   Service.publish({
@@ -20,15 +38,15 @@ const handleIncomingMessage = async msg => {
   publishStatusMsg(msg, Status.delivered)
 }
 
-const useMessages = sender => {
+const useMessages = (sender, activeContact) => {
   const [messages, setMessages] = useState([])
 
   const getMessages = async () => {
-    const data = await Service.getUserMessages(sender)
+    const data = await Service.getUserMessages(sender, activeContact)
     setMessages(data)
   }
 
-  useEffect(getMessages, [sender])
+  useEffect(getMessages, [sender, activeContact])
 
   const listener = async ({ data }) => {
     data.receiver === sender &&
@@ -40,20 +58,22 @@ const useMessages = sender => {
   }
 
   useEffect(() => {
-    channel.addEventListener('message', listener)
-
-    return () => channel.removeEventListener('message', listener)
-  }, [messages, setMessages])
+    messagesChannel.addEventListener('message', listener)
+    return () => {
+      messagesChannel.removeEventListener('message', listener)
+    }
+  }, [activeContact, sender])
 
   return messages
 }
 
 export const Messages = () => {
   const sender = useDID()
+  const activeContact = useActiveContact()
 
   return (
     <ul>
-      {useMessages(sender).map((message, index) => {
+      {useMessages(sender, activeContact).map((message, index) => {
         message.receiver === sender &&
           message.status !== 'viewed' &&
           publishStatusMsg(message, Status.viewed)
@@ -95,24 +115,24 @@ const usePublish = (receiver: string, text: string) => {
 }
 
 export const Sending = (props: any) => {
-  const [receiver, handleReceiver] = useHandler()
+  const receiver = useActiveContact()
   const [message, handleMessage] = useHandler()
   const handleSend = usePublish(receiver, message)
   const sender = useDID()
 
   return (
     <Box {...props}>
-      <TextInput
-        placeholder="Receiver"
-        value={receiver}
-        onChange={handleReceiver}
-      />
       <TextArea
         placeholder="Message"
         value={message}
         onChange={handleMessage}
       />
-      <Button primary label="Send" onClick={handleSend} disabled={!sender} />
+      <Button
+        primary
+        label="Send"
+        onClick={handleSend}
+        disabled={!sender || !receiver}
+      />
     </Box>
   )
 }
