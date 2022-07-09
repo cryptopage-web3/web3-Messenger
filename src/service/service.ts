@@ -17,7 +17,7 @@ export const publish = message => {
     //peer.publish(message.receiver, message.text)
     console.log('publish message', message)
   } catch (error) {
-    console.log('error :>> ', error)
+    console.log('error publish:>> ', error)
   }
 }
 
@@ -61,11 +61,37 @@ export const addContact = async contact => {
   }
 }
 
+export const updateContact = async (contact, publicKey) => {
+  try {
+    return DB.updateContact(contact, publicKey)
+  } catch (error) {
+    console.log('error updateContact :>> ', error)
+  }
+}
+
 export const getAllContact = async currentDid => {
   try {
     const contacts = await DB.getAllContacts()
     return R.filter(R.propEq('current_did', currentDid), contacts)
   } catch (error) {
     console.log('error getAllContact :>> ', error)
+  }
+}
+
+export const getPublicKey = async () => {
+  if (!('ethereum' in window)) return
+
+  try {
+    // @ts-ignore
+    const [account] = await ethereum.request({ method: 'eth_requestAccounts' })
+    // @ts-ignore
+    const key = await ethereum.request({
+      method: 'eth_getEncryptionPublicKey',
+      params: [account]
+    })
+    return key
+  } catch (error) {
+    console.log('error getPublicKey:>> ', error)
+    return ''
   }
 }

@@ -1,9 +1,8 @@
 import React from 'react'
 import { Avatar, Connect, Name } from './profile'
-import { Box, Header, Main, Footer, Sidebar, Grid } from 'grommet'
+import { Header, Main, Footer, Sidebar, Grid } from 'grommet'
 import { Messages, Sending } from './messenger'
-import { Contacts } from './contacts'
-import { Grommet } from 'grommet'
+import { Add, List } from './contacts/index'
 
 const rows = ['auto', 'flex', '100px']
 const columns = ['auto', 'flex', 'auto']
@@ -23,7 +22,8 @@ export const App = () => (
     </Header>
 
     <Sidebar gridArea="nav" width="medium" overflow="hidden">
-      <Contacts />
+      <Add />
+      <List />
     </Sidebar>
 
     <Main gridArea="main">

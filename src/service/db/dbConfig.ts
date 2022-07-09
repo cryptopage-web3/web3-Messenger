@@ -25,6 +25,11 @@ export const DBConfig = {
           name: 'contact_did',
           keypath: 'contact_did',
           options: { unique: true }
+        },
+        {
+          name: 'contact_public_key',
+          keypath: 'contact_public_key',
+          options: { unique: true }
         }
       ]
     }

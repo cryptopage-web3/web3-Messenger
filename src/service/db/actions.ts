@@ -65,6 +65,21 @@ export const addContact = async (contact: Contact) => {
   }
 }
 
+export const updateContact = async (contact: Contact, publicKey) => {
+  const { getAll, update } = useIndexedDB('contacts')
+
+  try {
+    const contacts = await getAll()
+    const foundContact = contacts.find(c => c.contact_did === contact)
+
+    if (foundContact.contact_public_key) return
+
+    update({ ...foundContact, contact_public_key: publicKey })
+  } catch (error) {
+    console.log('error addContact :>> ', error)
+  }
+}
+
 export const getAllContacts = async () => {
   const { getAll } = useIndexedDB('contacts')
 

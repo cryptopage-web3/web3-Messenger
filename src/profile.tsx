@@ -5,9 +5,11 @@ import {
 } from '@self.id/framework'
 import { Anchor, Box, Button, Heading, Paragraph, Header } from 'grommet'
 import * as R from 'ramda'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Status } from './service/peer'
 import * as Service from './service'
+
+const keyChannel = new BroadcastChannel('peer:key')
 
 const getName = R.path(['content', 'name'])
 const useName = () => getName(useViewerRecord('basicProfile'))
@@ -30,9 +32,24 @@ const useSubscribe = connection => {
   }, [did, connection])
 }
 
+const usePublicKey = () => {
+  const did = useDID()
+
+  useEffect(async () => {
+    if (!did) return
+
+    const key = await Service.getPublicKey()
+    keyChannel.postMessage({
+      type: 'publicKey',
+      payload: key
+    })
+  }, [did])
+}
+
 export const Connect = () => {
   const [connection, connect, disconnect] = useConnection()
   useSubscribe(connection)
+  usePublicKey()
 
   return connection.status === 'connected' ? (
     <Button label="Disconnect" onClick={disconnect} />
@@ -40,7 +57,7 @@ export const Connect = () => {
     <Button
       disabled={connection.status === 'connecting'}
       label="Connect"
-      onClick={() => connect()}
+      onClick={connect}
     />
   ) : (
     <Paragraph>
