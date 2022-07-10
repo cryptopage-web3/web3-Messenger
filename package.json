@@ -33,8 +33,10 @@
     "url": "^0.11.0"
   },
   "dependencies": {
+    "@metamask/eth-sig-util": "^4.0.1",
     "@self.id/framework": "^0.2.0",
     "crypto": "^1.0.1",
+    "ethereumjs-util": "^7.1.5",
     "grommet": "^2.20.0",
     "ipfs-core": "^0.14.1",
     "ramda": "^0.28.0",
