@@ -3,6 +3,17 @@ import * as server from './server'
 import * as peer from './peer'
 import * as Bus from './bus'
 import * as DB from './db'
+import * as NaCl from './nacl'
+
+//TODO: reimplement in a fancy way
+export const getEncryptionPublicKey = async () => {
+  return await NaCl.getEncryptionPublicKey()
+}
+
+//TODO: reimplement in a fancy way
+export const decrypt = async encryptedMessage => {
+  return await NaCl.decrypt(encryptedMessage)
+}
 
 export const subscribe = DID => {
   //peer.subscribe(DID)
@@ -23,6 +34,13 @@ export const publish = message => {
 
 export const addMessage = async message => {
   try {
+    //TODO: implement without mutation of the Message object
+    message.text = await NaCl.encrypt(
+      message.text,
+      await NaCl.getEncryptionPublicKey()
+    )
+    console.debug('(addMessage) message [mutated]', message)
+
     return DB.addMessage(message)
   } catch (error) {
     console.log('error addMessage :>> ', error)
@@ -75,23 +93,5 @@ export const getAllContact = async currentDid => {
     return R.filter(R.propEq('current_did', currentDid), contacts)
   } catch (error) {
     console.log('error getAllContact :>> ', error)
-  }
-}
-
-export const getPublicKey = async () => {
-  if (!('ethereum' in window)) return
-
-  try {
-    // @ts-ignore
-    const [account] = await ethereum.request({ method: 'eth_requestAccounts' })
-    // @ts-ignore
-    const key = await ethereum.request({
-      method: 'eth_getEncryptionPublicKey',
-      params: [account]
-    })
-    return key
-  } catch (error) {
-    console.log('error getPublicKey:>> ', error)
-    return ''
   }
 }
