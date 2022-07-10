@@ -57,7 +57,7 @@ function checkalive() {
 
 // processes a circuit-relay announce over pubsub
 async function processAnnounce(addr) {
-  me = (await ipfs.id()).id
+  const me = (await ipfs.id()).id
 
   if (addr.from == me) return
 
@@ -72,11 +72,11 @@ async function processAnnounce(addr) {
 
   if (addr == 'keep-alive') return
 
-  peer = addr.split('/')[9]
+  const peer = addr.split('/')[9]
   if (peer == me) return
 
-  peers = await ipfs.swarm.peers()
-  for (i in peers) {
+  const peers = await ipfs.swarm.peers()
+  for (const i in peers) {
     if (peers[i].peer == peer) return
   }
 
@@ -100,7 +100,7 @@ const dobootstrap = async reconnect => {
   if (now - lastBootstrap < 1000 * 60) return
 
   lastBootstrap = now
-  for (i in bootstraps) {
+  for (const i in bootstraps) {
     console.log('Attempt to connect ', bootstraps[i])
     try {
       if (reconnect) {
@@ -149,6 +149,7 @@ const start = async () => {
 
   console.log('peer started, ID:', ipfs.libp2p.peerId.toB58String())
 
+  // @ts-ignore
   window.ipfs = ipfs
 
   //////////////////
