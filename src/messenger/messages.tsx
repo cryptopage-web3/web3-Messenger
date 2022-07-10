@@ -57,6 +57,15 @@ const useMessages = (sender, activeContact) => {
   return messages
 }
 
+//TODO: reimplement without closure, if needed
+const decrypt = message => {
+  return async () => {
+    console.debug('(decrypt) message.text [messages]', message.text)
+    const decrypted = await Service.decrypt(message.text)
+    alert(decrypted)
+  }
+}
+
 export const Messages = () => {
   const sender = useDID()
   const activeContact = useActiveContact()
@@ -76,7 +85,13 @@ export const Messages = () => {
               message.sender === sender ? message.status : ''
             }`
           : message
-        return <li key={key}>{text}</li>
+
+        //TODO: "decrypt in the view on click for each message" might be a good solution for us, need to discuss with b0rey
+        return (
+          <li key={key} onClick={decrypt(message)}>
+            {text}
+          </li>
+        )
       })}
     </ul>
   )
