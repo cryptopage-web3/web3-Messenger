@@ -3,6 +3,7 @@ import { Box, TextInput, Button } from 'grommet'
 import { Status } from '../service/peer'
 import { useDID } from '../profile'
 import * as Service from '../service'
+import { isAddress } from 'ethers/lib/utils' //TODO: better extract all this Web3-related functionality out of here...
 
 const contactChannel = new BroadcastChannel('peer:contact')
 
@@ -15,12 +16,23 @@ const useAdd = sender => {
   )
 
   const handleAdd = useCallback(async () => {
-    await Service.addContact({ current_did: sender, contact_did: input })
+    let searchInput = '' //TODO: fancy way?
+    if (isAddress(input)) {
+      searchInput = 'eip155:1:' + input
+      console.warn(
+        'Ethereum Wallet Address detected. Add mainnet prefix (eip155:1:) for search:',
+        searchInput
+      )
+    }
+    //TODO:implement contact_did checker, probably in another place, as well as the Wallet Address checker
+    //isDid(input)
+
+    await Service.addContact({ current_did: sender, contact_did: searchInput })
     contactChannel.postMessage({
       type: 'newContact',
-      payload: { current_did: sender, contact_did: input }
+      payload: { current_did: sender, contact_did: searchInput }
     })
-    Status.subscribe(input)
+    Status.subscribe(searchInput)
     setInput('')
   }, [input])
 
