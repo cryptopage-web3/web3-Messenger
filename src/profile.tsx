@@ -38,7 +38,7 @@ const usePublicKey = () => {
   useEffect(async () => {
     if (!did) return
 
-    const key = await Service.getPublicKey()
+    const key = await Service.getEncryptionPublicKey()
     keyChannel.postMessage({
       type: 'publicKey',
       payload: key
