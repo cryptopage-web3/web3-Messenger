@@ -33,10 +33,10 @@ export const Add = () => {
   const { input, handleAdd, handleChange } = useAdd(sender)
 
   return (
-    <Box gap="small">
-      <TextInput placeholder="DID" value={input} onChange={handleChange} />
+    <Box gap='small' pad='small' height={{ min: 'unset' }}>
+      <TextInput placeholder='DID' value={input} onChange={handleChange} />
       <Button
-        label="Add"
+        label='Add'
         onClick={handleAdd}
         disabled={!sender || input.length === 0}
       />

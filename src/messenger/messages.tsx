@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { useDID } from '../profile'
 import * as Service from '../service'
 import { Status } from '../service/types'
-import { useActiveContact, usePublicKey } from './sending'
+import { useActiveContact, usePublicKey } from './chat-input'
+import { MessagesContainer } from './messages-container'
 
 const messagesChannel = new BroadcastChannel('peer:messages')
 
@@ -37,8 +38,8 @@ const useMessages = (sender, activeContact) => {
 
   const listener = async ({ data }) => {
     data.receiver === sender &&
-      data.type === 'message' &&
-      (await handleIncomingMessage({ ...data, receiverPublicKey: publicKey }))
+    data.type === 'message' &&
+    (await handleIncomingMessage({ ...data, receiverPublicKey: publicKey }))
 
     if (data.type === 'status') {
       await Service.updateStatus(data)
@@ -62,22 +63,24 @@ export const Messages = () => {
   const activeContact = useActiveContact()
 
   return (
-    <ul>
-      {useMessages(sender, activeContact).map((message, index) => {
-        message.receiver === sender &&
+    <MessagesContainer>
+      <ul>
+        {useMessages(sender, activeContact).map((message, index) => {
+          message.receiver === sender &&
           message.status !== 'viewed' &&
           publishStatusMsg(message, Status.viewed)
 
-        const key = message?.date ? message.date : index
-        const text = message?.text
-          ? `${new Date(message.date).toLocaleTimeString('ru-RU')} / ${
+          const key = message?.date ? message.date : index
+          const text = message?.text
+            ? `${new Date(message.date).toLocaleTimeString('ru-RU')} / ${
               message.sender
             } -> ${message.text} -> ${
               message.sender === sender ? message.status : ''
             }`
-          : message
-        return <li key={key}>{text}</li>
-      })}
-    </ul>
+            : message
+          return <li key={key}>{text}</li>
+        })}
+      </ul>
+    </MessagesContainer>
   )
 }

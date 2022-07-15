@@ -1,8 +1,11 @@
-import { Box, Button, TextArea } from 'grommet'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState, useRef } from 'react'
 import { useDID } from '../profile'
 import * as Service from '../service'
 import { Status } from '../service/types'
+import { InputMessage } from './input-message'
+import { AttachButton } from './attach-button'
+import { SendButton } from './send-button'
+import { ChatInputContainer } from './chat-input-container'
 
 const contactsChannel = new BroadcastChannel('peer:contacts')
 const keyChannel = new BroadcastChannel('peer:key')
@@ -66,25 +69,54 @@ const usePublish = (receiver: string, text: string) => {
   }, [sender, receiver, text, publicKey])
 }
 
-export const Sending = (props: any) => {
+const buttonStyleConfig = {
+  alignSelf: 'end',
+  plain: true
+}
+
+const useAutosizeTextArea = (
+  textAreaRef: React.RefObject<HTMLTextAreaElement> | null,
+  value: string
+) => {
+  useEffect(() => {
+    const elem = textAreaRef.current
+    const minHeight = '30px'
+
+    if (elem) {
+      elem.style.height = minHeight
+      const scrollHeight = elem.scrollHeight
+
+      elem.style.height = scrollHeight + 'px'
+    }
+  }, [textAreaRef, value])
+}
+
+export const ChatInput = (props: any) => {
   const receiver = useActiveContact()
   const [message, handleMessage] = useHandler()
   const handleSend = usePublish(receiver, message)
   const sender = useDID()
 
+  const textAreaRef = useRef<HTMLTextAreaElement>(null)
+
+  useAutosizeTextArea(textAreaRef, message)
+
   return (
-    <Box {...props}>
-      <TextArea
-        placeholder="Message"
+    <ChatInputContainer {...props}>
+      <InputMessage
+        ref={textAreaRef}
+        placeholder='Write a message'
         value={message}
         onChange={handleMessage}
       />
-      <Button
-        primary
-        label="Send"
+      <AttachButton
+        {...buttonStyleConfig}
+      />
+      {message && <SendButton
         onClick={handleSend}
         disabled={!sender || !receiver}
-      />
-    </Box>
+        {...buttonStyleConfig}
+      />}
+    </ChatInputContainer>
   )
 }
