@@ -64,7 +64,7 @@ export const Add = () => {
   const { input, handleAdd, handleChange } = useAdd(sender)
 
   return (
-    <Box gap='small'>
+    <Box gap='small' pad='small' height={{ min: 'unset' }}>
       <TextInput placeholder='DID' value={input} onChange={handleChange} />
       <Button
         label='Add'
