@@ -58,10 +58,10 @@ export const addContact = async (contact: Contact) => {
     const res = await add(contact)
     return res
   } catch (error) {
-    console.log('error addContact :>> ', error)
+    console.error('error addContact :>> ', error)
     if (error?.target?.error?.name === 'ConstraintError') {
       alert(
-        'The user is already in contacts, or the search string is neither DID nor Ethereum Wallet Address'
+        'The user is already in contacts'
       )
     }
   }
