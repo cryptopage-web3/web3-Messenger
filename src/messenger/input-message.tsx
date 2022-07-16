@@ -19,6 +19,6 @@ export const InputMessage = styled(StyledInputMessage)`
   font-weight: 400;
   overflow: hidden;
   min-height: 30px;
-  max-height: 500px;
+  max-height: 20rem;
 `
 

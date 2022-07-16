@@ -91,6 +91,21 @@ const useAutosizeTextArea = (
   }, [textAreaRef, value])
 }
 
+const useKeyPress = (sender, receiver, message, handleSend) => {
+  return useCallback((event) => {
+    const enterKey = 'Enter'
+
+    if (event.key === enterKey && !event.shiftKey) {
+      event.preventDefault()
+      event.stopPropagation()
+
+      if (receiver && sender && message) {
+        handleSend()
+      }
+    }
+  }, [receiver, sender, message, handleSend])
+}
+
 export const ChatInput = (props: any) => {
   const receiver = useActiveContact()
   const [message, handleMessage] = useHandler()
@@ -101,6 +116,8 @@ export const ChatInput = (props: any) => {
 
   useAutosizeTextArea(textAreaRef, message)
 
+  const handleKeyPress = useKeyPress(sender, receiver, message, handleSend)
+
   return (
     <ChatInputContainer {...props}>
       <InputMessage
@@ -108,6 +125,7 @@ export const ChatInput = (props: any) => {
         placeholder='Write a message'
         value={message}
         onChange={handleMessage}
+        onKeyPress={handleKeyPress}
       />
       <AttachButton
         {...buttonStyleConfig}
