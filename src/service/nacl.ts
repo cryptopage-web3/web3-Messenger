@@ -1,6 +1,33 @@
 import { bufferToHex } from 'ethereumjs-util'
 import * as EthSigUtil from '@metamask/eth-sig-util'
 
+//TODO: since this module works with MetaMask API, should we rename it as metamask.ts?
+
+//TODO: there is too much redundancy in all the functions below... we should get rid of it, right?
+
+//TODO: should we introduce a Message type for the whole app? Not just of IndexedDB?
+
+export const sign = async message => {
+  if (!('ethereum' in window)) return
+
+  console.debug('(sign) message', message)
+  try {
+    // @ts-ignore
+    const [account] = await ethereum.request({ method: 'eth_requestAccounts' })
+    // @ts-ignore
+    const signedMessage = await ethereum.request({
+      method: 'personal_sign',
+      params: [message, account]
+    })
+    console.debug('(sign) signedMessage', signedMessage)
+
+    return signedMessage
+  } catch (error) {
+    console.log('error sign:>> ', error)
+    return ''
+  }
+}
+
 export const getEncryptionPublicKey = async () => {
   if (!('ethereum' in window)) return
 

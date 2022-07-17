@@ -21,20 +21,47 @@ export const subscribe = DID => {
   console.log(`message subscribe ${DID}`)
 }
 
+const encryptMessage = async message => {
+  const encryptionPublicKey = await NaCl.getEncryptionPublicKey()
+  const encryptedText = await NaCl.encrypt(message.text, encryptionPublicKey)
+  const encryptedMessage = { ...message, text: encryptedText }
+  console.debug('(encryptMessage) encryptedMessage', encryptedMessage)
+
+  return encryptedMessage
+}
+
 export const publish = message => {
   try {
     Bus.channel.postMessage(message)
     server.publish(message)
     //peer.publish(message.receiver, message.text)
     console.log('publish message', message)
+    // encryptMessage(message).then(encryptedMessage =>{
+    //   Bus.channel.postMessage(encryptedMessage)
+    //   server.publish(encryptedMessage)
+    //   //peer.publish(message.receiver, message.text)
+    //   console.log('publish message', encryptedMessage)
+    // })
   } catch (error) {
     console.log('error publish:>> ', error)
   }
 }
 
+//TODO: the entity of Message is not clear for me, why don't we reuse types of IndexedDB?
+export const publishHandshakeMsg = (senderDid, senderEncryptionPublicKey) => {
+  const unsignedMessage = {
+    type: 'handshake',
+    sender: senderDid,
+    senderPublicKey: senderEncryptionPublicKey
+  }
+  console.debug('(publishHandshakeMsg) unsignedMessage', unsignedMessage)
+
+  NaCl.sign(unsignedMessage).then(sign => publish({ ...unsignedMessage, sign }))
+}
+
 export const addMessage = async message => {
   try {
-    //TODO: implement without mutation of the Message object
+    //TODO: change the place of encryption
     message.text = await NaCl.encrypt(
       message.text,
       await NaCl.getEncryptionPublicKey()

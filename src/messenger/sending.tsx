@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { useDID } from '../profile'
 import * as Service from '../service'
 import { Status } from '../service/types'
+import { isPublicEncryptionKey } from '../service/db'
 
 const contactsChannel = new BroadcastChannel('peer:contacts')
 const keyChannel = new BroadcastChannel('peer:key')
@@ -52,6 +53,13 @@ const usePublish = (receiver: string, text: string) => {
   const sender = useDID()
   const publicKey = usePublicKey()
   return useCallback(async () => {
+    // if (!isPublicEncryptionKey(receiver)){
+    //   console.warn('sender', sender)
+    //   console.warn('receiver', receiver)
+    //   Service.publishHandshakeMsg(sender, publicKey)
+    //   return
+    // }
+
     const message = {
       type: 'message',
       sender,

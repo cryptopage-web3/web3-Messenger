@@ -9,9 +9,15 @@ type Message = {
   date: Date
 }
 
+//TODO: if we would like to re-use DB types, should we define them higher in the file/folder structure?!
 type Contact = {
   did: string
+  //alias: string TODO: implement for the case when we search by a Wallet Address  (alias - for user, without prefix; while did - for the app, with prefix), check nicknames of Self.id
+  // publicEncryptionKey: string
 }
+
+//TODO: validate whether it's a Public Encryption Key or not (Elliptic Curve x25519-xsalsa20-poly1305)
+export const isPublicEncryptionKey = (str: string) => str !== ''
 
 export const addMessage = async (message: Message) => {
   const { add } = useIndexedDB('messages')
