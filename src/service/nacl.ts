@@ -7,6 +7,28 @@ import * as EthSigUtil from '@metamask/eth-sig-util'
 
 //TODO: should we introduce a Message type for the whole app? Not just of IndexedDB?
 
+export const checkSign = async (message, account) => {
+  if (!('ethereum' in window)) return
+
+  console.debug('(checkSign) message', message)
+  console.debug('(checkSign) account', message)
+  try {
+    // @ts-ignore
+    const [account] = await ethereum.request({ method: 'eth_requestAccounts' })
+    // @ts-ignore
+    const signedMessage = await ethereum.request({
+      method: 'personal_sign',
+      params: [message, account]
+    })
+    console.debug('(sign) signedMessage', signedMessage)
+
+    return signedMessage
+  } catch (error) {
+    console.log('error sign:>> ', error)
+    return ''
+  }
+}
+
 export const sign = async message => {
   if (!('ethereum' in window)) return
 

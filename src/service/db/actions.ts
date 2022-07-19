@@ -71,7 +71,7 @@ export const addContact = async (contact: Contact) => {
   }
 }
 
-export const updateContact = async (contact: Contact, publicKey) => {
+export const updateContact = async (contact: Contact, encrytionPublicKey) => {
   const { getAll, update } = useIndexedDB('contacts')
 
   try {
@@ -80,7 +80,7 @@ export const updateContact = async (contact: Contact, publicKey) => {
 
     if (foundContact.contact_public_key) return
 
-    update({ ...foundContact, contact_public_key: publicKey })
+    update({ ...foundContact, contact_public_key: encrytionPublicKey })
   } catch (error) {
     console.log('error addContact :>> ', error)
   }

@@ -34,16 +34,26 @@ export const publish = message => {
   try {
     Bus.channel.postMessage(message)
     server.publish(message)
-    //peer.publish(message.receiver, message.text)
     console.log('publish message', message)
-    // encryptMessage(message).then(encryptedMessage =>{
-    //   Bus.channel.postMessage(encryptedMessage)
-    //   server.publish(encryptedMessage)
-    //   //peer.publish(message.receiver, message.text)
-    //   console.log('publish message', encryptedMessage)
-    // })
   } catch (error) {
     console.log('error publish:>> ', error)
+  }
+}
+export const doesContactHaveEncryptionPublicKey = senderDid => {
+  //TODO: check whether we have an encryption public key for the sender
+
+  return true
+}
+
+export const handleHandshakeMessage = async msg => {
+  if (
+    msg.type === 'handshake' &&
+    doesContactHaveEncryptionPublicKey(msg.sender)
+  ) {
+    const encryptionPublicKey = await NaCl.getEncryptionPublicKey()
+    //checkSign(msg)
+    //updateContact(sender_did, msg.senderPublicKey)
+    await publishHandshakeMsg(msg.sender, encryptionPublicKey)
   }
 }
 
@@ -54,6 +64,7 @@ export const publishHandshakeMsg = (senderDid, senderEncryptionPublicKey) => {
     sender: senderDid,
     senderPublicKey: senderEncryptionPublicKey
   }
+  // OUR public ethereum key => OUR public encryption key
   console.debug('(publishHandshakeMsg) unsignedMessage', unsignedMessage)
 
   NaCl.sign(unsignedMessage).then(sign => publish({ ...unsignedMessage, sign }))
@@ -61,13 +72,7 @@ export const publishHandshakeMsg = (senderDid, senderEncryptionPublicKey) => {
 
 export const addMessage = async message => {
   try {
-    //TODO: change the place of encryption
-    message.text = await NaCl.encrypt(
-      message.text,
-      await NaCl.getEncryptionPublicKey()
-    )
-    console.debug('(addMessage) message [mutated]', message)
-
+    console.log('addMessage message', message)
     return DB.addMessage(message)
   } catch (error) {
     console.log('error addMessage :>> ', error)
@@ -106,9 +111,9 @@ export const addContact = async contact => {
   }
 }
 
-export const updateContact = async (contact, publicKey) => {
+export const updateContact = async (contact, encrytionPublicKey) => {
   try {
-    return DB.updateContact(contact, publicKey)
+    return DB.updateContact(contact, encrytionPublicKey)
   } catch (error) {
     console.log('error updateContact :>> ', error)
   }

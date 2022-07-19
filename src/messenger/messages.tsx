@@ -19,8 +19,17 @@ const publishStatusMsg = (msg, status) =>
 
 const handleIncomingMessage = async msg => {
   await Service.addMessage(msg)
-  await Service.updateContact(msg.sender, msg.senderPublicKey)
-  publishStatusMsg(msg, Status.delivered)
+  switch (msg.type) {
+    case 'handshake':
+      await Service.handleHandshakeMessage(msg)
+      await Service.updateContact(msg.sender, msg.senderPublicKey) //TODO: get rid of the redundancy
+      break
+    case 'status':
+      publishStatusMsg(msg, Status.delivered)
+      break
+    // case 'message':
+    //   decrypt(msg)
+  }
 }
 
 const useMessages = (sender, activeContact) => {
@@ -30,7 +39,8 @@ const useMessages = (sender, activeContact) => {
 
   const getMessages = async () => {
     const data = await Service.getUserMessages(sender, activeContact)
-    setMessages(data)
+    console.debug('(useMessages) (getMessages) data', data)
+    setMessages(data || []) //TODO: handle empty message history
   }
 
   useEffect(getMessages, [sender, activeContact])
@@ -87,6 +97,7 @@ export const Messages = () => {
           : message
 
         //TODO: "decrypt in the view on click for each message" might be a good solution for us, need to discuss with b0rey
+        console.debug('(Messages) index text', index, text)
         return (
           <li key={key} onClick={decrypt(message)}>
             {text}
