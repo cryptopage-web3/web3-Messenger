@@ -10,8 +10,8 @@ import * as EthSigUtil from '@metamask/eth-sig-util'
 export const checkSign = async (message, account) => {
   if (!('ethereum' in window)) return
 
-  console.debug('(checkSign) message', message)
-  console.debug('(checkSign) account', message)
+  //console.debug('(checkSign) message', message)
+  //console.debug('(checkSign) account', message)
   try {
     // @ts-ignore
     const [account] = await ethereum.request({ method: 'eth_requestAccounts' })
@@ -20,7 +20,7 @@ export const checkSign = async (message, account) => {
       method: 'personal_sign',
       params: [message, account]
     })
-    console.debug('(sign) signedMessage', signedMessage)
+    //console.debug('(sign) signedMessage', signedMessage)
 
     return signedMessage
   } catch (error) {
@@ -33,13 +33,15 @@ export const sign = async message => {
   if (!('ethereum' in window)) return
 
   console.debug('(sign) message', message)
+  const serializedMessage = JSON.stringify(message)
+  console.debug('(sign) serializedMessage', serializedMessage)
   try {
     // @ts-ignore
     const [account] = await ethereum.request({ method: 'eth_requestAccounts' })
     // @ts-ignore
     const signedMessage = await ethereum.request({
       method: 'personal_sign',
-      params: [message, account]
+      params: [serializedMessage, account]
     })
     console.debug('(sign) signedMessage', signedMessage)
 
@@ -62,7 +64,7 @@ export const getEncryptionPublicKey = async () => {
       params: [account]
     })
 
-    console.debug('(getEncryptionPublicKey) key', key)
+    //console.debug('(getEncryptionPublicKey) key', key)
     return key
   } catch (error) {
     console.log('error getPublicKey:>> ', error)
@@ -76,7 +78,7 @@ export const getEncryptionPublicKey = async () => {
 export const decrypt = async encryptedMessage => {
   if (!('ethereum' in window)) return
 
-  console.debug('(decrypt) encryptedMessage', encryptedMessage)
+  //console.debug('(decrypt) encryptedMessage', encryptedMessage)
   try {
     // @ts-ignore
     const [account] = await ethereum.request({ method: 'eth_requestAccounts' })
@@ -85,7 +87,7 @@ export const decrypt = async encryptedMessage => {
       method: 'eth_decrypt',
       params: [encryptedMessage, account]
     })
-    console.debug('(decrypt) decryptedMessage', decryptedMessage)
+    //console.debug('(decrypt) decryptedMessage', decryptedMessage)
 
     return decryptedMessage
   } catch (error) {
@@ -103,7 +105,7 @@ export const encrypt = async (
 ): Promise<string> => {
   if (!('ethereum' in window)) return
 
-  console.debug('(encrypt) message', message)
+  //console.debug('(encrypt) message', message)
   try {
     // @ts-ignore
     const encryptedMessage = EthSigUtil.encrypt({
@@ -111,12 +113,12 @@ export const encrypt = async (
       data: message,
       version: 'x25519-xsalsa20-poly1305'
     })
-    console.debug('(encrypt) encryptedMessage', encryptedMessage)
+    //console.debug('(encrypt) encryptedMessage', encryptedMessage)
 
     const preparedMessage = bufferToHex(
       Buffer.from(JSON.stringify(encryptedMessage), 'utf8')
     )
-    console.debug('(encrypt) preparedMessage', preparedMessage)
+    //console.debug('(encrypt) preparedMessage', preparedMessage)
 
     return preparedMessage
   } catch (error) {

@@ -3,6 +3,8 @@ import { Box, TextInput, Button } from 'grommet'
 import { Status } from '../service/peer'
 import { useDID } from '../profile'
 import * as Service from '../service'
+import { publishHandshakeMsg } from '../service'
+import * as NaCl from '../service/nacl'
 
 const contactChannel = new BroadcastChannel('peer:contact')
 
@@ -15,6 +17,9 @@ const useAdd = sender => {
   )
 
   const handleAdd = useCallback(async () => {
+    const encryptionPublicKey = await NaCl.getEncryptionPublicKey()
+    await publishHandshakeMsg(sender, encryptionPublicKey)
+
     await Service.addContact({ current_did: sender, contact_did: input })
     contactChannel.postMessage({
       type: 'newContact',

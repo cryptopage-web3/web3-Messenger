@@ -19,17 +19,15 @@ const publishStatusMsg = (msg, status) =>
 
 const handleIncomingMessage = async msg => {
   await Service.addMessage(msg)
-  switch (msg.type) {
-    case 'handshake':
-      await Service.handleHandshakeMessage(msg)
-      await Service.updateContact(msg.sender, msg.senderPublicKey) //TODO: get rid of the redundancy
-      break
-    case 'status':
-      publishStatusMsg(msg, Status.delivered)
-      break
-    // case 'message':
-    //   decrypt(msg)
-  }
+  await Service.handleHandshakeMessage(msg)
+  publishStatusMsg(msg, Status.delivered)
+}
+
+const handleHandshakeMessage = async msg => {
+  await Service.addMessage(msg)
+  await Service.handleHandshakeMessage(msg)
+  await Service.updateContact(msg.sender, msg.senderPublicKey) //TODO: get rid of the redundancy
+  publishStatusMsg(msg, Status.delivered)
 }
 
 const useMessages = (sender, activeContact) => {
@@ -39,20 +37,33 @@ const useMessages = (sender, activeContact) => {
 
   const getMessages = async () => {
     const data = await Service.getUserMessages(sender, activeContact)
-    console.debug('(useMessages) (getMessages) data', data)
-    setMessages(data || []) //TODO: handle empty message history
+    //console.debug('(useMessages) (getMessages) data', data)
+    setMessages(data) //TODO: handle empty message history
   }
 
   useEffect(getMessages, [sender, activeContact])
 
-  const listener = async ({ data }) => {
-    data.receiver === sender &&
-      data.type === 'message' &&
-      (await handleIncomingMessage({ ...data, receiverPublicKey: publicKey }))
+  const listener = async ({ data: message }) => {
+    console.debug('(useMessages) (listener) message', message)
+    console.debug('(useMessages) (listener) sender', sender)
+    if (message.receiver === sender) {
+      if (message.type === 'message') {
+        console.debug('(useMessages) (listener) [message] message', message)
+        await handleIncomingMessage({
+          ...message,
+          receiverPublicKey: publicKey
+        })
+      }
+      if (message.type === 'handshake') {
+        console.debug('(useMessages) (listener) [handshake] message', message)
+        await handleHandshakeMessage(message)
+      }
+    }
 
-    if (data.type === 'status') {
-      await Service.updateStatus(data)
-      await Service.updateContact(data.sender, data.senderPublicKey)
+    if (message.type === 'status') {
+      console.debug('(useMessages) (listener) [status] message', message)
+      await Service.updateStatus(message)
+      await Service.updateContact(message.sender, message.senderPublicKey)
     }
     getMessages()
   }
@@ -70,7 +81,7 @@ const useMessages = (sender, activeContact) => {
 //TODO: reimplement without closure, if needed
 const decrypt = message => {
   return async () => {
-    console.debug('(decrypt) message.text [messages]', message.text)
+    //console.debug('(decrypt) message.text [messages]', message.text)
     const decrypted = await Service.decrypt(message.text)
     alert(decrypted)
   }
@@ -94,10 +105,10 @@ export const Messages = () => {
             } -> ${message.text} -> ${
               message.sender === sender ? message.status : ''
             }`
-          : message
+          : ''
 
         //TODO: "decrypt in the view on click for each message" might be a good solution for us, need to discuss with b0rey
-        console.debug('(Messages) index text', index, text)
+        //console.debug('(Messages) index text', index, text)
         return (
           <li key={key} onClick={decrypt(message)}>
             {text}

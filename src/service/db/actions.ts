@@ -23,6 +23,7 @@ export const addMessage = async (message: Message) => {
   const { add } = useIndexedDB('messages')
 
   try {
+    //console.debug('(addMessage) message', message)
     return add(message)
   } catch (error) {
     console.log('error :>> ', error)

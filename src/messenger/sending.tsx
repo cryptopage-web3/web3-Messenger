@@ -53,13 +53,6 @@ const usePublish = (receiver: string, text: string) => {
   const sender = useDID()
   const publicKey = usePublicKey()
   return useCallback(async () => {
-    // if (!isPublicEncryptionKey(receiver)){
-    //   console.warn('sender', sender)
-    //   console.warn('receiver', receiver)
-    //   Service.publishHandshakeMsg(sender, publicKey)
-    //   return
-    // }
-
     const message = {
       type: 'message',
       sender,
@@ -69,8 +62,10 @@ const usePublish = (receiver: string, text: string) => {
       senderPublicKey: publicKey,
       date: Date.now()
     }
-    const id = await Service.addMessage(message)
-    Service.publish({ ...message, id })
+
+    const encryptedMessage = await Service.encryptMessage(message)
+    const id = await Service.addMessage(encryptedMessage)
+    Service.publish({ ...encryptedMessage, id })
   }, [sender, receiver, text, publicKey])
 }
 

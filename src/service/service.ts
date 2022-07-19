@@ -21,11 +21,11 @@ export const subscribe = DID => {
   console.log(`message subscribe ${DID}`)
 }
 
-const encryptMessage = async message => {
+export const encryptMessage = async message => {
   const encryptionPublicKey = await NaCl.getEncryptionPublicKey()
   const encryptedText = await NaCl.encrypt(message.text, encryptionPublicKey)
   const encryptedMessage = { ...message, text: encryptedText }
-  console.debug('(encryptMessage) encryptedMessage', encryptedMessage)
+  //console.debug('(encryptMessage) encryptedMessage', encryptedMessage)
 
   return encryptedMessage
 }
@@ -46,10 +46,7 @@ export const doesContactHaveEncryptionPublicKey = senderDid => {
 }
 
 export const handleHandshakeMessage = async msg => {
-  if (
-    msg.type === 'handshake' &&
-    doesContactHaveEncryptionPublicKey(msg.sender)
-  ) {
+  if (doesContactHaveEncryptionPublicKey(msg.sender)) {
     const encryptionPublicKey = await NaCl.getEncryptionPublicKey()
     //checkSign(msg)
     //updateContact(sender_did, msg.senderPublicKey)
@@ -62,10 +59,11 @@ export const publishHandshakeMsg = (senderDid, senderEncryptionPublicKey) => {
   const unsignedMessage = {
     type: 'handshake',
     sender: senderDid,
+    receiver: senderDid,
     senderPublicKey: senderEncryptionPublicKey
   }
   // OUR public ethereum key => OUR public encryption key
-  console.debug('(publishHandshakeMsg) unsignedMessage', unsignedMessage)
+  //console.debug('(publishHandshakeMsg) unsignedMessage', unsignedMessage)
 
   NaCl.sign(unsignedMessage).then(sign => publish({ ...unsignedMessage, sign }))
 }
@@ -104,6 +102,7 @@ export const updateStatus = async data => {
 }
 
 export const addContact = async contact => {
+  console.debug('(addContact) contact', contact)
   try {
     return DB.addContact(contact)
   } catch (error) {
@@ -112,6 +111,8 @@ export const addContact = async contact => {
 }
 
 export const updateContact = async (contact, encrytionPublicKey) => {
+  console.debug('(updateContact) contact', contact)
+  console.debug('(updateContact) encrytionPublicKey', encrytionPublicKey)
   try {
     return DB.updateContact(contact, encrytionPublicKey)
   } catch (error) {
