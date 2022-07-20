@@ -25,6 +25,7 @@ const handleIncomingMessage = async msg => {
 }
 
 const handleHandshakeMessage = async msg => {
+  console.log('handleHandshakeMessage')
   await Service.addMessage(msg)
   await Service.handleHandshakeMessage(msg)
   await Service.updateContact(msg.sender, msg.senderPublicKey) //TODO: get rid of the redundancy
@@ -44,7 +45,7 @@ const useMessages = (sender, activeContact) => {
   useEffect(getMessages, [sender, activeContact])
 
   const listener = async ({ data: message }) => {
-    console.debug('(useMessages) (listener) message', message)
+    console.log('(useMessages) (listener) message', message)
     console.debug('(useMessages) (listener) sender', sender)
     if (message.receiver === sender) {
       if (message.type === 'message') {

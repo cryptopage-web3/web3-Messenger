@@ -11,7 +11,10 @@ type Message = {
 
 //TODO: if we would like to re-use DB types, should we define them higher in the file/folder structure?!
 type Contact = {
-  did: string
+  contact_did: string;
+  current_did: string;
+  contact_public_key?: string;
+  // did: string
   //alias: string TODO: implement for the case when we search by a Wallet Address  (alias - for user, without prefix; while did - for the app, with prefix), check nicknames of Self.id
   // publicEncryptionKey: string
 }
@@ -42,9 +45,9 @@ export const getAllMessages = async () => {
 }
 
 export const updateStatus = async ({
-  messageId,
-  status
-}: {
+                                     messageId,
+                                     status
+                                   }: {
   messageId: number
   status: keyof typeof Status
 }) => {
@@ -62,8 +65,7 @@ export const addContact = async (contact: Contact) => {
   const { add } = useIndexedDB('contacts')
 
   try {
-    const res = await add(contact)
-    return res
+    return await add(contact)
   } catch (error) {
     console.error('error addContact :>> ', error)
     if (error?.target?.error?.name === 'ConstraintError') {
@@ -74,16 +76,28 @@ export const addContact = async (contact: Contact) => {
   }
 }
 
-export const updateContact = async (contact: Contact, encrytionPublicKey) => {
+export const getContactByID = async (DID: string): Promise<Contact | undefined> => {
+  const { getAll } = useIndexedDB('contacts')
+
+  try {
+    const contacts = await getAll()
+
+    return contacts.find(c => c.contact_did === DID)
+  } catch (error) {
+    console.error('error getContactByID :>> ', error)
+  }
+}
+
+export const updateContact = async (contactDid: string, encryptionPublicKey) => {
   const { getAll, update } = useIndexedDB('contacts')
 
   try {
     const contacts = await getAll()
-    const foundContact = contacts.find(c => c.contact_did === contact)
+    const foundContact = contacts.find(c => c.contact_did === contactDid)
 
     if (foundContact.contact_public_key) return
 
-    update({ ...foundContact, contact_public_key: encrytionPublicKey })
+    update({ ...foundContact, contact_public_key: encryptionPublicKey })
   } catch (error) {
     console.log('error addContact :>> ', error)
   }

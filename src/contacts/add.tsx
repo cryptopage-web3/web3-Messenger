@@ -42,18 +42,19 @@ const useAdd = sender => {
   )
 
   const handleAdd = useCallback(async () => {
+    console.log("handleAdd")
+    //TODO add check if contact exist
     try {
       const searchInput = getProcessedInput(input)
-
-      const encryptionPublicKey = await NaCl.getEncryptionPublicKey()
-
-      await publishHandshakeMsg(sender, encryptionPublicKey)
 
       await Service.addContact({ current_did: sender, contact_did: searchInput })
       contactChannel.postMessage({
         type: 'newContact',
         payload: { current_did: sender, contact_did: searchInput }
       })
+
+      await publishHandshakeMsg(sender, searchInput)
+
       Status.subscribe(searchInput)
       setInput('')
     }catch (e) {

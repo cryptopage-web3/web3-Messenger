@@ -4,6 +4,7 @@ import * as peer from './peer'
 import * as Bus from './bus'
 import * as DB from './db'
 import * as NaCl from './nacl'
+import * as Service from './index'
 
 //TODO: reimplement in a fancy way
 export const getEncryptionPublicKey = async () => {
@@ -39,27 +40,30 @@ export const publish = message => {
     console.log('error publish:>> ', error)
   }
 }
-export const doesContactHaveEncryptionPublicKey = senderDid => {
+export const doesContactHaveEncryptionPublicKey = async senderDid => {
+  console.log("==========doesContactHaveEncryptionPublicKey===========")
   //TODO: check whether we have an encryption public key for the sender
+  const contact = await DB.getContactByID(senderDid);
+  console.log({contact})
 
-  return true
+  return Boolean(contact.contact_public_key)
 }
 
 export const handleHandshakeMessage = async msg => {
-  if (doesContactHaveEncryptionPublicKey(msg.sender)) {
-    const encryptionPublicKey = await NaCl.getEncryptionPublicKey()
+  if (!await doesContactHaveEncryptionPublicKey(msg.sender)) {
     //checkSign(msg)
     //updateContact(sender_did, msg.senderPublicKey)
-    await publishHandshakeMsg(msg.sender, encryptionPublicKey)
+    await publishHandshakeMsg(msg.receiver, msg.sender)
   }
 }
 
 //TODO: the entity of Message is not clear for me, why don't we reuse types of IndexedDB?
-export const publishHandshakeMsg = (senderDid, senderEncryptionPublicKey) => {
+export const publishHandshakeMsg = async (senderDid: string, receiverDid: string) => {
+  const senderEncryptionPublicKey = await NaCl.getEncryptionPublicKey()
   const unsignedMessage = {
     type: 'handshake',
     sender: senderDid,
-    receiver: senderDid,
+    receiver: receiverDid,
     senderPublicKey: senderEncryptionPublicKey
   }
   // OUR public ethereum key => OUR public encryption key
@@ -110,11 +114,11 @@ export const addContact = async contact => {
   }
 }
 
-export const updateContact = async (contact, encrytionPublicKey) => {
-  console.debug('(updateContact) contact', contact)
+export const updateContact = async (contactDid: string, encrytionPublicKey) => {
+  console.debug('(updateContact) contact', contactDid)
   console.debug('(updateContact) encrytionPublicKey', encrytionPublicKey)
   try {
-    return DB.updateContact(contact, encrytionPublicKey)
+    return DB.updateContact(contactDid, encrytionPublicKey)
   } catch (error) {
     console.log('error updateContact :>> ', error)
   }
