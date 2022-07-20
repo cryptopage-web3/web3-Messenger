@@ -1,2 +1,1 @@
-export * from './messages'
-export * from './sending'
+export * from './chat'

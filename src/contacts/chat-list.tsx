@@ -3,6 +3,8 @@ import styled from 'styled-components'
 import * as R from 'ramda'
 import { useDID } from '../profile'
 import * as Service from '../service'
+import {Contact} from "./contact";
+import { ChatListContainer } from './chat-list-container'
 
 const channel = new BroadcastChannel('peer:status')
 const contactsChannel = new BroadcastChannel('peer:contacts')
@@ -90,23 +92,11 @@ const useContacts = () => {
   return [list, setActiveContact]
 }
 
-const Contact = styled(({ className, contact_did, setActiveItem }) => {
-  return (
-    <li className={className} onClick={setActiveItem(contact_did)}>
-      <b>{contact_did}</b>
-    </li>
-  )
-})`
-  background: ${({ active }) => (active ? 'lightgray' : 'transparent')};
-  padding: 20px 0;
-  overflow: scroll;
-  cursor: pointer;
-`
-
-export const List = styled(({ className }) => {
+export const ChatList = styled(({ className }) => {
   const [contacts, setActiveItem] = useContacts()
 
   return (
+    <ChatListContainer>
     <ul className={className}>
       {contacts.map(item => (
         <Contact
@@ -116,6 +106,7 @@ export const List = styled(({ className }) => {
         />
       ))}
     </ul>
+    </ChatListContainer>
   )
 })`
   list-style-type: none;
