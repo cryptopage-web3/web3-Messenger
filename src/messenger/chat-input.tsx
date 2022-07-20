@@ -6,7 +6,6 @@ import { InputMessage } from './input-message'
 import { AttachButton } from './attach-button'
 import { SendButton } from './send-button'
 import { ChatInputContainer } from './chat-input-container'
-import { isPublicEncryptionKey } from '../service/db'
 
 const contactsChannel = new BroadcastChannel('peer:contacts')
 const keyChannel = new BroadcastChannel('peer:key')

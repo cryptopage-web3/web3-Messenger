@@ -20,7 +20,7 @@ const publishStatusMsg = (msg, status) =>
 
 const handleIncomingMessage = async msg => {
   await Service.addMessage(msg)
-  await Service.handleHandshakeMessage(msg)
+  //await Service.handleHandshakeMessage(msg)//test and remove. no needed for type message messages
   publishStatusMsg(msg, Status.delivered)
 }
 
@@ -94,30 +94,30 @@ export const Messages = () => {
 
   return (
     <MessagesContainer>
-    <ul>
-      {useMessages(sender, activeContact).map((message, index) => {
-        message.receiver === sender &&
+      <ul>
+        {useMessages(sender, activeContact).map((message, index) => {
+          message.receiver === sender &&
           message.status !== 'viewed' &&
           publishStatusMsg(message, Status.viewed)
 
-        const key = message?.date ? message.date : index
-        const text = message?.text
-          ? `${new Date(message.date).toLocaleTimeString('ru-RU')} / ${
+          const key = message?.date ? message.date : index
+          const text = message?.text
+            ? `${new Date(message.date).toLocaleTimeString('ru-RU')} / ${
               message.sender
             } -> ${message.text} -> ${
               message.sender === sender ? message.status : ''
             }`
-          : ''
+            : ''
 
-        //TODO: "decrypt in the view on click for each message" might be a good solution for us, need to discuss with b0rey
-        //console.debug('(Messages) index text', index, text)
-        return (
-          <li key={key} onClick={decrypt(message)}>
-            {text}
-          </li>
-        )
-      })}
-    </ul>
-</MessagesContainer>
+          //TODO: "decrypt in the view on click for each message" might be a good solution for us, need to discuss with b0rey
+          //console.debug('(Messages) index text', index, text)
+          return (
+            <li key={key} onClick={decrypt(message)}>
+              {text}
+            </li>
+          )
+        })}
+      </ul>
+    </MessagesContainer>
   )
 }

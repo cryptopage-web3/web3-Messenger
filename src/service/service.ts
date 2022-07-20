@@ -41,10 +41,10 @@ export const publish = message => {
   }
 }
 export const doesContactHaveEncryptionPublicKey = async senderDid => {
-  console.log("==========doesContactHaveEncryptionPublicKey===========")
+  console.log('==========doesContactHaveEncryptionPublicKey===========')
   //TODO: check whether we have an encryption public key for the sender
-  const contact = await DB.getContactByID(senderDid);
-  console.log({contact})
+  const contact = await DB.getContactByID(senderDid)
+  console.log({ contact })
 
   return Boolean(contact.contact_public_key)
 }
@@ -111,6 +111,7 @@ export const addContact = async contact => {
     return DB.addContact(contact)
   } catch (error) {
     console.log('error addContact :>> ', error)
+    throw error
   }
 }
 
