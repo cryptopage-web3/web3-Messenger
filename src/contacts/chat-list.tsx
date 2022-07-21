@@ -98,7 +98,7 @@ export const ChatList = styled(({ className }) => {
   return (
     <ChatListContainer>
     <ul className={className}>
-      {contacts.map(item => (
+      {(contacts || []).map(item => (
         <Contact
           key={item.contact_did}
           setActiveItem={setActiveItem}

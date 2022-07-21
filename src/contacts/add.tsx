@@ -42,22 +42,32 @@ const useAdd = sender => {
   )
 
   const handleAdd = useCallback(async () => {
-    console.log("handleAdd")
+    console.log('handleAdd')
     //TODO add check if contact exist
     try {
       const searchInput = getProcessedInput(input)
 
-      await Service.addContact({ current_did: sender, contact_did: searchInput })
-      contactChannel.postMessage({
-        type: 'newContact',
-        payload: { current_did: sender, contact_did: searchInput }
-      })
+      const foundContact = await Service.getContactByID(searchInput)
 
-      await publishHandshakeMsg(sender, searchInput)
+      //TODO handle existed account in norm way
+      if (!foundContact) {
+        await Service.addContact({
+          current_did: sender,
+          contact_did: searchInput
+        })
+        contactChannel.postMessage({
+          type: 'newContact',
+          payload: { current_did: sender, contact_did: searchInput }
+        })
+      }
+
+      if (!foundContact || foundContact && !foundContact.contact_public_key) {
+        await publishHandshakeMsg(sender, searchInput, 'need_reply')
+      }
 
       Status.subscribe(searchInput)
       setInput('')
-    }catch (e) {
+    } catch (e) {
       alert(e.message)
     }
   }, [input])

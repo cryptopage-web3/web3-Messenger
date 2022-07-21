@@ -5,8 +5,10 @@ import { Status } from '../service/types'
 import { useActiveContact, usePublicKey } from './chat-input'
 import { MessagesContainer } from './messages-container'
 import { validateSignature } from '../service/nacl'
+import * as DB from '../service/db'
 
 const messagesChannel = new BroadcastChannel('peer:messages')
+const contactChannel = new BroadcastChannel('peer:contact')
 
 const publishStatusMsg = (msg, status) =>
   Service.publish({
@@ -29,8 +31,27 @@ const handleHandshakeMessage = async msg => {
   console.log('handleHandshakeMessage')
   if (await validateSignature(msg)) {
     await Service.addMessage(msg)
+
+    //create method addOrUpdate?
+    const contact = await DB.getContactByID(msg.sender)
+    if (!contact) {
+      await Service.addContact({
+        current_did: msg.receiver,
+        contact_did: msg.sender,
+        contact_public_key: msg.senderPublicKey
+      })
+      contactChannel.postMessage({
+        current_did: msg.receiver,
+        contact_did: msg.sender,
+        contact_public_key: msg.senderPublicKey
+      })
+    } else {
+      await Service.updateContact(msg.sender, msg.senderPublicKey)
+    }
+
     await Service.handleHandshakeMessage(msg)
-    await Service.updateContact(msg.sender, msg.senderPublicKey) //TODO: get rid of the redundancy
+
+    //TODO: get rid of the redundancy
     publishStatusMsg(msg, Status.delivered)
   } else {
     console.error('invalid signature')
@@ -102,16 +123,16 @@ export const Messages = () => {
       <ul>
         {useMessages(sender, activeContact).map((message, index) => {
           message.receiver === sender &&
-            message.status !== 'viewed' &&
-            publishStatusMsg(message, Status.viewed)
+          message.status !== 'viewed' &&
+          publishStatusMsg(message, Status.viewed)
 
           const key = message?.date ? message.date : index
           const text = message?.text
             ? `${new Date(message.date).toLocaleTimeString('ru-RU')} / ${
-                message.sender
-              } -> ${message.text} -> ${
-                message.sender === sender ? message.status : ''
-              }`
+              message.sender
+            } -> ${message.text} -> ${
+              message.sender === sender ? message.status : ''
+            }`
             : ''
 
           //TODO: "decrypt in the view on click for each message" might be a good solution for us, need to discuss with b0rey

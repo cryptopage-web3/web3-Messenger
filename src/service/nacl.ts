@@ -17,13 +17,11 @@ export const getEthereumWalletAddress = async () => {
   return account
 }
 
-export const validateSignature = async message => {
+export const validateSignature = message => {
   const signerEthereumWalletAddress = getWalletAddressFromSignature(message)
-  console.debug(
-    '(validateSignature) signerEthereumWalletAddress',
-    signerEthereumWalletAddress
-  )
-  return signerEthereumWalletAddress === message.senderEthereumWalletAddress
+
+  console.debug('(validateSignature) signerEthereumWalletAddress', signerEthereumWalletAddress, 'message.senderEthereumWalletAddress', message.senderEthereumWalletAddress)
+  return signerEthereumWalletAddress.toLowerCase() === message.senderEthereumWalletAddress.toLowerCase()
 }
 
 export const sign = async message => {

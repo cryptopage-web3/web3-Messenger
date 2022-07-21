@@ -23,7 +23,8 @@ export const subscribe = DID => {
 }
 
 export const encryptMessage = async message => {
-  const encryptionPublicKey = await NaCl.getEncryptionPublicKey()
+  const contact = await Service.getContactByID(message.receiver)
+  const encryptionPublicKey = contact.contact_public_key;
   const encryptedText = await NaCl.encrypt(message.text, encryptionPublicKey)
   const encryptedMessage = { ...message, text: encryptedText }
   //console.debug('(encryptMessage) encryptedMessage', encryptedMessage)
@@ -46,26 +47,30 @@ export const doesContactHaveEncryptionPublicKey = async senderDid => {
   const contact = await DB.getContactByID(senderDid)
   console.log({ contact })
 
-  return Boolean(contact.contact_public_key)
+  return Boolean(contact && contact.contact_public_key)
 }
 
 export const handleHandshakeMessage = async msg => {
-  if (!(await doesContactHaveEncryptionPublicKey(msg.sender))) {
+  // if (!(await doesContactHa
+  // veEncryptionPublicKey(msg.sender))) {
+  if(msg.status==='need_reply'){
     //checkSign(msg)
     //updateContact(sender_did, msg.senderPublicKey)
-    await publishHandshakeMsg(msg.receiver, msg.sender)
+    await publishHandshakeMsg(msg.receiver, msg.sender, 'dont_need')
   }
 }
 
 //TODO: the entity of Message is not clear for me, why don't we reuse types of IndexedDB?
 export const publishHandshakeMsg = async (
   senderDid: string,
-  receiverDid: string
+  receiverDid: string,
+  status
 ) => {
   const senderEncryptionPublicKey = await NaCl.getEncryptionPublicKey()
   const ethereumWalletAddress = await NaCl.getEthereumWalletAddress()
   const unsignedMessage = {
     type: 'handshake',
+    status,
     sender: senderDid,
     receiver: receiverDid,
     senderPublicKey: senderEncryptionPublicKey,
@@ -137,6 +142,14 @@ export const getAllContact = async currentDid => {
   try {
     const contacts = await DB.getAllContacts()
     return R.filter(R.propEq('current_did', currentDid), contacts)
+  } catch (error) {
+    console.log('error getAllContact :>> ', error)
+  }
+}
+
+export const getContactByID = async currentDid => {
+  try {
+    return await DB.getContactByID(currentDid)
   } catch (error) {
     console.log('error getAllContact :>> ', error)
   }

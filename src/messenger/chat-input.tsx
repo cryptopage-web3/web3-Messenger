@@ -14,6 +14,7 @@ export const useActiveContact = () => {
   const [activeContact, setActiveContact] = useState('')
 
   const listener = async ({ data }) => {
+    console.log('(useActiveContact)',data)
     data.type === 'activeContact' && setActiveContact(data.payload)
   }
 
