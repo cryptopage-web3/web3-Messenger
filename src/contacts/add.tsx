@@ -5,7 +5,8 @@ import { useDID } from '../profile'
 import * as Service from '../service'
 import { isAddress } from 'ethers/lib/utils' //TODO: better extract all this Web3-related functionality out of here...
 import { publishHandshakeMsg } from '../service'
-import * as NaCl from '../service/nacl'
+import { useCeramic } from '../profile'
+import { Caip10Link } from '@ceramicnetwork/stream-caip10-link'
 
 const contactChannel = new BroadcastChannel('peer:contact')
 
@@ -15,16 +16,15 @@ const isDid = input => true
  * Return processed input if it is Ethereum Wallet Address or DID
  * @param input
  */
-const getProcessedInput = (input: string) => {
+const getProcessedInput = async (input: string, ceramic) => {
   if (isAddress(input)) {
-    const ethMainnetPrefix = 'eip155:1:'
-
-    console.warn(
-      `Ethereum Wallet Address detected. Added mainnet prefix (eip155:1:) for search:`,
-      input
+    const link = await Caip10Link.fromAccount(ceramic, input + '@eip155:1')
+    const did = link.did
+    console.debug(
+      `Ethereum Wallet Address detected. Composing DID using Caip10Link. DID:`,
+      did
     )
-
-    return ethMainnetPrefix + input
+    return did
   }
 
   //TODO implement contact_did checker, probably in another place, as well as the Wallet Address checker
@@ -41,11 +41,13 @@ const useAdd = sender => {
     [input, setInput]
   )
 
+  const ceramic = useCeramic()
+
   const handleAdd = useCallback(async () => {
     console.log('handleAdd')
     //TODO add check if contact exist
     try {
-      const searchInput = getProcessedInput(input)
+      const searchInput = await getProcessedInput(input, ceramic)
 
       const foundContact = await Service.getContactByID(searchInput)
 
