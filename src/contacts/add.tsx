@@ -44,20 +44,17 @@ const useAdd = sender => {
   const ceramic = useCeramic()
 
   const handleAdd = useCallback(async () => {
-    console.log('handleAdd')
-    //TODO add check if contact exist
     try {
       const searchInput = await getProcessedInput(input, ceramic)
 
       const foundContact = await Service.getContactByID(searchInput)
 
-      //TODO handle existed account in norm way
       if (!foundContact) {
         const contact = {
           current_did: sender,
           contact_did: searchInput
         }
-        console.debug('(useAdd) (handleAdd) contact', contact)
+
         await Service.addContact(contact)
         contactChannel.postMessage({
           type: 'newContact',
@@ -66,7 +63,7 @@ const useAdd = sender => {
       }
 
       if (!foundContact || (foundContact && !foundContact.contact_public_key)) {
-        await publishHandshakeMsg(sender, searchInput, 'need_reply')
+        await publishHandshakeMsg(sender, searchInput, true)
       }
 
       Status.subscribe(searchInput)

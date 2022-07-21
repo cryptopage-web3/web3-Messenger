@@ -53,6 +53,7 @@ const useHandler = () => {
 }
 
 const usePublish = (receiver: string, text: string) => {
+  console.log('(usePublish)', text)
   const sender = useDID()
   const publicKey = usePublicKey()
   return useCallback(async () => {
@@ -64,6 +65,8 @@ const usePublish = (receiver: string, text: string) => {
       status: Status.sent,
       date: Date.now()
     }
+
+    console.log("in use callback", text)
 
     const encryptedMessage = await Service.encryptMessage(message)
     const id = await Service.addMessage(encryptedMessage)

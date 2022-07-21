@@ -5,6 +5,7 @@ import * as Bus from './bus'
 import * as DB from './db'
 import * as NaCl from './nacl'
 import * as Service from './index'
+import { MessageType } from '../@types'
 
 //TODO: reimplement in a fancy way
 export const getEncryptionPublicKey = async () => {
@@ -27,7 +28,6 @@ export const encryptMessage = async message => {
   const encryptionPublicKey = contact.contact_public_key
   const encryptedText = await NaCl.encrypt(message.text, encryptionPublicKey)
   const encryptedMessage = { ...message, text: encryptedText }
-  //console.debug('(encryptMessage) encryptedMessage', encryptedMessage)
 
   return encryptedMessage
 }
@@ -41,44 +41,24 @@ export const publish = message => {
     console.log('error publish:>> ', error)
   }
 }
-export const doesContactHaveEncryptionPublicKey = async senderDid => {
-  console.log('==========doesContactHaveEncryptionPublicKey===========')
-  //TODO: check whether we have an encryption public key for the sender
-  const contact = await DB.getContactByID(senderDid)
-  console.log({ contact })
-
-  return Boolean(contact && contact.contact_public_key)
-}
-
-export const handleHandshakeMessage = async msg => {
-  // if (!(await doesContactHa
-  // veEncryptionPublicKey(msg.sender))) {
-  if (msg.status === 'need_reply') {
-    //checkSign(msg)
-    //updateContact(sender_did, msg.senderPublicKey)
-    await publishHandshakeMsg(msg.receiver, msg.sender, 'dont_need')
-  }
-}
 
 //TODO: the entity of Message is not clear for me, why don't we reuse types of IndexedDB?
 export const publishHandshakeMsg = async (
   senderDid: string,
   receiverDid: string,
-  status
+  encryptionPublicKeyRequested: boolean
 ) => {
   const senderEncryptionPublicKey = await NaCl.getEncryptionPublicKey()
   const ethereumWalletAddress = await NaCl.getEthereumWalletAddress()
   const unsignedMessage = {
-    type: 'handshake',
-    status,
+    type: MessageType.handshake,
+    encryptionPublicKeyRequested,
     sender: senderDid,
     receiver: receiverDid,
     senderEncryptionPublicKey: senderEncryptionPublicKey,
     senderEthereumWalletAddress: ethereumWalletAddress
   }
   // OUR public ethereum key => OUR public encryption key
-  //console.debug('(publishHandshakeMsg) unsignedMessage', unsignedMessage)
-
   NaCl.sign(unsignedMessage).then(sign => {
     const message = { ...unsignedMessage, sign }
     publish(message)

@@ -1,11 +1,11 @@
+import { MessageType } from './message-type'
+
 export type Message = {
-  messageId: string //??? - it seems that field used only by status message
-  id: string
-  type: string //TODO create "type" types
-  status: string //todo create "status" types
-  sign?: string //only for handshake
-  sender: string
-  receiver: string
-  text: string
-  date: Date
+  id: string;
+  type: MessageType.message;
+  status: string;//
+  sender: string;
+  receiver: string;
+  text: string;
+  date: Date;
 }
