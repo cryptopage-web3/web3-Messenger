@@ -1,5 +1,6 @@
 import { useIndexedDB } from 'react-indexed-db'
 import { Status } from '../types'
+import { Contact } from '../../@types'
 
 type Message = {
   type: 'message'
@@ -7,16 +8,6 @@ type Message = {
   receiver: string
   text: string
   date: Date
-}
-
-//TODO: if we would like to re-use DB types, should we define them higher in the file/folder structure?!
-type Contact = {
-  contact_did: string;
-  current_did: string;
-  contact_public_key?: string;
-  // did: string
-  //alias: string TODO: implement for the case when we search by a Wallet Address  (alias - for user, without prefix; while did - for the app, with prefix), check nicknames of Self.id
-  // publicEncryptionKey: string
 }
 
 //TODO: validate whether it's a Public Encryption Key or not (Elliptic Curve x25519-xsalsa20-poly1305)
@@ -69,9 +60,7 @@ export const addContact = async (contact: Contact) => {
   } catch (error) {
     console.error('error addContact :>> ', error)
     if (error?.target?.error?.name === 'ConstraintError') {
-      alert(
-        'The user is already in contacts'
-      )
+      throw Error('The user is already in contacts')
     }
   }
 }

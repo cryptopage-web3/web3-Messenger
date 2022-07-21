@@ -121,6 +121,7 @@ export const addContact = async contact => {
     return DB.addContact(contact)
   } catch (error) {
     console.log('error addContact :>> ', error)
+    throw error
   }
 }
 
