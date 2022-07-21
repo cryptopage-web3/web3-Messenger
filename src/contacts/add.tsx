@@ -9,7 +9,7 @@ import * as NaCl from '../service/nacl'
 
 const contactChannel = new BroadcastChannel('peer:contact')
 
-const isDid = (input) => true
+const isDid = input => true
 
 /**
  * Return processed input if it is Ethereum Wallet Address or DID
@@ -51,17 +51,19 @@ const useAdd = sender => {
 
       //TODO handle existed account in norm way
       if (!foundContact) {
-        await Service.addContact({
+        const contact = {
           current_did: sender,
           contact_did: searchInput
-        })
+        }
+        console.debug('(useAdd) (handleAdd) contact', contact)
+        await Service.addContact(contact)
         contactChannel.postMessage({
           type: 'newContact',
-          payload: { current_did: sender, contact_did: searchInput }
+          payload: contact
         })
       }
 
-      if (!foundContact || foundContact && !foundContact.contact_public_key) {
+      if (!foundContact || (foundContact && !foundContact.contact_public_key)) {
         await publishHandshakeMsg(sender, searchInput, 'need_reply')
       }
 
@@ -81,10 +83,10 @@ export const Add = () => {
   const { input, handleAdd, handleChange } = useAdd(sender)
 
   return (
-    <Box gap='small' pad='small' height={{ min: 'unset' }}>
-      <TextInput placeholder='DID' value={input} onChange={handleChange} />
+    <Box gap="small" pad="small" height={{ min: 'unset' }}>
+      <TextInput placeholder="DID" value={input} onChange={handleChange} />
       <Button
-        label='Add'
+        label="Add"
         onClick={handleAdd}
         disabled={!sender || input.length === 0}
       />
