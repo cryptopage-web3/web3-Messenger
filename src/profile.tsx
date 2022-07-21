@@ -16,12 +16,12 @@ const useName = () => getName(useViewerRecord('basicProfile'))
 const useCryptoAccounts = () => useViewerRecord('cryptoAccounts')
 
 const getDID = R.path([0, 'selfID', 'id'])
-const getResolver = R.path([0, 'selfID', 'client', 'ceramic'])
+const getCeramic = R.path([0, 'selfID', 'client', 'ceramic'])
 
 export const useCeramic = () => {
-  const resolver = getResolver(useConnection())
-  console.debug('(useResolver) resolver', resolver)
-  return resolver
+  const ceramic = getCeramic(useConnection())
+  console.debug('(useResolver) ceramic', ceramic)
+  return ceramic
 }
 
 export const useDID = () => {
