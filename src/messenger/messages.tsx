@@ -16,9 +16,7 @@ const publishStatusMsg = (msg, status) =>
     messageId: msg.id,
     status,
     sender: msg.receiver,
-    receiver: msg.sender,
-    senderPublicKey: msg.receiverPublicKey,
-    receiverPublicKey: msg.senderPublicKey
+    receiver: msg.sender
   })
 
 const handleIncomingMessage = async msg => {
@@ -28,7 +26,7 @@ const handleIncomingMessage = async msg => {
 }
 
 const handleHandshakeMessage = async msg => {
-  console.log('handleHandshakeMessage')
+  console.debug('(handleHandshakeMessage) msg', msg)
   if (await validateSignature(msg)) {
     await Service.addMessage(msg)
 
@@ -38,15 +36,15 @@ const handleHandshakeMessage = async msg => {
       await Service.addContact({
         current_did: msg.receiver,
         contact_did: msg.sender,
-        contact_public_key: msg.senderPublicKey
+        contact_public_key: msg.senderEncryptionPublicKey
       })
       contactChannel.postMessage({
         current_did: msg.receiver,
         contact_did: msg.sender,
-        contact_public_key: msg.senderPublicKey
+        contact_public_key: msg.senderEncryptionPublicKey
       })
     } else {
-      await Service.updateContact(msg.sender, msg.senderPublicKey)
+      await Service.updateContact(msg.sender, msg.senderEncryptionPublicKey)
     }
 
     await Service.handleHandshakeMessage(msg)
@@ -76,10 +74,7 @@ const useMessages = (sender, activeContact) => {
     if (message.receiver === sender) {
       if (message.type === 'message') {
         console.debug('(useMessages) (listener) [message] message', message)
-        await handleIncomingMessage({
-          ...message,
-          receiverPublicKey: publicKey
-        })
+        await handleIncomingMessage(message)
       }
       if (message.type === 'handshake') {
         console.debug('(useMessages) (listener) [handshake] message', message)
@@ -90,7 +85,6 @@ const useMessages = (sender, activeContact) => {
     if (message.type === 'status') {
       console.debug('(useMessages) (listener) [status] message', message)
       await Service.updateStatus(message)
-      await Service.updateContact(message.sender, message.senderPublicKey)
     }
     getMessages()
   }
@@ -123,16 +117,16 @@ export const Messages = () => {
       <ul>
         {useMessages(sender, activeContact).map((message, index) => {
           message.receiver === sender &&
-          message.status !== 'viewed' &&
-          publishStatusMsg(message, Status.viewed)
+            message.status !== 'viewed' &&
+            publishStatusMsg(message, Status.viewed)
 
           const key = message?.date ? message.date : index
           const text = message?.text
             ? `${new Date(message.date).toLocaleTimeString('ru-RU')} / ${
-              message.sender
-            } -> ${message.text} -> ${
-              message.sender === sender ? message.status : ''
-            }`
+                message.sender
+              } -> ${message.text} -> ${
+                message.sender === sender ? message.status : ''
+              }`
             : ''
 
           //TODO: "decrypt in the view on click for each message" might be a good solution for us, need to discuss with b0rey

@@ -36,14 +36,14 @@ export const getAllMessages = async () => {
 }
 
 export const updateStatus = async ({
-                                     messageId,
-                                     status
-                                   }: {
+  messageId,
+  status
+}: {
   messageId: number
   status: keyof typeof Status
 }) => {
   const { update, getByID } = useIndexedDB('messages')
-
+  console.debug('(updateStatus) messageId', messageId)
   try {
     const msg = await getByID(messageId)
     return update({ ...msg, status })
@@ -65,7 +65,9 @@ export const addContact = async (contact: Contact) => {
   }
 }
 
-export const getContactByID = async (DID: string): Promise<Contact | undefined> => {
+export const getContactByID = async (
+  DID: string
+): Promise<Contact | undefined> => {
   const { getAll } = useIndexedDB('contacts')
 
   try {
@@ -77,7 +79,10 @@ export const getContactByID = async (DID: string): Promise<Contact | undefined> 
   }
 }
 
-export const updateContact = async (contactDid: string, encryptionPublicKey) => {
+export const updateContact = async (
+  contactDid: string,
+  encryptionPublicKey
+) => {
   const { getAll, update } = useIndexedDB('contacts')
 
   try {

@@ -24,7 +24,7 @@ export const subscribe = DID => {
 
 export const encryptMessage = async message => {
   const contact = await Service.getContactByID(message.receiver)
-  const encryptionPublicKey = contact.contact_public_key;
+  const encryptionPublicKey = contact.contact_public_key
   const encryptedText = await NaCl.encrypt(message.text, encryptionPublicKey)
   const encryptedMessage = { ...message, text: encryptedText }
   //console.debug('(encryptMessage) encryptedMessage', encryptedMessage)
@@ -53,7 +53,7 @@ export const doesContactHaveEncryptionPublicKey = async senderDid => {
 export const handleHandshakeMessage = async msg => {
   // if (!(await doesContactHa
   // veEncryptionPublicKey(msg.sender))) {
-  if(msg.status==='need_reply'){
+  if (msg.status === 'need_reply') {
     //checkSign(msg)
     //updateContact(sender_did, msg.senderPublicKey)
     await publishHandshakeMsg(msg.receiver, msg.sender, 'dont_need')
@@ -73,7 +73,7 @@ export const publishHandshakeMsg = async (
     status,
     sender: senderDid,
     receiver: receiverDid,
-    senderPublicKey: senderEncryptionPublicKey,
+    senderEncryptionPublicKey: senderEncryptionPublicKey,
     senderEthereumWalletAddress: ethereumWalletAddress
   }
   // OUR public ethereum key => OUR public encryption key
