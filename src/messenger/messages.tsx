@@ -28,7 +28,8 @@ const handleIncomingMessage = async msg => {
 const handleHandshakeMessage = async msg => {
   console.debug('(handleHandshakeMessage) msg', msg)
   if (await validateSignature(msg)) {
-    await Service.addMessage(msg)
+    const id = await Service.addMessage(msg)
+    msg.id=id;
 
     //create method addOrUpdate?
     const contact = await DB.getContactByID(msg.sender)
@@ -49,6 +50,7 @@ const handleHandshakeMessage = async msg => {
 
     await Service.handleHandshakeMessage(msg)
 
+    console.debug('(handleHandshakeMessage) msg before publishStatusMsg',msg)
     //TODO: get rid of the redundancy
     publishStatusMsg(msg, Status.delivered)
   } else {
