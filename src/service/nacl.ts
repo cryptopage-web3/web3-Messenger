@@ -1,43 +1,40 @@
 import { bufferToHex } from 'ethereumjs-util'
 import * as EthSigUtil from '@metamask/eth-sig-util'
-
+import { verifyMessage } from 'ethers/lib/utils'
 //TODO: since this module works with MetaMask API, should we rename it as metamask.ts?
 
 //TODO: there is too much redundancy in all the functions below... we should get rid of it, right?
 
 //TODO: should we introduce a Message type for the whole app? Not just of IndexedDB?
 
-export const checkSign = async (message, account) => {
-  if (!('ethereum' in window)) return
+const getWalletAddressFromSignature = ({ sign, ...message }) =>
+  verifyMessage(JSON.stringify(message), sign)
 
-  //console.debug('(checkSign) message', message)
-  //console.debug('(checkSign) account', message)
-  try {
-    // @ts-ignore
-    const [account] = await ethereum.request({ method: 'eth_requestAccounts' })
-    // @ts-ignore
-    const signedMessage = await ethereum.request({
-      method: 'personal_sign',
-      params: [message, account]
-    })
-    //console.debug('(sign) signedMessage', signedMessage)
+export const getEthereumWalletAddress = async () => {
+  // @ts-ignore
+  const [account] = await ethereum.request({ method: 'eth_requestAccounts' })
+  console.debug('(getEthereumWalletAddress) account', account)
+  return account
+}
 
-    return signedMessage
-  } catch (error) {
-    console.log('error sign:>> ', error)
-    return ''
-  }
+export const validateSignature = async message => {
+  const signerEthereumWalletAddress = getWalletAddressFromSignature(message)
+  console.debug(
+    '(validateSignature) signerEthereumWalletAddress',
+    signerEthereumWalletAddress
+  )
+  return signerEthereumWalletAddress === message.signerWalletAddress
 }
 
 export const sign = async message => {
-  if (!('ethereum' in window)) return
+  if (!('ethereum' in window)) return //TODO: implement in a separated function
 
   console.debug('(sign) message', message)
   const serializedMessage = JSON.stringify(message)
   console.debug('(sign) serializedMessage', serializedMessage)
   try {
     // @ts-ignore
-    const [account] = await ethereum.request({ method: 'eth_requestAccounts' })
+    const account = await getEthereumWalletAddress()
     // @ts-ignore
     const signedMessage = await ethereum.request({
       method: 'personal_sign',
@@ -56,8 +53,7 @@ export const getEncryptionPublicKey = async () => {
   if (!('ethereum' in window)) return
 
   try {
-    // @ts-ignore
-    const [account] = await ethereum.request({ method: 'eth_requestAccounts' })
+    const account = await getEthereumWalletAddress()
     // @ts-ignore
     const key = await ethereum.request({
       method: 'eth_getEncryptionPublicKey',
@@ -80,8 +76,7 @@ export const decrypt = async encryptedMessage => {
 
   //console.debug('(decrypt) encryptedMessage', encryptedMessage)
   try {
-    // @ts-ignore
-    const [account] = await ethereum.request({ method: 'eth_requestAccounts' })
+    const account = await getEthereumWalletAddress()
     // @ts-ignore
     const decryptedMessage = await ethereum.request({
       method: 'eth_decrypt',
