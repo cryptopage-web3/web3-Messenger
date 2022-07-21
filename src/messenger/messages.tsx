@@ -4,6 +4,7 @@ import * as Service from '../service'
 import { Status } from '../service/types'
 import { useActiveContact, usePublicKey } from './chat-input'
 import { MessagesContainer } from './messages-container'
+import { validateSignature } from '../service/nacl'
 
 const messagesChannel = new BroadcastChannel('peer:messages')
 
@@ -26,10 +27,14 @@ const handleIncomingMessage = async msg => {
 
 const handleHandshakeMessage = async msg => {
   console.log('handleHandshakeMessage')
-  await Service.addMessage(msg)
-  await Service.handleHandshakeMessage(msg)
-  await Service.updateContact(msg.sender, msg.senderPublicKey) //TODO: get rid of the redundancy
-  publishStatusMsg(msg, Status.delivered)
+  if (await validateSignature(msg)) {
+    await Service.addMessage(msg)
+    await Service.handleHandshakeMessage(msg)
+    await Service.updateContact(msg.sender, msg.senderPublicKey) //TODO: get rid of the redundancy
+    publishStatusMsg(msg, Status.delivered)
+  } else {
+    console.error('invalid signature')
+  }
 }
 
 const useMessages = (sender, activeContact) => {
@@ -97,16 +102,16 @@ export const Messages = () => {
       <ul>
         {useMessages(sender, activeContact).map((message, index) => {
           message.receiver === sender &&
-          message.status !== 'viewed' &&
-          publishStatusMsg(message, Status.viewed)
+            message.status !== 'viewed' &&
+            publishStatusMsg(message, Status.viewed)
 
           const key = message?.date ? message.date : index
           const text = message?.text
             ? `${new Date(message.date).toLocaleTimeString('ru-RU')} / ${
-              message.sender
-            } -> ${message.text} -> ${
-              message.sender === sender ? message.status : ''
-            }`
+                message.sender
+              } -> ${message.text} -> ${
+                message.sender === sender ? message.status : ''
+              }`
             : ''
 
           //TODO: "decrypt in the view on click for each message" might be a good solution for us, need to discuss with b0rey

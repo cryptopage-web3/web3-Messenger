@@ -5,7 +5,6 @@ import * as Bus from './bus'
 import * as DB from './db'
 import * as NaCl from './nacl'
 import * as Service from './index'
-import { validateSignature } from './nacl'
 
 //TODO: reimplement in a fancy way
 export const getEncryptionPublicKey = async () => {
@@ -78,7 +77,6 @@ export const publishHandshakeMsg = async (
   NaCl.sign(unsignedMessage).then(sign => {
     const message = { ...unsignedMessage, sign }
     publish(message)
-    //validateSignature(message)
   })
 }
 

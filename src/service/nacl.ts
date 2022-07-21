@@ -23,7 +23,7 @@ export const validateSignature = async message => {
     '(validateSignature) signerEthereumWalletAddress',
     signerEthereumWalletAddress
   )
-  return signerEthereumWalletAddress === message.signerWalletAddress
+  return signerEthereumWalletAddress === message.senderEthereumWalletAddress
 }
 
 export const sign = async message => {
