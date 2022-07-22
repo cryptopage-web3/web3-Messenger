@@ -14,6 +14,7 @@ export const useActiveContact = () => {
   const [activeContact, setActiveContact] = useState('')
 
   const listener = async ({ data }) => {
+    console.log('(useActiveContact)', data)
     data.type === 'activeContact' && setActiveContact(data.payload)
   }
 
@@ -52,6 +53,7 @@ const useHandler = () => {
 }
 
 const usePublish = (receiver: string, text: string) => {
+  console.log('(usePublish)', text)
   const sender = useDID()
   const publicKey = usePublicKey()
   return useCallback(async () => {
@@ -61,11 +63,14 @@ const usePublish = (receiver: string, text: string) => {
       receiver,
       text,
       status: Status.sent,
-      senderPublicKey: publicKey,
       date: Date.now()
     }
-    const id = await Service.addMessage(message)
-    Service.publish({ ...message, id })
+
+    console.log("in use callback", text)
+
+    const encryptedMessage = await Service.encryptMessage(message)
+    const id = await Service.addMessage(encryptedMessage)
+    Service.publish({ ...encryptedMessage, id })
   }, [sender, receiver, text, publicKey])
 }
 
@@ -92,18 +97,21 @@ const useAutosizeTextArea = (
 }
 
 const useKeyPress = (sender, receiver, message, handleSend) => {
-  return useCallback((event) => {
-    const enterKey = 'Enter'
+  return useCallback(
+    event => {
+      const enterKey = 'Enter'
 
-    if (event.key === enterKey && !event.shiftKey) {
-      event.preventDefault()
-      event.stopPropagation()
+      if (event.key === enterKey && !event.shiftKey) {
+        event.preventDefault()
+        event.stopPropagation()
 
-      if (receiver && sender && message) {
-        handleSend()
+        if (receiver && sender && message) {
+          handleSend()
+        }
       }
-    }
-  }, [receiver, sender, message, handleSend])
+    },
+    [receiver, sender, message, handleSend]
+  )
 }
 
 export const ChatInput = (props: any) => {
@@ -122,19 +130,19 @@ export const ChatInput = (props: any) => {
     <ChatInputContainer {...props}>
       <InputMessage
         ref={textAreaRef}
-        placeholder='Write a message'
+        placeholder="Write a message"
         value={message}
         onChange={handleMessage}
         onKeyPress={handleKeyPress}
       />
-      <AttachButton
-        {...buttonStyleConfig}
-      />
-      {message && <SendButton
-        onClick={handleSend}
-        disabled={!sender || !receiver}
-        {...buttonStyleConfig}
-      />}
+      <AttachButton {...buttonStyleConfig} />
+      {message && (
+        <SendButton
+          onClick={handleSend}
+          disabled={!sender || !receiver}
+          {...buttonStyleConfig}
+        />
+      )}
     </ChatInputContainer>
   )
 }

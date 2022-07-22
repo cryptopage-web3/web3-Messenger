@@ -3,6 +3,19 @@ import * as server from './server'
 import * as peer from './peer'
 import * as Bus from './bus'
 import * as DB from './db'
+import * as NaCl from './nacl'
+import * as Service from './index'
+import { MessageType } from '../@types'
+
+//TODO: reimplement in a fancy way
+export const getEncryptionPublicKey = async () => {
+  return await NaCl.getEncryptionPublicKey()
+}
+
+//TODO: reimplement in a fancy way
+export const decrypt = async encryptedMessage => {
+  return await NaCl.decrypt(encryptedMessage)
+}
 
 export const subscribe = DID => {
   //peer.subscribe(DID)
@@ -10,19 +23,51 @@ export const subscribe = DID => {
   console.log(`message subscribe ${DID}`)
 }
 
+export const encryptMessage = async message => {
+  const contact = await Service.getContactByID(message.receiver)
+  const encryptionPublicKey = contact.contact_public_key
+  const encryptedText = await NaCl.encrypt(message.text, encryptionPublicKey)
+  const encryptedMessage = { ...message, text: encryptedText }
+
+  return encryptedMessage
+}
+
 export const publish = message => {
   try {
     Bus.channel.postMessage(message)
     server.publish(message)
-    //peer.publish(message.receiver, message.text)
     console.log('publish message', message)
   } catch (error) {
     console.log('error publish:>> ', error)
   }
 }
 
+//TODO: the entity of Message is not clear for me, why don't we reuse types of IndexedDB?
+export const publishHandshakeMsg = async (
+  senderDid: string,
+  receiverDid: string,
+  encryptionPublicKeyRequested: boolean
+) => {
+  const senderEncryptionPublicKey = await NaCl.getEncryptionPublicKey()
+  const ethereumWalletAddress = await NaCl.getEthereumWalletAddress()
+  const unsignedMessage = {
+    type: MessageType.handshake,
+    encryptionPublicKeyRequested,
+    sender: senderDid,
+    receiver: receiverDid,
+    senderEncryptionPublicKey: senderEncryptionPublicKey,
+    senderEthereumWalletAddress: ethereumWalletAddress
+  }
+  // OUR public ethereum key => OUR public encryption key
+  NaCl.sign(unsignedMessage).then(sign => {
+    const message = { ...unsignedMessage, sign }
+    publish(message)
+  })
+}
+
 export const addMessage = async message => {
   try {
+    console.log('addMessage message', message)
     return DB.addMessage(message)
   } catch (error) {
     console.log('error addMessage :>> ', error)
@@ -54,16 +99,20 @@ export const updateStatus = async data => {
 }
 
 export const addContact = async contact => {
+  console.debug('(addContact) contact', contact)
   try {
     return DB.addContact(contact)
   } catch (error) {
     console.log('error addContact :>> ', error)
+    throw error
   }
 }
 
-export const updateContact = async (contact, publicKey) => {
+export const updateContact = async (contactDid: string, encrytionPublicKey) => {
+  console.debug('(updateContact) contact', contactDid)
+  console.debug('(updateContact) encrytionPublicKey', encrytionPublicKey)
   try {
-    return DB.updateContact(contact, publicKey)
+    return DB.updateContact(contactDid, encrytionPublicKey)
   } catch (error) {
     console.log('error updateContact :>> ', error)
   }
@@ -78,20 +127,10 @@ export const getAllContact = async currentDid => {
   }
 }
 
-export const getPublicKey = async () => {
-  if (!('ethereum' in window)) return
-
+export const getContactByID = async currentDid => {
   try {
-    // @ts-ignore
-    const [account] = await ethereum.request({ method: 'eth_requestAccounts' })
-    // @ts-ignore
-    const key = await ethereum.request({
-      method: 'eth_getEncryptionPublicKey',
-      params: [account]
-    })
-    return key
+    return await DB.getContactByID(currentDid)
   } catch (error) {
-    console.log('error getPublicKey:>> ', error)
-    return ''
+    console.log('error getAllContact :>> ', error)
   }
 }

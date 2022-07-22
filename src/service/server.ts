@@ -3,7 +3,7 @@ import * as Bus from './bus'
 let ws: WebSocket
 let topics: Set<string> = new Set()
 
-setInterval(() => console.log(Array.from(topics)), 1000)
+//setInterval(() => console.log(Array.from(topics)), 1000)
 
 export const publish = (message: string) => {
   ws.send(JSON.stringify(message))

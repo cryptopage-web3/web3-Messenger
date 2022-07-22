@@ -16,8 +16,17 @@ const useName = () => getName(useViewerRecord('basicProfile'))
 const useCryptoAccounts = () => useViewerRecord('cryptoAccounts')
 
 const getDID = R.path([0, 'selfID', 'id'])
+const getCeramic = R.path([0, 'selfID', 'client', 'ceramic'])
+
+export const useCeramic = () => {
+  const ceramic = getCeramic(useConnection())
+  console.debug('(useResolver) ceramic', ceramic)
+  return ceramic
+}
+
 export const useDID = () => {
   const result = useConnection()
+  console.debug('(useDID) result', result)
   return getDID(result)
 }
 
@@ -38,7 +47,7 @@ const usePublicKey = () => {
   useEffect(async () => {
     if (!did) return
 
-    const key = await Service.getPublicKey()
+    const key = await Service.getEncryptionPublicKey()
     keyChannel.postMessage({
       type: 'publicKey',
       payload: key

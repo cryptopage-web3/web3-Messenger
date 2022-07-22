@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import * as R from 'ramda'
 import { useDID } from '../profile'
 import * as Service from '../service'
-import {Contact} from "./contact";
+import { Contact } from './contact'
 import { ChatListContainer } from './chat-list-container'
 
 const channel = new BroadcastChannel('peer:status')
@@ -61,6 +61,7 @@ const useContacts = () => {
 
     if (R.find(R.propEq('contact_did', data.sender), list)) return
 
+    console.debug('(useContacts) (listenNewMessage) data', data)
     await Service.addContact({
       current_did: data.receiver,
       contact_did: data.sender
@@ -97,15 +98,15 @@ export const ChatList = styled(({ className }) => {
 
   return (
     <ChatListContainer>
-    <ul className={className}>
-      {contacts.map(item => (
-        <Contact
-          key={item.contact_did}
-          setActiveItem={setActiveItem}
-          {...item}
-        />
-      ))}
-    </ul>
+      <ul className={className}>
+        {(contacts || []).map(item => (
+          <Contact
+            key={item.contact_did}
+            setActiveItem={setActiveItem}
+            {...item}
+          />
+        ))}
+      </ul>
     </ChatListContainer>
   )
 })`

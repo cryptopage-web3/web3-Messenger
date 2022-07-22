@@ -4,25 +4,27 @@ import { Status } from '../service/peer'
 import { useDID } from '../profile'
 import * as Service from '../service'
 import { isAddress } from 'ethers/lib/utils' //TODO: better extract all this Web3-related functionality out of here...
+import { publishHandshakeMsg } from '../service'
+import { useCeramic } from '../profile'
+import { Caip10Link } from '@ceramicnetwork/stream-caip10-link'
 
 const contactChannel = new BroadcastChannel('peer:contact')
 
-const isDid = (input) => true
+const isDid = input => true
 
 /**
  * Return processed input if it is Ethereum Wallet Address or DID
  * @param input
  */
-const getProcessedInput = (input: string) => {
+const getProcessedInput = async (input: string, ceramic) => {
   if (isAddress(input)) {
-    const ethMainnetPrefix = 'eip155:1:'
-
-    console.warn(
-      `Ethereum Wallet Address detected. Added mainnet prefix (eip155:1:) for search:`,
-      input
+    const link = await Caip10Link.fromAccount(ceramic, input + '@eip155:1')
+    const did = link.did
+    console.debug(
+      `Ethereum Wallet Address detected. Composing DID using Caip10Link. DID:`,
+      did
     )
-
-    return ethMainnetPrefix + input
+    return did
   }
 
   //TODO implement contact_did checker, probably in another place, as well as the Wallet Address checker
@@ -39,15 +41,31 @@ const useAdd = sender => {
     [input, setInput]
   )
 
+  const ceramic = useCeramic()
+
   const handleAdd = useCallback(async () => {
     try {
-      const searchInput = getProcessedInput(input)
+      const searchInput = await getProcessedInput(input, ceramic)
 
-      await Service.addContact({ current_did: sender, contact_did: searchInput })
-      contactChannel.postMessage({
-        type: 'newContact',
-        payload: { current_did: sender, contact_did: searchInput }
-      })
+      const foundContact = await Service.getContactByID(searchInput)
+
+      if (!foundContact) {
+        const contact = {
+          current_did: sender,
+          contact_did: searchInput
+        }
+
+        await Service.addContact(contact)
+        contactChannel.postMessage({
+          type: 'newContact',
+          payload: contact
+        })
+      }
+
+      if (!foundContact || (foundContact && !foundContact.contact_public_key)) {
+        await publishHandshakeMsg(sender, searchInput, true)
+      }
+
       Status.subscribe(searchInput)
       setInput('')
     } catch (e) {
@@ -64,10 +82,10 @@ export const Add = () => {
   const { input, handleAdd, handleChange } = useAdd(sender)
 
   return (
-    <Box gap='small' pad='small' height={{ min: 'unset' }}>
-      <TextInput placeholder='DID' value={input} onChange={handleChange} />
+    <Box gap="small" pad="small" height={{ min: 'unset' }}>
+      <TextInput placeholder="DID" value={input} onChange={handleChange} />
       <Button
-        label='Add'
+        label="Add"
         onClick={handleAdd}
         disabled={!sender || input.length === 0}
       />
