@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react'
-import styled from 'styled-components'
+import React, { useCallback, useEffect, useState } from 'react'
 import * as R from 'ramda'
 import { useDID } from '../profile'
 import * as Service from '../service'
 import { Contact } from './contact'
-import { ChatListContainer } from './chat-list-container'
+import { List, ScrollContainer } from '../components'
 
-const channel = new BroadcastChannel('peer:status')
+const statusChannel = new BroadcastChannel('peer:status')
 const contactsChannel = new BroadcastChannel('peer:contacts')
 const messagesChannel = new BroadcastChannel('peer:messages')
 const contactChannel = new BroadcastChannel('peer:contact')
@@ -16,15 +15,16 @@ const usePeerStatus = (list, setList) => {
     const listener = ({ data }) => {
       setList(list.map(item => (item.DID === data.DID ? data : item)))
     }
-    channel.addEventListener('message', listener)
 
-    return () => channel.removeEventListener('message', listener)
+    statusChannel.addEventListener('message', listener)
+
+    return () => statusChannel.removeEventListener('message', listener)
   }, [list, setList])
 }
 
 const getNewList = (list, did) =>
   R.map(el => {
-    if (el.contact_did === did) {
+    if (el.receiver_did === did) {
       return { ...el, active: !el.active }
     }
     return el?.active ? { ...el, active: false } : el
@@ -46,71 +46,67 @@ const useContacts = () => {
 
   usePeerStatus(list, setList)
 
-  const setContacts = async () => {
-    const list = await Service.getAllContact(sender)
-    setList(list)
-  }
+  const setContacts = useCallback(async () => {
+    const allContacts = await Service.getAllContactsByDid(sender)
+    setList(allContacts)
+  }, [sender])
 
   useEffect(() => {
     if (!sender) return
     setContacts()
-  }, [sender])
-
-  const listenNewMessage = async ({ data }) => {
-    if (data.type !== 'message' || data.receiver !== sender) return
-
-    if (R.find(R.propEq('contact_did', data.sender), list)) return
-
-    console.debug('(useContacts) (listenNewMessage) data', data)
-    await Service.addContact({
-      current_did: data.receiver,
-      contact_did: data.sender
-    })
-    setContacts()
-  }
-
-  const listenNewContact = async ({ data }) => {
-    if (data.type !== 'newContact') return
-
-    const L = await Service.getAllContact(sender)
-    const newList = getNewList(L, data.payload.contact_did)
-    setList(newList)
-    contactsChannel.postMessage({
-      type: 'activeContact',
-      payload: data.payload.contact_did
-    })
-  }
+  }, [sender, setContacts])
 
   useEffect(() => {
+    const listenNewMessage = async ({ data }) => {
+      if (data.type !== 'message' || data.receiver !== sender) return
+
+      if (R.find(R.propEq('receiver_did', data.sender), list)) return
+
+      console.debug('(useContacts) (listenNewMessage) data', data)
+      await Service.addContact({
+        sender_did: data.receiver,
+        receiver_did: data.sender
+      })
+      setContacts()
+    }
+
+    const listenNewContact = async ({ data }) => {
+      if (data.type !== 'newContact') return
+
+      const allContacts = await Service.getAllContactsByDid(sender)
+      const newList = getNewList(allContacts, data.payload.receiver_did)
+      setList(newList)
+      contactsChannel.postMessage({
+        type: 'activeContact',
+        payload: data.payload.receiver_did
+      })
+    }
+
     messagesChannel.addEventListener('message', listenNewMessage)
     contactChannel.addEventListener('message', listenNewContact)
     return () => {
       messagesChannel.removeEventListener('message', listenNewMessage)
       contactChannel.removeEventListener('message', listenNewContact)
     }
-  }, [sender, list])
+  }, [sender, list, setContacts])
 
   return [list, setActiveContact]
 }
 
-export const ChatList = styled(({ className }) => {
+export const Contacts = () => {
   const [contacts, setActiveItem] = useContacts()
 
   return (
-    <ChatListContainer>
-      <ul className={className}>
-        {(contacts || []).map(item => (
+    <ScrollContainer>
+      <List>
+        {contacts.map(item => (
           <Contact
-            key={item.contact_did}
+            key={item.receiver_did}
             setActiveItem={setActiveItem}
             {...item}
           />
         ))}
-      </ul>
-    </ChatListContainer>
+      </List>
+    </ScrollContainer>
   )
-})`
-  list-style-type: none;
-  margin-top: 20px;
-  padding: 0;
-`
+}

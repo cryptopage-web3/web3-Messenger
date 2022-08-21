@@ -1,2 +1,2 @@
 export * from './add'
-export * from './chat-list'
+export * from './contacts'

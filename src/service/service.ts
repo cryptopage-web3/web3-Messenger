@@ -1,6 +1,6 @@
 import * as R from 'ramda'
+import { v4 as uuidv4 } from 'uuid'
 import * as server from './server'
-import * as peer from './peer'
 import * as Bus from './bus'
 import * as DB from './db'
 import * as NaCl from './nacl'
@@ -24,8 +24,8 @@ export const subscribe = DID => {
 }
 
 export const encryptMessage = async message => {
-  const contact = await Service.getContactByID(message.receiver)
-  const encryptionPublicKey = contact.contact_public_key
+  const contact = await Service.getContactByDid(message.receiver)
+  const encryptionPublicKey = contact.receiver_public_key
   const encryptedText = await NaCl.encrypt(message.text, encryptionPublicKey)
   const encryptedMessage = { ...message, text: encryptedText }
 
@@ -38,7 +38,7 @@ export const publish = message => {
     server.publish(message)
     console.log('publish message', message)
   } catch (error) {
-    console.log('error publish:>> ', error)
+    console.error('error publish:>> ', error)
   }
 }
 
@@ -59,18 +59,23 @@ export const publishHandshakeMsg = async (
     senderEthereumWalletAddress: ethereumWalletAddress
   }
   // OUR public ethereum key => OUR public encryption key
-  NaCl.sign(unsignedMessage).then(sign => {
-    const message = { ...unsignedMessage, sign }
-    publish(message)
-  })
+  const sign = await NaCl.sign(unsignedMessage)
+  const signedMessage = {
+    ...unsignedMessage,
+    sign,
+    messageId: senderDid + uuidv4()
+  }
+  await Service.addMessage(signedMessage)
+
+  Service.publish(signedMessage)
 }
 
 export const addMessage = async message => {
   try {
     console.log('addMessage message', message)
-    return DB.addMessage(message)
+    return await DB.addMessage(message)
   } catch (error) {
-    console.log('error addMessage :>> ', error)
+    console.error('error addMessage :>> ', error)
   }
 }
 
@@ -81,56 +86,69 @@ export const getUserMessages = async (currentUser, activeContact) => {
     const messages = await DB.getAllMessages()
     return R.filter(
       item =>
-        (item.receiver === activeContact && item.sender === currentUser) ||
-        (item.sender === activeContact && item.receiver === currentUser),
+        ((item.receiver === activeContact && item.sender === currentUser) ||
+          (item.sender === activeContact && item.receiver === currentUser)) &&
+        item.type === MessageType.message,
       messages
     )
   } catch (error) {
-    console.log('error getUserMessages :>> ', error)
+    console.error('error getUserMessages :>> ', error)
+  }
+}
+
+export const getAllMessages = async () => {
+  try {
+    return await DB.getAllMessages()
+  } catch (error) {
+    console.error('error :>> ', error)
+    return []
   }
 }
 
 export const updateStatus = async data => {
   try {
-    return DB.updateStatus(data)
+    await DB.updateStatus(data)
   } catch (error) {
-    console.log('error updateStatus :>> ', error)
+    console.error('error updateStatus :>> ', error)
   }
 }
 
 export const addContact = async contact => {
   console.debug('(addContact) contact', contact)
   try {
-    return DB.addContact(contact)
+    return await DB.addContact(contact)
   } catch (error) {
-    console.log('error addContact :>> ', error)
+    console.error('error addContact :>> ', error)
     throw error
   }
 }
 
-export const updateContact = async (contactDid: string, encrytionPublicKey) => {
+export const updateContact = async (
+  contactDid: string,
+  encryptionPublicKey
+) => {
   console.debug('(updateContact) contact', contactDid)
-  console.debug('(updateContact) encrytionPublicKey', encrytionPublicKey)
+  console.debug('(updateContact) encryptionPublicKey', encryptionPublicKey)
   try {
-    return DB.updateContact(contactDid, encrytionPublicKey)
+    return await DB.updateContact(contactDid, encryptionPublicKey)
   } catch (error) {
-    console.log('error updateContact :>> ', error)
+    console.error('error updateContact :>> ', error)
   }
 }
 
-export const getAllContact = async currentDid => {
+export const getAllContactsByDid = async currentDid => {
   try {
     const contacts = await DB.getAllContacts()
-    return R.filter(R.propEq('current_did', currentDid), contacts)
+    return R.filter(R.propEq('sender_did', currentDid), contacts)
   } catch (error) {
-    console.log('error getAllContact :>> ', error)
+    console.error('error getAllContactsByDid :>> ', error)
   }
 }
 
-export const getContactByID = async currentDid => {
+export const getContactByDid = async currentDid => {
   try {
-    return await DB.getContactByID(currentDid)
+    return await DB.getContactByDid(currentDid)
   } catch (error) {
-    console.log('error getAllContact :>> ', error)
+    console.error('error getContactByDid :>> ', error)
   }
 }

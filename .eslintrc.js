@@ -17,6 +17,13 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module'
   },
-  plugins: ['react', '@typescript-eslint'],
-  rules: {}
+  plugins: ['react', '@typescript-eslint', 'react-hooks'],
+  rules: {
+    'no-unused-vars': 1,
+    'react/react-in-jsx-scope': 'off',
+    'react/jsx-closing-bracket-location': [1, 'tag-aligned'],
+    'react/jsx-closing-tag-location': 1,
+    'react-hooks/rules-of-hooks': 'error',
+    'react-hooks/exhaustive-deps': 'warn'
+  }
 }

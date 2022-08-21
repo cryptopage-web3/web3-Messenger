@@ -1,10 +1,10 @@
 import * as React from 'react'
 import styled from 'styled-components'
 
-export const Contact = styled(({ className, contact_did, setActiveItem }) => {
+export const Contact = styled(({ className, receiver_did, setActiveItem }) => {
   return (
-    <li className={className} onClick={setActiveItem(contact_did)}>
-      <b>{contact_did}</b>
+    <li className={className} onClick={setActiveItem(receiver_did)}>
+      <b>{receiver_did}</b>
     </li>
   )
 })`

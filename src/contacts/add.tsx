@@ -1,11 +1,10 @@
-import React, { useState, useCallback, useEffect } from 'react'
-import { Box, TextInput, Button } from 'grommet'
+import React, { useCallback, useState } from 'react'
+import { Box, Button, TextInput } from 'grommet'
 import { Status } from '../service/peer'
-import { useDID } from '../profile'
+import { useCeramic, useDID } from '../profile'
 import * as Service from '../service'
-import { isAddress } from 'ethers/lib/utils' //TODO: better extract all this Web3-related functionality out of here...
 import { publishHandshakeMsg } from '../service'
-import { useCeramic } from '../profile'
+import { isAddress } from 'ethers/lib/utils' //TODO: better extract all this Web3-related functionality out of here...
 import { Caip10Link } from '@ceramicnetwork/stream-caip10-link'
 
 const contactChannel = new BroadcastChannel('peer:contact')
@@ -13,10 +12,13 @@ const contactChannel = new BroadcastChannel('peer:contact')
 const isDid = input => true
 
 /**
- * Return processed input if it is Ethereum Wallet Address or DID
- * @param input
+ * If input is Ethereum Wallet Address then get did by input
+ * If input is did then return did
+ *
+ * @param input - DID or Ethereum Wallet Address
+ * @param ceramic
  */
-const getProcessedInput = async (input: string, ceramic) => {
+const getDid = async (input: string, ceramic) => {
   if (isAddress(input)) {
     const link = await Caip10Link.fromAccount(ceramic, input + '@eip155:1')
     const did = link.did
@@ -24,10 +26,11 @@ const getProcessedInput = async (input: string, ceramic) => {
       `Ethereum Wallet Address detected. Composing DID using Caip10Link. DID:`,
       did
     )
+
     return did
   }
 
-  //TODO implement contact_did checker, probably in another place, as well as the Wallet Address checker
+  //TODO implement receiver_did checker, probably in another place, as well as the Wallet Address checker
   if (isDid(input)) return input
 
   throw Error('The search string is nether Ethereum Wallet Address or DID')
@@ -36,23 +39,20 @@ const getProcessedInput = async (input: string, ceramic) => {
 const useAdd = sender => {
   const [input, setInput] = useState('')
 
-  const handleChange = useCallback(
-    event => setInput(event.target.value),
-    [input, setInput]
-  )
+  const handleChange = useCallback(event => setInput(event.target.value), [])
 
   const ceramic = useCeramic()
 
   const handleAdd = useCallback(async () => {
     try {
-      const searchInput = await getProcessedInput(input, ceramic)
+      const did = await getDid(input, ceramic)
 
-      const foundContact = await Service.getContactByID(searchInput)
+      const foundContact = await Service.getContactByDid(did)
 
       if (!foundContact) {
         const contact = {
-          current_did: sender,
-          contact_did: searchInput
+          sender_did: sender,
+          receiver_did: did
         }
 
         await Service.addContact(contact)
@@ -62,16 +62,19 @@ const useAdd = sender => {
         })
       }
 
-      if (!foundContact || (foundContact && !foundContact.contact_public_key)) {
-        await publishHandshakeMsg(sender, searchInput, true)
+      if (
+        !foundContact ||
+        (foundContact && !foundContact.receiver_public_key)
+      ) {
+        await publishHandshakeMsg(sender, did, true)
       }
 
-      Status.subscribe(searchInput)
+      Status.subscribe(did) //TODO не понятно что делает эта подписка
       setInput('')
     } catch (e) {
       alert(e.message)
     }
-  }, [input])
+  }, [ceramic, input, sender])
 
   return { input, handleAdd, handleChange }
 }
@@ -82,12 +85,12 @@ export const Add = () => {
   const { input, handleAdd, handleChange } = useAdd(sender)
 
   return (
-    <Box gap="small" pad="small" height={{ min: 'unset' }}>
+    <Box gap="small" pad="small">
       <TextInput placeholder="DID" value={input} onChange={handleChange} />
       <Button
         label="Add"
         onClick={handleAdd}
-        disabled={!sender || input.length === 0}
+        disabled={!sender || !input.length}
       />
     </Box>
   )

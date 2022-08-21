@@ -8,6 +8,7 @@ export const DBConfig = {
       storeSchema: [
         { name: 'receiver', keypath: 'receiver', options: { unique: false } },
         { name: 'sender', keypath: 'sender', options: { unique: false } },
+        { name: 'messageId', keypath: 'messageId', options: { unique: true } },
         { name: 'text', keypath: 'text', options: { unique: false } },
         { name: 'date', keypath: 'date', options: { unique: false } }
       ]
@@ -17,18 +18,18 @@ export const DBConfig = {
       storeConfig: { keyPath: 'id', autoIncrement: true },
       storeSchema: [
         {
-          name: 'current_did',
-          keypath: 'current_did',
+          name: 'sender_did',
+          keypath: 'sender_did',
           options: { unique: false }
         },
         {
-          name: 'contact_did',
-          keypath: 'contact_did',
+          name: 'receiver_did',
+          keypath: 'receiver_did',
           options: { unique: true }
         },
         {
-          name: 'contact_public_key',
-          keypath: 'contact_public_key',
+          name: 'receiver_public_key',
+          keypath: 'receiver_public_key',
           options: { unique: true }
         }
       ]

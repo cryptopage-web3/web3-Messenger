@@ -7,8 +7,7 @@ import { verifyMessage } from 'ethers/lib/utils'
 
 //TODO: should we introduce a Message type for the whole app? Not just of IndexedDB?
 
-const getWalletAddressFromSignature = ({ sign, ...message }) =>
-  verifyMessage(JSON.stringify(message), sign)
+const getWalletAddressFromSignature = ({ sign, messageId, ...message }) => verifyMessage(JSON.stringify(message), sign)
 
 export const getEthereumWalletAddress = async () => {
   // @ts-ignore
@@ -20,7 +19,6 @@ export const getEthereumWalletAddress = async () => {
 export const validateSignature = message => {
   const signerEthereumWalletAddress = getWalletAddressFromSignature(message)
 
-  console.debug('(validateSignature) signerEthereumWalletAddress', signerEthereumWalletAddress, 'message.senderEthereumWalletAddress', message.senderEthereumWalletAddress)
   return signerEthereumWalletAddress.toLowerCase() === message.senderEthereumWalletAddress.toLowerCase()
 }
 
@@ -42,7 +40,7 @@ export const sign = async message => {
 
     return signedMessage
   } catch (error) {
-    console.log('error sign:>> ', error)
+    console.error('error sign:>> ', error)
     return ''
   }
 }
@@ -52,6 +50,7 @@ export const getEncryptionPublicKey = async () => {
 
   try {
     const account = await getEthereumWalletAddress()
+
     // @ts-ignore
     const key = await ethereum.request({
       method: 'eth_getEncryptionPublicKey',
@@ -61,7 +60,7 @@ export const getEncryptionPublicKey = async () => {
     //console.debug('(getEncryptionPublicKey) key', key)
     return key
   } catch (error) {
-    console.log('error getPublicKey:>> ', error)
+    console.error('error getPublicKey:>> ', error)
     return ''
   }
   //TODO:rewrite function after Metamask implements more fancy encryption
@@ -84,7 +83,7 @@ export const decrypt = async encryptedMessage => {
 
     return decryptedMessage
   } catch (error) {
-    console.log('error decrypt:>> ', error)
+    console.error('error decrypt:>> ', error)
     return ''
   }
   //TODO:rewrite function after Metamask implements more fancy encryption
@@ -98,7 +97,6 @@ export const encrypt = async (
 ): Promise<string> => {
   if (!('ethereum' in window)) return
 
-  //console.debug('(encrypt) message', message)
   try {
     // @ts-ignore
     const encryptedMessage = EthSigUtil.encrypt({
@@ -115,7 +113,7 @@ export const encrypt = async (
 
     return preparedMessage
   } catch (error) {
-    console.log('error encrypt:>> ', error)
+    console.error('error encrypt:>> ', error)
     return ''
   }
   //TODO:rewrite function after Metamask implements more fancy encryption

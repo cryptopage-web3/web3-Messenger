@@ -12,7 +12,6 @@ export const publish = (DID, status = 'online') => {
 
   intervalID = setInterval(() => {
     //peer.pubsub.publish(getChannelName(DID), encode(status))
-    console.info(`status publish ${getChannelName(DID)}`)
   }, STATUS_INTERVAL)
 }
 

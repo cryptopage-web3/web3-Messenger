@@ -1,12 +1,22 @@
 import { ChatInfo } from './chat-info'
 import { Messages } from './messages'
-import { ChatInput } from './chat-input'
+import { ChatForm } from './chat-form'
 import { Main } from 'grommet'
+import styled from 'styled-components'
+
+const StyledMain =styled(Main)`
+  background-color: #F5F9FD;
+  overflow: hidden;
+  
+  & > div:not(:last-child){
+    border-bottom: 1.6px solid #eee;
+  }
+`
 
 export const Chat = (props) => (
-  <Main {...props} background='#F5F9FD' overflor="hidden"> {/*TODO encapsulate colors, sizes (dig into grommet)?*/}
+  <StyledMain {...props}>
     <ChatInfo />
     <Messages />
-    <ChatInput direction='row' />
-  </Main>
+    <ChatForm direction='row' />
+  </StyledMain>
 )

@@ -18,9 +18,9 @@ export const addMessage = async (message: Message) => {
 
   try {
     //console.debug('(addMessage) message', message)
-    return add(message)
+    return await add(message)
   } catch (error) {
-    console.log('error :>> ', error)
+    console.error('error :>> ', error)
   }
 }
 
@@ -28,9 +28,9 @@ export const getAllMessages = async () => {
   const { getAll } = useIndexedDB('messages')
 
   try {
-    return getAll()
+    return await getAll()
   } catch (error) {
-    console.log('error :>> ', error)
+    console.error('error :>> ', error)
     return []
   }
 }
@@ -39,16 +39,19 @@ export const updateStatus = async ({
   messageId,
   status
 }: {
-  messageId: number
+  messageId: string
   status: keyof typeof Status
 }) => {
-  const { update, getByID } = useIndexedDB('messages')
-  console.debug('(updateStatus) messageId', messageId)
+  const { update, getByIndex } = useIndexedDB('messages')
+
   try {
-    const msg = await getByID(messageId)
-    return update({ ...msg, status })
+    const msg = await getByIndex('messageId', messageId)
+
+    if (!msg) throw Error('No message with provided id')
+
+    await update({ ...msg, status })
   } catch (error) {
-    console.log('error :>> ', error)
+    console.error('error :>> ', error)
   }
 }
 
@@ -65,7 +68,7 @@ export const addContact = async (contact: Contact) => {
   }
 }
 
-export const getContactByID = async (
+export const getContactByDid = async (
   DID: string
 ): Promise<Contact | undefined> => {
   const { getAll } = useIndexedDB('contacts')
@@ -73,7 +76,7 @@ export const getContactByID = async (
   try {
     const contacts = await getAll()
 
-    return contacts.find(c => c.contact_did === DID)
+    return contacts.find(c => c.receiver_did === DID)
   } catch (error) {
     console.error('error getContactByID :>> ', error)
   }
@@ -83,17 +86,18 @@ export const updateContact = async (
   contactDid: string,
   encryptionPublicKey
 ) => {
-  const { getAll, update } = useIndexedDB('contacts')
+  const { update, getByIndex } = useIndexedDB('contacts')
 
   try {
-    const contacts = await getAll()
-    const foundContact = contacts.find(c => c.contact_did === contactDid)
+    const foundContact = await getByIndex('receiver_did', contactDid)
 
-    if (foundContact.contact_public_key) return
+    if (!foundContact) throw Error('No contact with provided did')
 
-    update({ ...foundContact, contact_public_key: encryptionPublicKey })
+    if (foundContact.receiver_public_key) return
+
+    await update({ ...foundContact, receiver_public_key: encryptionPublicKey })
   } catch (error) {
-    console.log('error addContact :>> ', error)
+    console.error('error addContact :>> ', error)
   }
 }
 
@@ -101,8 +105,8 @@ export const getAllContacts = async () => {
   const { getAll } = useIndexedDB('contacts')
 
   try {
-    return getAll()
+    return await getAll()
   } catch (error) {
-    console.log('error getAllContacts :>> ', error)
+    console.error('error getAllContacts :>> ', error)
   }
 }

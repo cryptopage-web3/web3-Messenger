@@ -1,11 +1,13 @@
-import React, { useCallback, useEffect, useState, useRef } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { v4 as uuidv4 } from 'uuid'
 import { useDID } from '../profile'
 import * as Service from '../service'
 import { Status } from '../service/types'
-import { InputMessage } from './input-message'
+import { Input } from './input'
 import { AttachButton } from './attach-button'
 import { SendButton } from './send-button'
-import { ChatInputContainer } from './chat-input-container'
+import { Box } from 'grommet'
+import { MessageType } from '../@types'
 
 const contactsChannel = new BroadcastChannel('peer:contacts')
 const keyChannel = new BroadcastChannel('peer:key')
@@ -47,36 +49,21 @@ export const usePublicKey = () => {
   return key
 }
 
-const useHandler = () => {
-  const [value, setValue] = useState('')
-  return [value, useCallback(event => setValue(event.target.value))]
-}
+const sendMessage = async (sender: string, receiver: string, text: string) => {
+  const message = {
+    messageId: sender + uuidv4(),
+    type: MessageType.message,
+    sender,
+    receiver,
+    text,
+    status: Status.sent,
+    date: Date.now()
+  }
 
-const usePublish = (receiver: string, text: string) => {
-  console.log('(usePublish)', text)
-  const sender = useDID()
-  const publicKey = usePublicKey()
-  return useCallback(async () => {
-    const message = {
-      type: 'message',
-      sender,
-      receiver,
-      text,
-      status: Status.sent,
-      date: Date.now()
-    }
+  const encryptedMessage = await Service.encryptMessage(message)
 
-    console.log("in use callback", text)
-
-    const encryptedMessage = await Service.encryptMessage(message)
-    const id = await Service.addMessage(encryptedMessage)
-    Service.publish({ ...encryptedMessage, id })
-  }, [sender, receiver, text, publicKey])
-}
-
-const buttonStyleConfig = {
-  alignSelf: 'end',
-  plain: true
+  await Service.addMessage(encryptedMessage)
+  Service.publish(encryptedMessage)
 }
 
 const useAutosizeTextArea = (
@@ -96,7 +83,7 @@ const useAutosizeTextArea = (
   }, [textAreaRef, value])
 }
 
-const useKeyPress = (sender, receiver, message, handleSend) => {
+const useKeyPress = (sender, receiver, message, handleSubmit) => {
   return useCallback(
     event => {
       const enterKey = 'Enter'
@@ -106,43 +93,56 @@ const useKeyPress = (sender, receiver, message, handleSend) => {
         event.stopPropagation()
 
         if (receiver && sender && message) {
-          handleSend()
+          handleSubmit(event)
         }
       }
     },
-    [receiver, sender, message, handleSend]
+    [sender, receiver, message, handleSubmit]
   )
 }
 
-export const ChatInput = (props: any) => {
-  const receiver = useActiveContact()
-  const [message, handleMessage] = useHandler()
-  const handleSend = usePublish(receiver, message)
+export const ChatForm = (props: any) => {
   const sender = useDID()
+  const receiver = useActiveContact()
+
+  const [message, setMessage] = useState('')
+
+  const handleMessage = useCallback(event => setMessage(event.target.value), [])
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
 
   useAutosizeTextArea(textAreaRef, message)
 
-  const handleKeyPress = useKeyPress(sender, receiver, message, handleSend)
+  const handleSubmit = useCallback(
+    event => {
+      event.preventDefault()
+
+      const text = message.trim()
+
+      if (text.length) sendMessage(sender, receiver, text)
+
+      setMessage('')
+    },
+    [sender, receiver, message]
+  )
+
+  const handleKeyPress = useKeyPress(sender, receiver, message, handleSubmit)
 
   return (
-    <ChatInputContainer {...props}>
-      <InputMessage
-        ref={textAreaRef}
-        placeholder="Write a message"
-        value={message}
-        onChange={handleMessage}
-        onKeyPress={handleKeyPress}
-      />
-      <AttachButton {...buttonStyleConfig} />
-      {message && (
-        <SendButton
-          onClick={handleSend}
-          disabled={!sender || !receiver}
-          {...buttonStyleConfig}
+    <form onSubmit={handleSubmit}>
+      <Box {...props} elevation={'none'} pad={'15px'} gap={'10px'}>
+        <Input
+          ref={textAreaRef}
+          placeholder="Write a message"
+          value={message}
+          onChange={handleMessage}
+          onKeyPress={handleKeyPress}
         />
-      )}
-    </ChatInputContainer>
+        <AttachButton />
+        {message.trim() && (
+          <SendButton type="submit" disabled={!sender || !receiver} />
+        )}
+      </Box>
+    </form>
   )
 }

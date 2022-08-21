@@ -3,17 +3,7 @@ import { TextArea } from 'grommet'
 
 import styled from 'styled-components'
 
-
-const StyledInputMessage = React.forwardRef((props, ref) => (<TextArea
-  rows={1}
-  resize={false}
-  plain={true}
-  size={'14px'}
-  ref={ref}
-  {...props}
-/>))
-
-export const InputMessage = styled(StyledInputMessage)`
+const StyledInput = styled(TextArea)`
   line-height: 150%;
   padding: 0;
   font-weight: 400;
@@ -22,3 +12,14 @@ export const InputMessage = styled(StyledInputMessage)`
   max-height: 20rem;
 `
 
+export const Input = React.forwardRef((props, ref) => (
+  <StyledInput
+    rows={1}
+    resize={false}
+    plain={true}
+    ref={ref}
+    {...props}
+  />
+))
+
+Input.displayName='Input'

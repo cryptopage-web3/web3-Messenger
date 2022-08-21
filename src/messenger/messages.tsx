@@ -1,39 +1,43 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useDID } from '../profile'
 import * as Service from '../service'
 import { Status } from '../service/types'
-import { useActiveContact, usePublicKey } from './chat-input'
-import { MessagesContainer } from './messages-container'
+import { useActiveContact, usePublicKey } from './chat-form'
 import { validateSignature } from '../service/nacl'
 import * as DB from '../service/db'
+import { Message } from './message'
+import { MessageType } from '../@types'
+import { ScrollContainer } from '../components'
 
 const messagesChannel = new BroadcastChannel('peer:messages')
 const contactChannel = new BroadcastChannel('peer:contact')
 
-const publishStatusMsg = (msg, status) =>
+const publishStatusMsg = (msg, status) => {
   Service.publish({
     type: 'status',
-    messageId: msg.id,
+    messageId: msg.messageId,
     status,
     sender: msg.receiver,
     receiver: msg.sender
   })
+}
 
 const handleIncomingMessage = async msg => {
   await Service.addMessage(msg)
+
   publishStatusMsg(msg, Status.delivered)
 }
 
 const handleHandshakeMessage = async msg => {
   console.debug('(handleHandshakeMessage) msg', msg)
-  if (await validateSignature(msg)) {
-    const contact = await DB.getContactByID(msg.sender)
+  if (validateSignature(msg)) {
+    const contact = await DB.getContactByDid(msg.sender)
 
     if (!contact) {
       const contact = {
-        current_did: msg.receiver,
-        contact_did: msg.sender,
-        contact_public_key: msg.senderEncryptionPublicKey
+        sender_did: msg.receiver,
+        receiver_did: msg.sender,
+        receiver_public_key: msg.senderEncryptionPublicKey
       }
 
       await Service.addContact(contact)
@@ -49,95 +53,98 @@ const handleHandshakeMessage = async msg => {
       await Service.publishHandshakeMsg(msg.receiver, msg.sender, false)
     }
 
-    const id = await Service.addMessage(msg)
-
-    publishStatusMsg( {...msg, id}, Status.delivered)
+    await Service.addMessage(msg)
+    publishStatusMsg(msg, Status.delivered)
   } else {
     console.error('invalid signature')
   }
 }
 
-const useMessages = (sender, activeContact) => {
+const useMessages = (currentUser, activeContact) => {
   const [messages, setMessages] = useState([])
 
   const publicKey = usePublicKey()
 
-  const getMessages = async () => {
-    const data = await Service.getUserMessages(sender, activeContact)
+  const getMessages = useCallback(async () => {
+    const data = await Service.getUserMessages(currentUser, activeContact)
+
     setMessages(data)
-  }
+  }, [activeContact, currentUser])
 
-  useEffect(getMessages, [sender, activeContact])
-
-  const listener = async ({ data: message }) => {
-    try {
-      console.debug(`(useMessages) (listener) [${message.type}] message`, message)
-
-      if (message.receiver === sender) {
-        if (message.type === 'message') {
-          await handleIncomingMessage(message)
-        }
-        if (message.type === 'handshake') {
-          await handleHandshakeMessage(message)
-        }
-      }
-
-      if (message.type === 'status') {
-        await Service.updateStatus(message)
-      }
-      await getMessages()
-    } catch (error) {
-      console.error('(useMessages) (listener) error', error)
-    }
-  }
+  useEffect(getMessages, [getMessages])
 
   useEffect(() => {
+    const listener = async ({ data: message, ...props }) => {
+      try {
+        console.debug(
+          `(useMessages) (listener) [${message.type}] message`,
+          message,
+          props
+        )
+
+        if (message.receiver === currentUser) {
+          if (message.type === MessageType.message) {
+            await handleIncomingMessage(message)
+          }
+          if (message.type === MessageType.handshake) {
+            await handleHandshakeMessage(message)
+          }
+        }
+
+        //update status in both DBs (in receiver db and sender db)
+        if (message.type === MessageType.status) {
+          await Service.updateStatus(message)
+        }
+
+        await getMessages()
+      } catch (error) {
+        console.error('(useMessages) (listener) error', error)
+      }
+    }
+
     messagesChannel.addEventListener('message', listener)
     return () => {
       messagesChannel.removeEventListener('message', listener)
     }
-  }, [activeContact, sender, publicKey])
+  }, [activeContact, currentUser, getMessages, publicKey])
 
   return messages
 }
 
-//TODO: reimplement without closure, if needed
-const decrypt = message => {
-  return async () => {
-    const decrypted = await Service.decrypt(message.text)
-    alert(decrypted)
-  }
+const decrypt = async (message: string) => {
+  return await Service.decrypt(message)
 }
 
 export const Messages = () => {
-  const sender = useDID()
+  const currentUser = useDID()
   const activeContact = useActiveContact()
+  const messages = useMessages(currentUser, activeContact)
+
+  const handleClick = useCallback(async (textMessage: string) => {
+    const decryptedTextMessage = await decrypt(textMessage)
+
+    alert(decryptedTextMessage)
+  }, [])
 
   return (
-    <MessagesContainer>
+    <ScrollContainer>
       <ul>
-        {useMessages(sender, activeContact).map((message, index) => {
-          message.receiver === sender &&
-            message.status !== 'viewed' &&
+        {messages.map(message => {
+          currentUser === message.receiver &&
+            message.status !== Status.viewed &&
             publishStatusMsg(message, Status.viewed)
-
-          const key = message?.date ? message.date : index
-          const text = message?.text
-            ? `${new Date(message.date).toLocaleTimeString('ru-RU')} / ${
-                message.sender
-              } -> ${message.text} -> ${
-                message.sender === sender ? message.status : ''
-              }`
-            : ''
 
           //TODO: "decrypt in the view on click for each message" might be a good solution for us, need to discuss with b0rey
           return (
-            <li key={key} onClick={decrypt(message)}>
-              {text}
-            </li>
+            <Message
+              key={message.id}
+              currentUser={currentUser}
+              onClick={handleClick}
+              message={message}
+            />
           )
         })}
       </ul>
-    </MessagesContainer>
+    </ScrollContainer>
   )
 }

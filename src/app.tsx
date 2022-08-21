@@ -2,7 +2,7 @@ import React from 'react'
 import { Avatar, Connect, Name } from './profile'
 import { Header, Sidebar, Grid } from 'grommet'
 import { Chat } from './messenger'
-import { Add, ChatList } from './contacts'
+import { Add, Contacts } from './contacts'
 
 const rows = ['auto', 'flex']
 const columns = ['auto', 'flex']
@@ -22,7 +22,7 @@ export const App = () => (
 
     <Sidebar gridArea='nav' width='medium' pad='none'>
       <Add />
-      <ChatList />
+      <Contacts />
     </Sidebar>
 
     <Chat gridArea='main' />
