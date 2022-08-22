@@ -5,7 +5,7 @@ import * as Bus from './bus'
 import * as DB from './db'
 import * as NaCl from './nacl'
 import * as Service from './index'
-import { MessageType } from '../@types'
+import { Message, MessageType } from '../@types'
 
 //TODO: reimplement in a fancy way
 export const getEncryptionPublicKey = async () => {
@@ -93,6 +93,14 @@ export const getUserMessages = async (currentUser, activeContact) => {
     )
   } catch (error) {
     console.error('error getUserMessages :>> ', error)
+  }
+}
+
+export const updateTextByMessageId = async (msg: Message) => {
+  try {
+    await DB.updateText(msg)
+  } catch (error) {
+    console.error('error updateStatus :>> ', error)
   }
 }
 

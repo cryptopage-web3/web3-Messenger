@@ -62,7 +62,7 @@ const sendMessage = async (sender: string, receiver: string, text: string) => {
 
   const encryptedMessage = await Service.encryptMessage(message)
 
-  await Service.addMessage(encryptedMessage)
+  await Service.addMessage(message)
   Service.publish(encryptedMessage)
 }
 

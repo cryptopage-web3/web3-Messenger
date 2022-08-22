@@ -6,7 +6,7 @@ import { useActiveContact, usePublicKey } from './chat-form'
 import { validateSignature } from '../service/nacl'
 import * as DB from '../service/db'
 import { Message } from './message'
-import { MessageType } from '../@types'
+import { Message as TMessage, MessageType } from '../@types'
 import { ScrollContainer } from '../components'
 
 const messagesChannel = new BroadcastChannel('peer:messages')
@@ -71,6 +71,15 @@ const useMessages = (currentUser, activeContact) => {
     setMessages(data)
   }, [activeContact, currentUser])
 
+  const handleUpdate = useCallback(
+    async (msg: TMessage) => {
+      await Service.updateTextByMessageId(msg)
+
+      getMessages()
+    },
+    [getMessages]
+  )
+
   useEffect(getMessages, [getMessages])
 
   useEffect(() => {
@@ -108,7 +117,7 @@ const useMessages = (currentUser, activeContact) => {
     }
   }, [activeContact, currentUser, getMessages, publicKey])
 
-  return messages
+  return [messages, handleUpdate]
 }
 
 const decrypt = async (message: string) => {
@@ -118,13 +127,16 @@ const decrypt = async (message: string) => {
 export const Messages = () => {
   const currentUser = useDID()
   const activeContact = useActiveContact()
-  const messages = useMessages(currentUser, activeContact)
+  const [messages, handleUpdate] = useMessages(currentUser, activeContact)
 
-  const handleClick = useCallback(async (textMessage: string) => {
-    const decryptedTextMessage = await decrypt(textMessage)
+  const handleClick = useCallback(
+    async (msg: TMessage) => {
+      const decryptedText: Promise<string> = await decrypt(msg.text)
 
-    alert(decryptedTextMessage)
-  }, [])
+      await handleUpdate({ ...msg, text: decryptedText })
+    },
+    [handleUpdate]
+  )
 
   return (
     <ScrollContainer>

@@ -35,6 +35,20 @@ export const getAllMessages = async () => {
   }
 }
 
+export const getMessageById = async (messageId: string) => {
+  const { getByIndex } = useIndexedDB('messages')
+
+  try {
+    const msg = await getByIndex('messageId', messageId)
+
+    if (!msg) throw Error('No message with provided id')
+
+    return msg
+  } catch (error) {
+    console.error('error :>> ', error)
+  }
+}
+
 export const updateStatus = async ({
   messageId,
   status
@@ -42,14 +56,30 @@ export const updateStatus = async ({
   messageId: string
   status: keyof typeof Status
 }) => {
-  const { update, getByIndex } = useIndexedDB('messages')
+  const { update } = useIndexedDB('messages')
 
   try {
-    const msg = await getByIndex('messageId', messageId)
-
-    if (!msg) throw Error('No message with provided id')
+    const msg = await getMessageById(messageId)
 
     await update({ ...msg, status })
+  } catch (error) {
+    console.error('error :>> ', error)
+  }
+}
+
+export const updateText = async ({
+  messageId,
+  text
+}: {
+  messageId: string
+  text: string
+}) => {
+  const { update } = useIndexedDB('messages')
+
+  try {
+    const msg = await getMessageById(messageId)
+
+    await update({ ...msg, text, encrypted: true })
   } catch (error) {
     console.error('error :>> ', error)
   }

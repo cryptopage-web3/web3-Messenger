@@ -8,4 +8,6 @@ export type Message = {
   receiver: string
   text: string
   date: Date
+  messageId: string
+  encrypted?: boolean
 }
