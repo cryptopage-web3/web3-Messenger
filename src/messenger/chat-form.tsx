@@ -2,12 +2,12 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import { useDID } from '../profile'
 import * as Service from '../service'
-import { Status } from '../service/types'
+import { publishHandshakeMsg } from '../service'
 import { Input } from './input'
 import { AttachButton } from './attach-button'
 import { SendButton } from './send-button'
 import { Box } from 'grommet'
-import { MessageType } from '../@types'
+import { Message as TMessage, MessageType, Status } from '../@types'
 
 const contactsChannel = new BroadcastChannel('peer:contacts')
 const keyChannel = new BroadcastChannel('peer:key')
@@ -50,20 +50,34 @@ export const usePublicKey = () => {
 }
 
 const sendMessage = async (sender: string, receiver: string, text: string) => {
-  const message = {
+  const message: TMessage = {
     messageId: sender + uuidv4(),
     type: MessageType.message,
     sender,
     receiver,
     text,
-    status: Status.sent,
+    status: Status.created,
     date: Date.now()
   }
 
-  const encryptedMessage = await Service.encryptMessage(message)
+  const contact = await Service.getContactByDid(receiver)
+  const encryptionPublicKey = contact.receiver_public_key
 
-  await Service.addMessage(message)
-  Service.publish(encryptedMessage)
+  if (!encryptionPublicKey) {
+    message.status = Status.failed
+
+    await Service.addMessage(message)
+
+    Service.publish({ updateMessages: true })
+    await publishHandshakeMsg(sender, receiver, true)
+  } else {
+    message.status = Status.sent
+
+    await Service.addMessage(message)
+
+    const encryptedMessage = await Service.encryptMessage(message)
+    Service.publish(encryptedMessage)
+  }
 }
 
 const useAutosizeTextArea = (

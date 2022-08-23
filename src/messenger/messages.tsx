@@ -1,12 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { useDID } from '../profile'
 import * as Service from '../service'
-import { Status } from '../service/types'
 import { useActiveContact, usePublicKey } from './chat-form'
 import { validateSignature } from '../service/nacl'
 import * as DB from '../service/db'
 import { Message } from './message'
-import { Message as TMessage, MessageType } from '../@types'
+import { Message as TMessage, MessageType, Status } from '../@types'
 import { ScrollContainer } from '../components'
 
 const messagesChannel = new BroadcastChannel('peer:messages')
@@ -22,6 +21,26 @@ const publishStatusMsg = (msg, status) => {
   })
 }
 
+const sendFailedToSendMessages = async (sender: string, receiver: string) => {
+  const userMessages = await Service.getUserMessages(sender, receiver)
+
+  for (const userMessage of userMessages) {
+    if (
+      userMessage.sender === sender &&
+      userMessage.receiver === receiver &&
+      userMessage.status === Status.failed
+    ) {
+      const msg = { ...userMessage, status: Status.sent }
+      delete msg.id
+
+      await Service.updateStatus(msg)
+
+      const encryptedMessage = await Service.encryptMessage(msg)
+      Service.publish(encryptedMessage)
+    }
+  }
+}
+
 const handleIncomingMessage = async msg => {
   await Service.addMessage(msg)
 
@@ -29,7 +48,6 @@ const handleIncomingMessage = async msg => {
 }
 
 const handleHandshakeMessage = async msg => {
-  console.debug('(handleHandshakeMessage) msg', msg)
   if (validateSignature(msg)) {
     const contact = await DB.getContactByDid(msg.sender)
 
@@ -45,8 +63,12 @@ const handleHandshakeMessage = async msg => {
         type: 'newContact',
         payload: contact
       })
-    } else {
+    } else if (!contact.receiver_public_key) {
       await Service.updateContact(msg.sender, msg.senderEncryptionPublicKey)
+    }
+
+    if (!contact.receiver_public_key) {
+      await sendFailedToSendMessages(msg.receiver, msg.sender)
     }
 
     if (msg.encryptionPublicKeyRequested) {
@@ -54,7 +76,6 @@ const handleHandshakeMessage = async msg => {
     }
 
     await Service.addMessage(msg)
-    publishStatusMsg(msg, Status.delivered)
   } else {
     console.error('invalid signature')
   }
@@ -90,6 +111,11 @@ const useMessages = (currentUser, activeContact) => {
           message,
           props
         )
+
+        if (message.updateMessages) {
+          await getMessages()
+          return
+        }
 
         if (message.receiver === currentUser) {
           if (message.type === MessageType.message) {

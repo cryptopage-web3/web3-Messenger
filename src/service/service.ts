@@ -4,7 +4,6 @@ import * as server from './server'
 import * as Bus from './bus'
 import * as DB from './db'
 import * as NaCl from './nacl'
-import * as Service from './index'
 import { Message, MessageType } from '../@types'
 
 //TODO: reimplement in a fancy way
@@ -23,15 +22,6 @@ export const subscribe = DID => {
   console.log(`message subscribe ${DID}`)
 }
 
-export const encryptMessage = async message => {
-  const contact = await Service.getContactByDid(message.receiver)
-  const encryptionPublicKey = contact.receiver_public_key
-  const encryptedText = await NaCl.encrypt(message.text, encryptionPublicKey)
-  const encryptedMessage = { ...message, text: encryptedText }
-
-  return encryptedMessage
-}
-
 export const publish = message => {
   try {
     Bus.channel.postMessage(message)
@@ -40,34 +30,6 @@ export const publish = message => {
   } catch (error) {
     console.error('error publish:>> ', error)
   }
-}
-
-//TODO: the entity of Message is not clear for me, why don't we reuse types of IndexedDB?
-export const publishHandshakeMsg = async (
-  senderDid: string,
-  receiverDid: string,
-  encryptionPublicKeyRequested: boolean
-) => {
-  const senderEncryptionPublicKey = await NaCl.getEncryptionPublicKey()
-  const ethereumWalletAddress = await NaCl.getEthereumWalletAddress()
-  const unsignedMessage = {
-    type: MessageType.handshake,
-    encryptionPublicKeyRequested,
-    sender: senderDid,
-    receiver: receiverDid,
-    senderEncryptionPublicKey: senderEncryptionPublicKey,
-    senderEthereumWalletAddress: ethereumWalletAddress
-  }
-  // OUR public ethereum key => OUR public encryption key
-  const sign = await NaCl.sign(unsignedMessage)
-  const signedMessage = {
-    ...unsignedMessage,
-    sign,
-    messageId: senderDid + uuidv4()
-  }
-  await Service.addMessage(signedMessage)
-
-  Service.publish(signedMessage)
 }
 
 export const addMessage = async message => {
@@ -113,7 +75,7 @@ export const getAllMessages = async () => {
   }
 }
 
-export const updateStatus = async data => {
+export const updateStatus = async (data: Message) => {
   try {
     await DB.updateStatus(data)
   } catch (error) {
@@ -159,4 +121,41 @@ export const getContactByDid = async currentDid => {
   } catch (error) {
     console.error('error getContactByDid :>> ', error)
   }
+}
+
+export const encryptMessage = async message => {
+  const contact = await getContactByDid(message.receiver)
+  const encryptionPublicKey = contact.receiver_public_key
+  const encryptedText = await NaCl.encrypt(message.text, encryptionPublicKey)
+  const encryptedMessage = { ...message, text: encryptedText }
+
+  return encryptedMessage
+}
+
+//TODO: the entity of Message is not clear for me, why don't we reuse types of IndexedDB?
+export const publishHandshakeMsg = async (
+  senderDid: string,
+  receiverDid: string,
+  encryptionPublicKeyRequested: boolean
+) => {
+  const senderEncryptionPublicKey = await NaCl.getEncryptionPublicKey()
+  const ethereumWalletAddress = await NaCl.getEthereumWalletAddress()
+  const unsignedMessage = {
+    type: MessageType.handshake,
+    encryptionPublicKeyRequested,
+    sender: senderDid,
+    receiver: receiverDid,
+    senderEncryptionPublicKey: senderEncryptionPublicKey,
+    senderEthereumWalletAddress: ethereumWalletAddress
+  }
+  // OUR public ethereum key => OUR public encryption key
+  const sign = await NaCl.sign(unsignedMessage)
+  const signedMessage = {
+    ...unsignedMessage,
+    sign,
+    messageId: senderDid + uuidv4()
+  }
+  await addMessage(signedMessage)
+
+  publish(signedMessage)
 }

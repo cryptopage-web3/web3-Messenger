@@ -1,14 +1,5 @@
 import { useIndexedDB } from 'react-indexed-db'
-import { Status } from '../types'
-import { Contact } from '../../@types'
-
-type Message = {
-  type: 'message'
-  sender: string
-  receiver: string
-  text: string
-  date: Date
-}
+import { Contact, Message, Status } from '../../@types'
 
 //TODO: validate whether it's a Public Encryption Key or not (Elliptic Curve x25519-xsalsa20-poly1305)
 export const isPublicEncryptionKey = (str: string) => str !== ''
@@ -54,7 +45,7 @@ export const updateStatus = async ({
   status
 }: {
   messageId: string
-  status: keyof typeof Status
+  status: Status
 }) => {
   const { update } = useIndexedDB('messages')
 
