@@ -67,7 +67,7 @@ const handleHandshakeMessage = async msg => {
       await Service.updateContact(msg.sender, msg.senderEncryptionPublicKey)
     }
 
-    if (!contact.receiver_public_key) {
+    if (!contact || contact && !contact.receiver_public_key) {
       await sendFailedToSendMessages(msg.receiver, msg.sender)
     }
 
