@@ -47,6 +47,7 @@ const handleIncomingMessage = async msg => {
   publishStatusMsg(msg, Status.delivered)
 }
 
+// eslint-disable-next-line max-lines-per-function
 const handleHandshakeMessage = async msg => {
   if (validateSignature(msg)) {
     const contact = await DB.getContactByDid(msg.sender)
@@ -67,7 +68,7 @@ const handleHandshakeMessage = async msg => {
       await Service.updateContact(msg.sender, msg.senderEncryptionPublicKey)
     }
 
-    if (!contact || contact && !contact.receiver_public_key) {
+    if (!contact || (contact && !contact.receiver_public_key)) {
       await sendFailedToSendMessages(msg.receiver, msg.sender)
     }
 
@@ -81,6 +82,7 @@ const handleHandshakeMessage = async msg => {
   }
 }
 
+// eslint-disable-next-line max-lines-per-function
 const useMessages = (currentUser, activeContact) => {
   const [messages, setMessages] = useState([])
 
@@ -103,7 +105,9 @@ const useMessages = (currentUser, activeContact) => {
 
   useEffect(getMessages, [getMessages])
 
+  // eslint-disable-next-line max-lines-per-function
   useEffect(() => {
+    // eslint-disable-next-line max-lines-per-function
     const listener = async ({ data: message, ...props }) => {
       try {
         console.debug(
@@ -150,6 +154,7 @@ const decrypt = async (message: string) => {
   return await Service.decrypt(message)
 }
 
+// eslint-disable-next-line max-lines-per-function
 export const Messages = () => {
   const currentUser = useDID()
   const activeContact = useActiveContact()

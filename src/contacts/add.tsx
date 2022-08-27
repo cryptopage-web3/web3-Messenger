@@ -36,6 +36,7 @@ const getDid = async (input: string, ceramic) => {
   throw Error('The search string is nether Ethereum Wallet Address or DID')
 }
 
+// eslint-disable-next-line max-lines-per-function
 const useAdd = sender => {
   const [input, setInput] = useState('')
 
@@ -43,6 +44,7 @@ const useAdd = sender => {
 
   const ceramic = useCeramic()
 
+  // eslint-disable-next-line max-lines-per-function
   const handleAdd = useCallback(async () => {
     try {
       const did = await getDid(input, ceramic)

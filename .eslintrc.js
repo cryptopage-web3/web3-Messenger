@@ -23,7 +23,14 @@ module.exports = {
     'react/react-in-jsx-scope': 'off',
     'react/jsx-closing-bracket-location': [1, 'tag-aligned'],
     'react/jsx-closing-tag-location': 1,
-    'react-hooks/rules-of-hooks': 'error',
-    'react-hooks/exhaustive-deps': 'warn'
+    'react-hooks/rules-of-hooks': 'warn',
+    'react-hooks/exhaustive-deps': 'warn',
+    'max-lines-per-function': [
+      'error',
+      {
+        max: 30,
+        IIFEs: true
+      }
+    ]
   }
 }

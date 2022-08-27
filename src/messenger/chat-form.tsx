@@ -115,6 +115,7 @@ const useKeyPress = (sender, receiver, message, handleSubmit) => {
   )
 }
 
+// eslint-disable-next-line max-lines-per-function
 export const ChatForm = (props: any) => {
   const sender = useDID()
   const receiver = useActiveContact()

@@ -30,6 +30,7 @@ const getNewList = (list, did) =>
     return el?.active ? { ...el, active: false } : el
   }, R.clone(list))
 
+// eslint-disable-next-line max-lines-per-function
 const useContacts = () => {
   const sender = useDID()
 
@@ -56,6 +57,7 @@ const useContacts = () => {
     setContacts()
   }, [sender, setContacts])
 
+  // eslint-disable-next-line max-lines-per-function
   useEffect(() => {
     const listenNewMessage = async ({ data }) => {
       if (data.type !== 'message' || data.receiver !== sender) return

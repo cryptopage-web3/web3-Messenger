@@ -4,19 +4,19 @@ import { ChatForm } from './chat-form'
 import { Main } from 'grommet'
 import styled from 'styled-components'
 
-const StyledMain =styled(Main)`
-  background-color: #F5F9FD;
+const StyledMain = styled(Main)`
+  background-color: #f5f9fd;
   overflow: hidden;
-  
-  & > div:not(:last-child){
+
+  & > div:not(:last-child) {
     border-bottom: 1.6px solid #eee;
   }
 `
 
-export const Chat = (props) => (
+export const Chat = props => (
   <StyledMain {...props}>
     <ChatInfo />
     <Messages />
-    <ChatForm direction='row' />
+    <ChatForm direction="row" />
   </StyledMain>
 )

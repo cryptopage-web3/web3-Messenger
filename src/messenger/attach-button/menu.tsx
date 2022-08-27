@@ -5,9 +5,9 @@ import { MenuItem } from './menu-item'
 
 export const Menu = () => {
   return (
-    <Box pad='none' width='160px'>
-      <MenuItem icon={Photo} name={'Photo'} border />
-      <MenuItem icon={Video} name={'Video'} border />
+    <Box pad="none" width="160px">
+      <MenuItem icon={Photo} name={'Photo'} />
+      <MenuItem icon={Video} name={'Video'} />
       <MenuItem icon={File} name={'File'} />
     </Box>
   )

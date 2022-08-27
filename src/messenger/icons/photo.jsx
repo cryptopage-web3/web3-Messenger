@@ -1,8 +1,18 @@
-import * as React from "react";
+import * as React from 'react'
 
-export const Photo = ({ color = '#1F1F1F' }) => (
-  <svg width="24" className="not-fill" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+export const Photo = () => (
+  <svg
+    width="24"
+    className="not-fill"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
     <path
       d="M14.4889 3.66247L14.3402 3.5H14.12H9.88H9.65978L9.51112 3.66247L7.82978 5.5H4H3.5V6V18V18.5H4H20H20.5V18V6V5.5H20H16.1702L14.4889 3.66247ZM7.17 4.5H7.39022L7.53888 4.33753L9.22022 2.5H14.7798L16.4611 4.33753L16.6098 4.5H16.83H20C20.8239 4.5 21.5 5.17614 21.5 6V18C21.5 18.8239 20.8239 19.5 20 19.5H4C3.17614 19.5 2.5 18.8239 2.5 18V6C2.5 5.17614 3.17614 4.5 4 4.5H7.17ZM15.5 12C15.5 10.0739 13.9261 8.5 12 8.5C10.0739 8.5 8.5 10.0739 8.5 12C8.5 13.9261 10.0739 15.5 12 15.5C13.9261 15.5 15.5 13.9261 15.5 12ZM7.5 12C7.5 9.51614 9.51614 7.5 12 7.5C14.4839 7.5 16.5 9.51614 16.5 12C16.5 14.4839 14.4839 16.5 12 16.5C9.51614 16.5 7.5 14.4839 7.5 12Z"
-      fill={color} stroke={color} />
-  </svg>)
+      fill="currentColor"
+      stroke="currentColor"
+    />
+  </svg>
+)

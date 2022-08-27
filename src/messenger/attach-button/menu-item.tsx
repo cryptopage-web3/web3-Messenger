@@ -1,38 +1,35 @@
-import React, { useCallback, useState } from 'react'
+import React from 'react'
 import { Box, Button, Text } from 'grommet'
+import styled from 'styled-components'
 
-const borderStyles = {
-  color: '#f1f1f1',
-  size: '1.6px',
-  style: 'solid',
-  side: 'bottom'
+const MenuItemButton = styled(Button)`
+  transition: 0.1s ease-out;
+
+  background: #fff;
+  color: #1f1f1f;
+
+  &:not(:last-child) {
+    border-bottom: 1.6px solid #f1f1f1;
+  }
+
+  &:hover {
+    background: #f5f9fd;
+    color: #1886ff;
+  }
+`
+
+type MenuItemProps = {
+  icon: React.ReactElement
+  name: string
 }
 
-const hoverIndicatorConfig = {
-  color: '#f5f9fd'
-}
-
-export const MenuItem = ({ icon, name, border = false }) => {
-  const [over, setOver] = useState(false)
-  const IconComponent = icon
-
-  const setOverTrue = useCallback(() => setOver(true), [])
-  const setOverFalse = useCallback(() => setOver(false), [])
-  const color = over ? '#007bff' : '#000'
-
+export const MenuItem = ({ icon: IconComponent, name }: MenuItemProps) => {
   return (
-    <Box align='left'
-         border={border && borderStyles}
-         onMouseOver={setOverTrue}
-         onMouseLeave={setOverFalse}
-         onFocus={setOverTrue}
-         onBlur={setOverFalse}>
-      <Button plain={true} hoverIndicator={hoverIndicatorConfig}>
-        <Box pad='15px' direction='row' align='center' gap='small'>
-          <IconComponent color={color} />
-          <Text size='14px' color={color}>{name}</Text>
-        </Box>
-      </Button>
-    </Box>
+    <MenuItemButton plain>
+      <Box pad="15px" direction="row" align="center" gap="10px">
+        <IconComponent />
+        <Text size="1rem">{name}</Text>
+      </Box>
+    </MenuItemButton>
   )
 }
