@@ -3,12 +3,12 @@ pipelines:
   branches:
     master:
       - step:
-          name: Install dependencies and build
-          script:
-            - yarn && yarn prepare && yarn build
-      - step:
           name: Deploy to cloudflare
-          deployment: Production
           script:
+            - echo "Install dependencies and build"
+            - yarn && yarn prepare && yarn build
+            - echo "Install wrangler"
             - npm i -g wrangler
-            - wrangler pages publish dist --project-name messenger
+            - echo "Deploy to cloudflare"
+            - wrangler pages publish ./dist --project-name messenger
+            
