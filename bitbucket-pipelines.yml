@@ -3,14 +3,10 @@ pipelines:
   branches:
     master:
       - step:
-          name: Install dependencies
+          name: Install dependencies and build
           deployment: Production
           script:
-            - yarn
-      - step:
-          name: Run build
-          script:
-            - npx parcel build
+            - yarn && yarn prepare && yarn build
       - step:
           name: Deploy to cloudflare
           script:
