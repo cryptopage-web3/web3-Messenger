@@ -4,6 +4,7 @@ pipelines:
     master:
       - step:
           name: Deploy to cloudflare
+          deployment: Production
           script:
             - echo "Install dependencies and build"
             - yarn && yarn prepare && yarn build
