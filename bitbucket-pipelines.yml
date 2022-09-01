@@ -6,11 +6,11 @@ pipelines:
           name: Install dependencies
           deployment: Production
           script:
-            - npm i
+            - yarn
       - step:
           name: Run build
           script:
-            - npm run build
+            - yarn build
       - step:
           name: Deploy to cloudflare
           script:
