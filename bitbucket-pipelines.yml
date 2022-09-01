@@ -13,7 +13,6 @@ pipelines:
             - npx parcel build
       - step:
           name: Deploy to cloudflare
-          deployment: Production
           script:
             - npm i -g wrangler
             - wrangler pages publish dist --project-name messenger
