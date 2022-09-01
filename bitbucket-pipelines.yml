@@ -4,11 +4,11 @@ pipelines:
     master:
       - step:
           name: Install dependencies and build
-          deployment: Production
           script:
             - yarn && yarn prepare && yarn build
       - step:
           name: Deploy to cloudflare
+          deployment: Production
           script:
             - npm i -g wrangler
             - wrangler pages publish dist --project-name messenger
