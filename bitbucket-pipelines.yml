@@ -1,0 +1,18 @@
+image: node
+pipelines:
+  branches:
+    master:
+      - step:
+          name: Install dependencies
+          deployment: Production
+          script:
+            - npm i
+      - step:
+          name: Run build
+          script:
+            - npm run build
+      - step:
+          name: Deploy to cloudflare
+          script:
+            - npm i -g wrangler
+            - wrangler pages publish dist --project-name messenger
