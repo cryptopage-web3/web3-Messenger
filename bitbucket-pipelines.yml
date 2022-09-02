@@ -1,15 +1,32 @@
-image: node
 pipelines:
   branches:
     master:
       - step:
-          name: Deploy to cloudflare
-          deployment: Production
-          script:
-            - echo "Install dependencies and build"
-            - yarn && yarn prepare && yarn build
-            - echo "Install wrangler"
-            - npm i -g wrangler
-            - echo "Deploy to cloudflare"
-            - wrangler pages publish ./dist --project-name messenger
-            
+           name: Copy deploy script to prod server
+           deployment: Production
+           script:
+             - pipe: atlassian/scp-deploy:1.2.1
+               variables:
+                  USER: $USER
+                  SERVER: $SERVER
+                  REMOTE_PATH: '/tmp/'
+                  LOCAL_PATH: './deploy/*'
+                  EXTRA_ARGS: ['-r']
+      - step:
+           name: Run deploy script to prod server
+           deployment: Production
+           script:
+             - pipe: atlassian/ssh-run:0.4.0
+               variables:
+                  SSH_USER: $USER
+                  SERVER: $SERVER
+                  MODE: 'command'
+                  COMMAND: > 
+                    /bin/bash /tmp/deploy.sh > $DEPLOY_LOG_FILE
+                  ENV_VARS: >-
+                    TG_BOT_ID=$TG_BOT_ID
+                    TG_CHAT_ID=$TG_CHAT_ID
+                    TG_TEXT_PREFIX=$TG_TEXT_PREFIX
+                    DEPLOY_LOG_FILE=$DEPLOY_LOG_FILE
+                    DEPLOY_DIR=$DEPLOY_DIR
+                  DEBUG: 'true'
