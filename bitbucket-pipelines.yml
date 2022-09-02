@@ -2,8 +2,10 @@ pipelines:
   branches:
     master:
       - step:
-           name: Copy deploy script to prod server
+           name: Deploy to prod server
+           deployment: Production
            script:
+             - "echo 'copy deploy script to server'"
              - pipe: atlassian/scp-deploy:1.2.1
                variables:
                   USER: $USER
@@ -11,10 +13,8 @@ pipelines:
                   REMOTE_PATH: '/tmp/'
                   LOCAL_PATH: './deploy/*'
                   EXTRA_ARGS: ['-r']
-      - step:
-           name: Run deploy script to prod server
-           deployment: Production
-           script:
+                  
+             - "echo 'run deploy script to server'"
              - pipe: atlassian/ssh-run:0.4.0
                variables:
                   SSH_USER: $USER
