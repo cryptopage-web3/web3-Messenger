@@ -3,7 +3,6 @@ pipelines:
     master:
       - step:
            name: Copy deploy script to prod server
-           deployment: Production
            script:
              - pipe: atlassian/scp-deploy:1.2.1
                variables:
