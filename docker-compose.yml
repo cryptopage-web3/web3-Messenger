@@ -1,6 +1,6 @@
 services:
   node:
-    image: node
+    build: ./.docker/node
     command: sh -c "yarn && yarn prepare && yarn start"
     working_dir: /app
     volumes:
