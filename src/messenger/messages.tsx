@@ -1,173 +1,66 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { useDID } from '../profile'
-import * as Service from '../service'
-import { useActiveContact, usePublicKey } from './chat-form'
-import { validateSignature } from '../service/nacl'
-import * as DB from '../service/db'
+import * as DB from './../service/db'
 import { Message } from './message'
-import { Message as TMessage, MessageType, Status } from '../@types'
+import { Message as TMessage, Status } from '../@types'
 import { ScrollContainer } from '../components'
+import { useActiveContact } from './useActiveContact'
 
 const messagesChannel = new BroadcastChannel('peer:messages')
-const contactChannel = new BroadcastChannel('peer:contact')
+const naclChannel = new BroadcastChannel('peer:nacl')
+const uiChannel = new BroadcastChannel('peer:ui')
 
-const publishStatusMsg = (msg, status) => {
-  Service.publish({
-    type: 'status',
-    messageId: msg.messageId,
-    status,
-    sender: msg.receiver,
-    receiver: msg.sender
-  })
-}
-
-const sendFailedToSendMessages = async (sender: string, receiver: string) => {
-  const userMessages = await Service.getUserMessages(sender, receiver)
-
-  for (const userMessage of userMessages) {
-    if (
-      userMessage.sender === sender &&
-      userMessage.receiver === receiver &&
-      userMessage.status === Status.failed
-    ) {
-      const msg = { ...userMessage, status: Status.sent }
-      delete msg.id
-
-      await Service.updateStatus(msg)
-
-      const encryptedMessage = await Service.encryptMessage(msg)
-      Service.publish(encryptedMessage)
-    }
-  }
-}
-
-const handleIncomingMessage = async msg => {
-  await Service.addMessage(msg)
-
-  publishStatusMsg(msg, Status.delivered)
-}
-
-// eslint-disable-next-line max-lines-per-function
-const handleHandshakeMessage = async msg => {
-  if (validateSignature(msg)) {
-    const contact = await DB.getContactByDid(msg.sender)
-
-    if (!contact) {
-      const contact = {
-        sender_did: msg.receiver,
-        receiver_did: msg.sender,
-        receiver_public_key: msg.senderEncryptionPublicKey
+const useUpdateUi = updateMessages => {
+  useEffect(() => {
+    const listenerUiChannel = async ({ data }) => {
+      if (data.type === 'updateMessages') {
+        await updateMessages()
+        return
       }
-
-      await Service.addContact(contact)
-      contactChannel.postMessage({
-        type: 'newContact',
-        payload: contact
-      })
-    } else if (!contact.receiver_public_key) {
-      await Service.updateContact(msg.sender, msg.senderEncryptionPublicKey)
     }
 
-    if (!contact || (contact && !contact.receiver_public_key)) {
-      await sendFailedToSendMessages(msg.receiver, msg.sender)
+    uiChannel.addEventListener('message', listenerUiChannel)
+    return () => {
+      uiChannel.removeEventListener('message', listenerUiChannel)
     }
-
-    if (msg.encryptionPublicKeyRequested) {
-      await Service.publishHandshakeMsg(msg.receiver, msg.sender, false)
-    }
-
-    await Service.addMessage(msg)
-  } else {
-    console.error('invalid signature')
-  }
+  }, [updateMessages])
 }
 
-// eslint-disable-next-line max-lines-per-function
 const useMessages = (currentUser, activeContact) => {
   const [messages, setMessages] = useState([])
 
-  const publicKey = usePublicKey()
-
   const getMessages = useCallback(async () => {
-    const data = await Service.getUserMessages(currentUser, activeContact)
+    const data = await DB.getUserMessages(currentUser, activeContact)
 
     setMessages(data)
   }, [activeContact, currentUser])
 
-  const handleUpdate = useCallback(
-    async (msg: TMessage) => {
-      await Service.updateTextByMessageId(msg)
-
-      getMessages()
-    },
-    [getMessages]
-  )
-
   useEffect(getMessages, [getMessages])
 
-  // eslint-disable-next-line max-lines-per-function
-  useEffect(() => {
-    // eslint-disable-next-line max-lines-per-function
-    const listener = async ({ data: message, ...props }) => {
-      try {
-        console.debug(
-          `(useMessages) (listener) [${message.type}] message`,
-          message,
-          props
-        )
+  useUpdateUi(getMessages)
 
-        if (message.updateMessages) {
-          await getMessages()
-          return
-        }
-
-        if (message.receiver === currentUser) {
-          if (message.type === MessageType.message) {
-            await handleIncomingMessage(message)
-          }
-          if (message.type === MessageType.handshake) {
-            await handleHandshakeMessage(message)
-          }
-        }
-
-        //update status in both DBs (in receiver db and sender db)
-        if (message.type === MessageType.status) {
-          await Service.updateStatus(message)
-        }
-
-        await getMessages()
-      } catch (error) {
-        console.error('(useMessages) (listener) error', error)
-      }
-    }
-
-    messagesChannel.addEventListener('message', listener)
-    return () => {
-      messagesChannel.removeEventListener('message', listener)
-    }
-  }, [activeContact, currentUser, getMessages, publicKey])
-
-  return [messages, handleUpdate]
+  return [messages, decryptMessage]
 }
 
-const decrypt = async (message: string) => {
-  return await Service.decrypt(message)
+const decryptMessage = (message: TMessage) => {
+  naclChannel.postMessage({
+    type: 'decryptMessage',
+    payload: message
+  })
 }
 
-// eslint-disable-next-line max-lines-per-function
+const updateStatus = (message, status: Status) => {
+  messagesChannel.postMessage({
+    type: 'status',
+    payload: { ...message, status }
+  })
+}
+
 export const Messages = () => {
   const currentUser = useDID()
   const activeContact = useActiveContact()
-  const [messages, handleUpdate] = useMessages(currentUser, activeContact)
 
-  const handleClick = useCallback(
-    async (msg: TMessage) => {
-      const decryptedText: Promise<string> = await decrypt(msg.text)
-
-      await handleUpdate({ ...msg, text: decryptedText })
-    },
-    [handleUpdate]
-  )
+  const [messages] = useMessages(currentUser, activeContact)
 
   return (
     <ScrollContainer>
@@ -175,14 +68,13 @@ export const Messages = () => {
         {messages.map(message => {
           currentUser === message.receiver &&
             message.status !== Status.viewed &&
-            publishStatusMsg(message, Status.viewed)
+            updateStatus(message, Status.viewed)
 
-          //TODO: "decrypt in the view on click for each message" might be a good solution for us, need to discuss with b0rey
           return (
             <Message
               key={message.id}
               currentUser={currentUser}
-              onClick={handleClick}
+              onClick={decryptMessage}
               message={message}
             />
           )

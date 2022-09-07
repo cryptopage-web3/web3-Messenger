@@ -3,9 +3,9 @@ import {
   useConnection,
   useViewerRecord
 } from '@self.id/framework'
-import { Anchor, Box, Button, Heading, Paragraph, Header } from 'grommet'
+import { Anchor, Button, Heading, Paragraph } from 'grommet'
 import * as R from 'ramda'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { Status } from './service/peer'
 import * as Service from './service'
 
@@ -41,24 +41,9 @@ const useSubscribe = connection => {
   }, [did, connection])
 }
 
-const usePublicKey = () => {
-  const did = useDID()
-
-  useEffect(async () => {
-    if (!did) return
-
-    const key = await Service.getEncryptionPublicKey()
-    keyChannel.postMessage({
-      type: 'publicKey',
-      payload: key
-    })
-  }, [did])
-}
-
 export const Connect = () => {
   const [connection, connect, disconnect] = useConnection()
   useSubscribe(connection)
-  usePublicKey()
 
   return connection.status === 'connected' ? (
     <Button label="Disconnect" onClick={disconnect} />

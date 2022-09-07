@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Avatar, Box, Text } from 'grommet'
 import styled from 'styled-components'
-import { useActiveContact } from './chat-form'
+import { useActiveContact } from './useActiveContact'
 
 const ChatAvatar = () => (
   <Avatar size="36px" background={{ color: 'violet' }}>
@@ -9,8 +9,15 @@ const ChatAvatar = () => (
   </Avatar>
 )
 
-const getShortText = (text: string) =>
-  text.slice(0, 5).concat('...').concat(text.slice(-3))
+const getShortText = (text: string) => {
+  const maxCharactersToDisplay = 11
+
+  if (text.length > maxCharactersToDisplay) {
+    return text.slice(0, 5).concat('...').concat(text.slice(-3))
+  }
+
+  return text
+}
 
 const ChatDID = () => {
   const activeContact = useActiveContact()

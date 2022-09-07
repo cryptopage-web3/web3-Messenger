@@ -1,55 +1,16 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import { useDID } from '../profile'
-import * as Service from '../service'
-import { publishHandshakeMsg } from '../service'
 import { Input } from './input'
 import { AttachButton } from './attach-button'
 import { SendButton } from './send-button'
 import { Box } from 'grommet'
 import { Message as TMessage, MessageType, Status } from '../@types'
+import { useActiveContact } from './useActiveContact'
 
-const contactsChannel = new BroadcastChannel('peer:contacts')
-const keyChannel = new BroadcastChannel('peer:key')
+const messagesChannel = new BroadcastChannel('peer:messages')
 
-export const useActiveContact = () => {
-  const [activeContact, setActiveContact] = useState('')
-
-  const listener = async ({ data }) => {
-    console.log('(useActiveContact)', data)
-    data.type === 'activeContact' && setActiveContact(data.payload)
-  }
-
-  useEffect(() => {
-    contactsChannel.addEventListener('message', listener)
-    return () => {
-      contactsChannel.removeEventListener('message', listener)
-    }
-  }, [])
-
-  return activeContact
-}
-
-export const usePublicKey = () => {
-  const [key, setKey] = useState('')
-
-  const listenKey = ({ data }) => {
-    if (data.type === 'publicKey') {
-      setKey(data.payload)
-    }
-  }
-
-  useEffect(() => {
-    keyChannel.addEventListener('message', listenKey)
-    return () => {
-      keyChannel.removeEventListener('message', listenKey)
-    }
-  }, [key])
-
-  return key
-}
-
-const sendMessage = async (sender: string, receiver: string, text: string) => {
+const sendMessage = (sender: string, receiver: string, text: string) => {
   const message: TMessage = {
     messageId: sender + uuidv4(),
     type: MessageType.message,
@@ -60,24 +21,10 @@ const sendMessage = async (sender: string, receiver: string, text: string) => {
     date: Date.now()
   }
 
-  const contact = await Service.getContactByDid(receiver)
-  const encryptionPublicKey = contact.receiver_public_key
-
-  if (!encryptionPublicKey) {
-    message.status = Status.failed
-
-    await Service.addMessage(message)
-
-    Service.publish({ updateMessages: true })
-    await publishHandshakeMsg(sender, receiver, true)
-  } else {
-    message.status = Status.sent
-
-    await Service.addMessage(message)
-
-    const encryptedMessage = await Service.encryptMessage(message)
-    Service.publish(encryptedMessage)
-  }
+  messagesChannel.postMessage({
+    type: 'addMessage',
+    payload: message
+  })
 }
 
 const useAutosizeTextArea = (
@@ -86,7 +33,7 @@ const useAutosizeTextArea = (
 ) => {
   useEffect(() => {
     const elem = textAreaRef.current
-    const minHeight = '30px'
+    const minHeight = '24px'
 
     if (elem) {
       elem.style.height = minHeight
@@ -148,7 +95,7 @@ export const ChatForm = (props: any) => {
       <Box {...props} elevation={'none'} pad={'15px'} gap={'10px'}>
         <Input
           ref={textAreaRef}
-          placeholder="Write a message"
+          placeholder="Write a message..."
           value={message}
           onChange={handleMessage}
           onKeyPress={handleKeyPress}

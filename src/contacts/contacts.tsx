@@ -1,14 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import * as R from 'ramda'
 import { useDID } from '../profile'
-import * as Service from '../service'
+import * as DB from '../service/db'
 import { Contact } from './contact'
 import { List, ScrollContainer } from '../components'
 
 const statusChannel = new BroadcastChannel('peer:status')
 const contactsChannel = new BroadcastChannel('peer:contacts')
-const messagesChannel = new BroadcastChannel('peer:messages')
-const contactChannel = new BroadcastChannel('peer:contact')
 
 const usePeerStatus = (list, setList) => {
   useEffect(() => {
@@ -22,6 +20,35 @@ const usePeerStatus = (list, setList) => {
   }, [list, setList])
 }
 
+const setActiveContact = (list, setList) => did => {
+  const newList = getNewList(list, did)
+  contactsChannel.postMessage({
+    type: 'activeContact',
+    payload: did
+  })
+
+  setList(newList)
+}
+
+const usePeerNewContact = (sender, list, setList) => {
+  useEffect(() => {
+    const listenNewContact = async ({ data }) => {
+      if (data.type !== 'newContactAdded') return
+
+      const newContact = data.payload.receiver
+      const newContactList = await DB.getAllContactsByDid(sender)
+
+      setActiveContact(newContactList, setList)(newContact)
+    }
+
+    contactsChannel.addEventListener('message', listenNewContact)
+
+    return () => {
+      contactsChannel.removeEventListener('message', listenNewContact)
+    }
+  }, [sender, list, setList])
+}
+
 const getNewList = (list, did) =>
   R.map(el => {
     if (el.receiver_did === did) {
@@ -30,69 +57,30 @@ const getNewList = (list, did) =>
     return el?.active ? { ...el, active: false } : el
   }, R.clone(list))
 
-// eslint-disable-next-line max-lines-per-function
+const setContacts = async (sender: string, setList: (arg: []) => void) => {
+  const allContacts = await DB.getAllContactsByDid(sender)
+  setList(allContacts)
+}
+
 const useContacts = () => {
   const sender = useDID()
-
   const [list, setList] = useState([])
-
-  const setActiveContact = did => () => {
-    const newList = getNewList(list, did)
-    contactsChannel.postMessage({
-      type: 'activeContact',
-      payload: did
-    })
-    setList(newList)
-  }
+  const setActiveItem = useCallback(
+    () => setActiveContact(list, setList),
+    [list]
+  )
 
   usePeerStatus(list, setList)
 
-  const setContacts = useCallback(async () => {
-    const allContacts = await Service.getAllContactsByDid(sender)
-    setList(allContacts)
-  }, [sender])
-
   useEffect(() => {
     if (!sender) return
-    setContacts()
-  }, [sender, setContacts])
 
-  // eslint-disable-next-line max-lines-per-function
-  useEffect(() => {
-    const listenNewMessage = async ({ data }) => {
-      if (data.type !== 'message' || data.receiver !== sender) return
+    setContacts(sender, setList)
+  }, [sender])
 
-      if (R.find(R.propEq('receiver_did', data.sender), list)) return
+  usePeerNewContact(sender, list, setList)
 
-      console.debug('(useContacts) (listenNewMessage) data', data)
-      await Service.addContact({
-        sender_did: data.receiver,
-        receiver_did: data.sender
-      })
-      setContacts()
-    }
-
-    const listenNewContact = async ({ data }) => {
-      if (data.type !== 'newContact') return
-
-      const allContacts = await Service.getAllContactsByDid(sender)
-      const newList = getNewList(allContacts, data.payload.receiver_did)
-      setList(newList)
-      contactsChannel.postMessage({
-        type: 'activeContact',
-        payload: data.payload.receiver_did
-      })
-    }
-
-    messagesChannel.addEventListener('message', listenNewMessage)
-    contactChannel.addEventListener('message', listenNewContact)
-    return () => {
-      messagesChannel.removeEventListener('message', listenNewMessage)
-      contactChannel.removeEventListener('message', listenNewContact)
-    }
-  }, [sender, list, setContacts])
-
-  return [list, setActiveContact]
+  return [list, setActiveItem]
 }
 
 export const Contacts = () => {

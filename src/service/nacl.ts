@@ -1,13 +1,17 @@
 import { bufferToHex } from 'ethereumjs-util'
 import * as EthSigUtil from '@metamask/eth-sig-util'
 import { verifyMessage } from 'ethers/lib/utils'
+import { MessageType } from '../@types'
+import { v4 as uuidv4 } from 'uuid'
+
 //TODO: since this module works with MetaMask API, should we rename it as metamask.ts?
 
 //TODO: there is too much redundancy in all the functions below... we should get rid of it, right?
 
 //TODO: should we introduce a Message type for the whole app? Not just of IndexedDB?
 
-const getWalletAddressFromSignature = ({ sign, messageId, ...message }) => verifyMessage(JSON.stringify(message), sign)
+const getWalletAddressFromSignature = ({ sign, messageId, ...message }) =>
+  verifyMessage(JSON.stringify(message), sign)
 
 export const getEthereumWalletAddress = async () => {
   // @ts-ignore
@@ -19,17 +23,19 @@ export const getEthereumWalletAddress = async () => {
 export const validateSignature = message => {
   const signerEthereumWalletAddress = getWalletAddressFromSignature(message)
 
-  return signerEthereumWalletAddress.toLowerCase() === message.senderEthereumWalletAddress.toLowerCase()
+  return (
+    signerEthereumWalletAddress.toLowerCase() ===
+    message.senderEthereumWalletAddress.toLowerCase()
+  )
 }
 
-export const sign = async message => {
+export const signMessage = async message => {
   if (!('ethereum' in window)) return //TODO: implement in a separated function
 
   console.debug('(sign) message', message)
   const serializedMessage = JSON.stringify(message)
   console.debug('(sign) serializedMessage', serializedMessage)
   try {
-    // @ts-ignore
     const account = await getEthereumWalletAddress()
     // @ts-ignore
     const signedMessage = await ethereum.request({
@@ -117,4 +123,30 @@ export const encrypt = async (
     return ''
   }
   //TODO:rewrite function after Metamask implements more fancy encryption
+}
+
+//OUR public ethereum key => OUR public encryption key
+export const getSignedMessage = async (
+  senderDid: string,
+  receiverDid: string,
+  encryptionPublicKeyRequested: boolean
+) => {
+  const senderEncryptionPublicKey = await getEncryptionPublicKey()
+  const ethereumWalletAddress = await getEthereumWalletAddress()
+  const unsignedMessage = {
+    type: MessageType.handshake,
+    encryptionPublicKeyRequested,
+    sender: senderDid,
+    receiver: receiverDid,
+    senderEncryptionPublicKey: senderEncryptionPublicKey,
+    senderEthereumWalletAddress: ethereumWalletAddress
+  }
+
+  const sign = await signMessage(unsignedMessage)
+
+  return {
+    ...unsignedMessage,
+    sign,
+    messageId: senderDid + uuidv4()
+  }
 }

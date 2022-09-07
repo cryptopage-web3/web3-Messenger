@@ -3,5 +3,6 @@ export enum Status {
   sent = 'sent',
   delivered = 'delivered',
   viewed = 'viewed',
-  failed = 'failed'
+  failed = 'failed',
+  pending = 'pending'
 }

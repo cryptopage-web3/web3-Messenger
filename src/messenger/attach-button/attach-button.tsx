@@ -16,6 +16,7 @@ export const AttachButton = props => (
     dropContent={<Menu />}
     dropProps={dropProps}
     dropAlign={dropAlign}
+    alignSelf="end"
     plain
     {...props}
   />

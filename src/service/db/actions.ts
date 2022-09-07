@@ -1,5 +1,6 @@
+import * as R from 'ramda'
 import { useIndexedDB } from 'react-indexed-db'
-import { Contact, Message, Status } from '../../@types'
+import { Contact, DBContact, Message, MessageType, Status } from '../../@types'
 
 //TODO: validate whether it's a Public Encryption Key or not (Elliptic Curve x25519-xsalsa20-poly1305)
 export const isPublicEncryptionKey = (str: string) => str !== ''
@@ -80,7 +81,13 @@ export const addContact = async (contact: Contact) => {
   const { add } = useIndexedDB('contacts')
 
   try {
-    return await add(contact)
+    const _contact = {
+      sender_did: contact.sender,
+      receiver_did: contact.receiver,
+      receiver_public_key: contact.receiverEncryptionPublicKey
+    }
+
+    return await add(_contact)
   } catch (error) {
     console.error('error addContact :>> ', error)
     if (error?.target?.error?.name === 'ConstraintError') {
@@ -91,7 +98,7 @@ export const addContact = async (contact: Contact) => {
 
 export const getContactByDid = async (
   DID: string
-): Promise<Contact | undefined> => {
+): Promise<DBContact | undefined> => {
   const { getAll } = useIndexedDB('contacts')
 
   try {
@@ -103,7 +110,7 @@ export const getContactByDid = async (
   }
 }
 
-export const updateContact = async (
+export const updateContactKey = async (
   contactDid: string,
   encryptionPublicKey
 ) => {
@@ -118,7 +125,7 @@ export const updateContact = async (
 
     await update({ ...foundContact, receiver_public_key: encryptionPublicKey })
   } catch (error) {
-    console.error('error addContact :>> ', error)
+    console.error('error updateContact :>> ', error)
   }
 }
 
@@ -129,5 +136,31 @@ export const getAllContacts = async () => {
     return await getAll()
   } catch (error) {
     console.error('error getAllContacts :>> ', error)
+  }
+}
+
+export const getUserMessages = async (currentUser, activeContact) => {
+  if (!currentUser || !activeContact) return []
+
+  try {
+    const messages = await getAllMessages()
+    return R.filter(
+      item =>
+        ((item.receiver === activeContact && item.sender === currentUser) ||
+          (item.sender === activeContact && item.receiver === currentUser)) &&
+        item.type === MessageType.message,
+      messages
+    )
+  } catch (error) {
+    console.error('error getUserMessages :>> ', error)
+  }
+}
+
+export const getAllContactsByDid = async currentDid => {
+  try {
+    const contacts = await getAllContacts()
+    return R.filter(R.propEq('sender_did', currentDid), contacts)
+  } catch (error) {
+    console.error('error getAllContactsByDid :>> ', error)
   }
 }

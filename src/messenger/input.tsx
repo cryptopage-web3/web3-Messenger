@@ -8,18 +8,13 @@ const StyledInput = styled(TextArea)`
   padding: 0;
   font-weight: 400;
   overflow: hidden;
-  min-height: 30px;
+  min-height: 24px;
   max-height: 20rem;
+  font-size: 12px;
 `
 
 export const Input = React.forwardRef((props, ref) => (
-  <StyledInput
-    rows={1}
-    resize={false}
-    plain={true}
-    ref={ref}
-    {...props}
-  />
+  <StyledInput rows={1} resize={false} plain={true} ref={ref} {...props} />
 ))
 
-Input.displayName='Input'
+Input.displayName = 'Input'

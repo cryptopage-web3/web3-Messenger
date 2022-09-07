@@ -19,6 +19,7 @@ module.exports = {
   },
   plugins: ['react', '@typescript-eslint', 'react-hooks'],
   rules: {
+    '@typescript-eslint/no-unused-vars': 'error',
     'no-unused-vars': 1,
     'react/react-in-jsx-scope': 'off',
     'react/jsx-closing-bracket-location': [1, 'tag-aligned'],
