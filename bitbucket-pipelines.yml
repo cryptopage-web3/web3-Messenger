@@ -13,7 +13,7 @@ pipelines:
                   REMOTE_PATH: '/tmp/'
                   LOCAL_PATH: './deploy/*'
                   EXTRA_ARGS: ['-r']
-                  
+
              - "echo 'run deploy script to server'"
              - pipe: atlassian/ssh-run:0.4.0
                variables:
@@ -26,6 +26,5 @@ pipelines:
                     TG_BOT_ID=$TG_BOT_ID
                     TG_CHAT_ID=$TG_CHAT_ID
                     TG_TEXT_PREFIX=$TG_TEXT_PREFIX
-                    DEPLOY_LOG_FILE=$DEPLOY_LOG_FILE
                     DEPLOY_DIR=$DEPLOY_DIR
                   DEBUG: 'true'

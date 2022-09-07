@@ -50,7 +50,7 @@ tg_message "start update site"
 
 rm -rf /var/www/html/*
 
-cp -rf $deploy_dir/dist /var/www/html 2>/dev/null
+cp -rf $deploy_dir/dist/* /var/www/html 2>/dev/null
 
 chown -R www-data:www-data /var/www/html
 
