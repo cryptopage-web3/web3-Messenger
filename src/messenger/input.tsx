@@ -10,7 +10,6 @@ const StyledInput = styled(TextArea)`
   overflow: hidden;
   min-height: 24px;
   max-height: 20rem;
-  font-size: 12px;
 `
 
 export const Input = React.forwardRef((props, ref) => (

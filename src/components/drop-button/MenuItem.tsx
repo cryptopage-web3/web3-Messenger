@@ -18,17 +18,23 @@ const MenuItemButton = styled(Button)`
   }
 `
 
-type MenuItemProps = {
+export type MenuItemProps = {
+  key: string
   icon: React.ReactElement
   name: string
+  onClick?: () => void
 }
 
-export const MenuItem = ({ icon: IconComponent, name }: MenuItemProps) => {
+export const MenuItem = ({
+  icon: IconComponent,
+  name,
+  onClick
+}: MenuItemProps) => {
   return (
-    <MenuItemButton plain>
+    <MenuItemButton plain onClick={onClick}>
       <Box pad="15px" direction="row" align="center" gap="10px">
         <IconComponent />
-        <Text size="1rem">{name}</Text>
+        <Text size="xsmall">{name}</Text>
       </Box>
     </MenuItemButton>
   )

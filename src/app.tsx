@@ -1,8 +1,10 @@
 import React from 'react'
 import { Avatar, Connect, Name } from './profile'
-import { Header, Sidebar, Grid } from 'grommet'
+import { Box, Grid, Header, Sidebar } from 'grommet'
 import { Chat } from './messenger'
-import { Add, Contacts } from './contacts'
+import { Contacts, EmptyContactsPlaceholder } from './contacts'
+import { SearchChat } from './contacts/search-chat'
+import { AddChatButton } from './contacts/add-chat-button'
 
 const rows = ['auto', 'flex']
 const columns = ['auto', 'flex']
@@ -14,17 +16,21 @@ const areas = [
 
 export const App = () => (
   <Grid fill rows={rows} columns={columns} areas={areas}>
-    <Header gridArea='header' pad='small'>
+    <Header gridArea="header" pad="small">
       <Avatar />
       <Name />
       <Connect />
     </Header>
 
-    <Sidebar gridArea='nav' width='medium' pad='none'>
-      <Add />
+    <Sidebar gridArea="nav" width="medium" pad="none">
+      <Box direction="row" justify="between">
+        <SearchChat />
+        <AddChatButton />
+      </Box>
       <Contacts />
+      <EmptyContactsPlaceholder />
     </Sidebar>
 
-    <Chat gridArea='main' />
+    <Chat gridArea="main" />
   </Grid>
 )
