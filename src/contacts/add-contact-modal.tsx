@@ -1,9 +1,10 @@
 import React, { useCallback, useState } from 'react'
-import { Box, Button, TextInput } from 'grommet'
 import { Status } from '../service/peer'
 import { useCeramic, useDID } from '../profile'
 import { isAddress } from 'ethers/lib/utils' //TODO: better extract all this Web3-related functionality out of here...
 import { Caip10Link } from '@ceramicnetwork/stream-caip10-link'
+import { useGlobalModalContext } from '../components/modals/useGLobalModalContext'
+import { AddContactModalStyled } from './add-contact-modal-styled'
 
 const contactsChannel = new BroadcastChannel('peer:contacts')
 
@@ -63,19 +64,32 @@ const useAdd = sender => {
   return { input, handleAdd, handleChange }
 }
 
-export const Add = () => {
+export const AddContactModal = () => {
   const sender = useDID()
 
   const { input, handleAdd, handleChange } = useAdd(sender)
 
+  const { closeModal, store } = useGlobalModalContext()
+  const { modalProps } = store || {}
+  const { title, confirmBtnText } = modalProps || {}
+
+  const onAdd = useCallback(() => {
+    handleAdd()
+    closeModal()
+  }, [handleAdd, closeModal])
+
+  const disabled = !sender || !input.length
+
   return (
-    <Box gap="small" pad="small" height={{ min: 'unset' }}>
-      <TextInput placeholder="DID" value={input} onChange={handleChange} />
-      <Button
-        label="Add"
-        onClick={handleAdd}
-        disabled={!sender || !input.length}
-      />
-    </Box>
+    <AddContactModalStyled
+      disabled={disabled}
+      sender={sender}
+      handleAdd={onAdd}
+      confirmBtnText={confirmBtnText}
+      title={title}
+      input={input}
+      handleModalToggle={closeModal}
+      handleChange={handleChange}
+    />
   )
 }

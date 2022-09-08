@@ -2,11 +2,11 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import { useDID } from '../profile'
 import { Input } from './input'
-import { AttachButton } from './attach-button'
-import { SendButton } from './send-button'
 import { Box } from 'grommet'
 import { Message as TMessage, MessageType, Status } from '../@types'
 import { useActiveContact } from './useActiveContact'
+import { AttachButton } from './attach-button'
+import { SendButton } from './send-button'
 
 const messagesChannel = new BroadcastChannel('peer:messages')
 

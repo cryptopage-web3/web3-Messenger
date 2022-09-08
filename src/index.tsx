@@ -6,6 +6,7 @@ import { createGlobalStyle } from 'styled-components'
 import { init as initPersistentService } from './service/PersistentService'
 import { init as initTransferService } from './service/TransferService'
 import { init as initLoggerService } from './service/LoggerService'
+import { GlobalModal } from './components'
 
 const GlobalStyle = createGlobalStyle`
   html, body, #root, #root > * {
@@ -21,11 +22,46 @@ initPersistentService()
 initTransferService()
 initLoggerService()
 
+const theme = {
+  global: {
+    colors: {
+      brand: '#1886FF'
+    },
+    font: {
+      family: 'SF Pro Display, Arial, system-ui',
+      size: '12px'
+    },
+    focus: {
+      shadow: 'none'
+    }
+  },
+  button: {
+    primary: {
+      color: '#1886FF',
+      font: {
+        size: '14px'
+      }
+    }
+  },
+  text: {
+    xsmall: {
+      size: '12px',
+      height: '18px'
+    },
+    small: {
+      size: '14px',
+      height: '20px'
+    }
+  }
+}
+
 render(
   <StrictMode>
-    <Provider>
-      <GlobalStyle />
-      <App />
+    <Provider ui={{ theme }}>
+      <GlobalModal>
+        <GlobalStyle />
+        <App />
+      </GlobalModal>
     </Provider>
   </StrictMode>,
   document.getElementById('root')

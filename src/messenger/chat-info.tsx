@@ -23,7 +23,7 @@ const ChatDID = () => {
   const activeContact = useActiveContact()
 
   return (
-    <Text size="12px" color="#007bff">
+    <Text size="xsmall" color="#007bff">
       {getShortText(activeContact)}
     </Text>
   )
@@ -32,15 +32,15 @@ const ChatDID = () => {
 const ChatName = () => {
   return (
     <Box direction="row" gap="2px">
-      <ChatDID /> <Text size="12px">/</Text>
-      <Text size="12px">ChatName</Text>
+      <ChatDID /> <Text size="xsmall">/</Text>
+      <Text size="xsmall">ChatName</Text>
     </Box>
   )
 }
 
 const ChatStatus = () => (
   <Box>
-    <Text size="12px" color="#687684">
+    <Text size="xsmall" color="#687684">
       Chat Status
     </Text>
   </Box>

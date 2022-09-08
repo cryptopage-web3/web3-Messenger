@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import * as R from 'ramda'
 import { useDID } from '../profile'
 import * as DB from '../service/db'
@@ -62,13 +62,10 @@ const setContacts = async (sender: string, setList: (arg: []) => void) => {
   setList(allContacts)
 }
 
-const useContacts = () => {
+export const useContacts = () => {
   const sender = useDID()
   const [list, setList] = useState([])
-  const setActiveItem = useCallback(
-    () => setActiveContact(list, setList),
-    [list]
-  )
+  const setActiveItem = useMemo(() => setActiveContact(list, setList), [list])
 
   usePeerStatus(list, setList)
 
@@ -84,7 +81,10 @@ const useContacts = () => {
 }
 
 export const Contacts = () => {
+  const sender = useDID()
   const [contacts, setActiveItem] = useContacts()
+
+  if (!contacts.length || !sender) return null
 
   return (
     <ScrollContainer>
