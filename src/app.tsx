@@ -14,6 +14,13 @@ const areas = [
   { name: 'main', start: [1, 1], end: [1, 1] }
 ]
 
+//TODO template for custom search input with drop down items
+// const StyledContactsSidebar = styled(Sidebar)`
+//   & > div {
+//     position: relative
+//   }
+// `
+
 export const App = () => (
   <Grid fill rows={rows} columns={columns} areas={areas}>
     <Header gridArea="header" pad="small">
@@ -22,8 +29,14 @@ export const App = () => (
       <Connect />
     </Header>
 
-    <Sidebar gridArea="nav" width="medium" pad="none">
-      <Box direction="row" justify="between">
+    <Sidebar gridArea="nav" width="medium" pad={{ right: '40px' }}>
+      <Box
+        direction="row"
+        justify="between"
+        gap="15px"
+        height={{ min: 'unset' }}
+        pad={{ bottom: '20px' }}
+      >
         <SearchChat />
         <AddChatButton />
       </Box>

@@ -1,23 +1,25 @@
 import * as React from 'react'
-import { ReactElement, useCallback, useState } from 'react'
-import { DropButton as DropButtonUi } from 'grommet'
+import { useCallback, useState } from 'react'
+import { DropButton as DropButtonUi, DropButtonExtendedProps } from 'grommet'
 import { Menu } from './Menu'
 import { MenuItemProps } from './MenuItem'
 
+export type DropAlignProps = {
+  top?: 'top' | 'bottom'
+  bottom?: 'top' | 'bottom'
+  right?: 'left' | 'right'
+  left?: 'left' | 'right'
+}
 const dropPropsDefault = {
   margin: { bottom: '8px' },
   round: '10px',
   elevation: 'medium'
 }
-const dropAlignDefault = { bottom: 'top', right: 'right' }
+const dropAlignDefault: DropAlignProps = { bottom: 'top', right: 'right' }
 
 type DropButtonProps = {
-  icon: ReactElement
-  disabled?: boolean
-  dropAlign?: { [arg: string]: string }
-  dropProps?: { [arg: string]: string | { [arg: string]: string } }
   menuConfig: MenuItemProps[]
-}
+} & Omit<DropButtonExtendedProps, 'dropContent'>
 
 export const DropButton = ({
   icon: IconComponent,
@@ -42,7 +44,6 @@ export const DropButton = ({
       dropContent={<Menu menuConfig={menuConfig} closeMenu={closeMenu} />}
       dropProps={dropProps || dropPropsDefault}
       dropAlign={dropAlign || dropAlignDefault}
-      alignSelf="end"
       disabled={disabled}
       plain
     />

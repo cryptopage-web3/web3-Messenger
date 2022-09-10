@@ -1,5 +1,5 @@
-import { Box, Button, Heading, Layer, TextInput } from 'grommet'
-import { PrimaryButton } from '../components'
+import { Box, Button, Heading, Layer } from 'grommet'
+import { PrimaryButton, TextInput } from '../components'
 import styled from 'styled-components'
 import { Close } from './icons'
 
@@ -44,10 +44,11 @@ type AddContactModalStyledProps = {
   title: string
   input: string
   handleModalToggle: () => void
-  handleChange: (arg: string) => void
+  handleChange: (event: InputEvent) => void
   disabled: boolean
 }
 
+// eslint-disable-next-line max-lines-per-function
 export const AddContactModalStyled = ({
   handleAdd,
   confirmBtnText,

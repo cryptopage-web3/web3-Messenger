@@ -1,12 +1,12 @@
 import * as React from 'react'
-import { DropButton } from '../components'
-import { MenuItemProps } from '../components/drop-button/MenuItem'
+import { DropAlignProps, DropButton } from '../components'
 import { useDID } from '../profile'
 import { useGlobalModalContext } from '../components/modals/useGLobalModalContext'
 import { AddContactModal } from './add-contact-modal'
 import { AddChat, CreateGroupChat, CreateSingleChat } from './icons'
+import { MenuItemProps } from '../components/drop-button/MenuItem'
 
-const dropAlign = { top: 'bottom', right: 'right' }
+const dropAlign: DropAlignProps = { top: 'bottom', right: 'right' }
 const dropProps = {
   margin: { top: '8px' },
   round: '10px',
@@ -47,6 +47,7 @@ export const AddChatButton = () => {
       disabled={!sender}
       dropAlign={dropAlign}
       dropProps={dropProps}
+      alignSelf="center"
     />
   )
 }

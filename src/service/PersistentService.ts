@@ -10,12 +10,17 @@ const addContact = async contact => {
 
     if (!foundContact) {
       await DB.addContact(contact)
-    }
 
-    contactsChannel.postMessage({
-      type: 'newContactAdded',
-      payload: contact
-    })
+      contactsChannel.postMessage({
+        type: 'newContactAdded',
+        payload: contact
+      })
+    } else {
+      contactsChannel.postMessage({
+        type: 'setActiveContact',
+        payload: contact
+      })
+    }
   } catch (e) {
     contactsChannel.postMessage({
       type: 'error',

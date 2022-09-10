@@ -10,5 +10,5 @@ const menuConfig: MenuItemProps[] = [
 ]
 
 export const AttachButton = () => (
-  <DropButton icon={Attach} menuConfig={menuConfig} />
+  <DropButton icon={Attach} menuConfig={menuConfig} alignSelf="end" />
 )
