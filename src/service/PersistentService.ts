@@ -47,11 +47,13 @@ const MessagesEventMap = {
     await DB.addMessage(message)
 
     uiChannel.postMessage({ type: 'updateMessages' })
+    uiChannel.postMessage({ type: 'lastMessageChanged', payload: message })
   },
   addIncomingMessage: async message => {
     await DB.addMessage(message)
 
     uiChannel.postMessage({ type: 'updateMessages' })
+    uiChannel.postMessage({ type: 'lastMessageChanged', payload: message })
   },
   updateMessageStatus: async message => {
     await DB.updateStatus({
@@ -60,11 +62,13 @@ const MessagesEventMap = {
     })
 
     uiChannel.postMessage({ type: 'updateMessages' })
+    uiChannel.postMessage({ type: 'lastMessageChanged', payload: message })
   },
   updateMessageText: async message => {
     await DB.updateText(message)
 
     uiChannel.postMessage({ type: 'updateMessages' })
+    uiChannel.postMessage({ type: 'lastMessageChanged', payload: message })
   }
 }
 

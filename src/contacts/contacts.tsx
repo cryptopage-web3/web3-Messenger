@@ -2,9 +2,9 @@ import React, { useEffect, useMemo, useState } from 'react'
 import * as R from 'ramda'
 import { useDID } from '../profile'
 import * as DB from '../service/db'
-import { Contact } from './contact'
 import { List, ScrollContainer } from '../components'
 import { DBContact } from '../@types'
+import { Contact } from './contact'
 
 const statusChannel = new BroadcastChannel('peer:status')
 const contactsChannel = new BroadcastChannel('peer:contacts')

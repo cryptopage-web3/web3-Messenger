@@ -156,6 +156,20 @@ export const getUserMessages = async (currentUser, activeContact) => {
   }
 }
 
+export const getLastMessage = async (currentUser, activeContact) => {
+  if (!currentUser || !activeContact) return []
+
+  try {
+    const messages = await getUserMessages(currentUser, activeContact)
+
+    if (!messages?.length) return null
+
+    return messages[messages.length - 1]
+  } catch (error) {
+    console.error('error getUserMessages :>> ', error)
+  }
+}
+
 export const getAllContactsByDid = async currentDid => {
   try {
     const contacts = await getAllContacts()

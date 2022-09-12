@@ -117,7 +117,7 @@ export const SearchChat = () => {
       showCleanIcon={true}
       onClickIcon={cleanValues}
       icon={Close}
-      pad={{ bottom: '15px' }}
+      pad={{ bottom: '10px' }}
     />
   )
 }

@@ -56,7 +56,7 @@ const requestKey = async ({ receiver, sender }) => {
     })
 
     await Service.publish({
-      type: 'incomingHandshake',
+      type: 'handshake',
       receiver: message.receiver,
       payload: message
     })
@@ -127,7 +127,7 @@ const MessagesEventMap = {
     })
   },
   // eslint-disable-next-line max-lines-per-function
-  incomingHandshake: async message => {
+  handshake: async message => {
     if (!validateSignature(message)) {
       messagesChannel.postMessage({
         type: 'error',
@@ -173,7 +173,7 @@ const MessagesEventMap = {
       })
 
       await Service.publish({
-        type: 'incomingHandshake',
+        type: 'handshake',
         receiver: message.sender,
         payload: signedMessage
       })
