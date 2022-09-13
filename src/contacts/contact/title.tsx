@@ -1,8 +1,8 @@
 import { Box } from 'grommet'
 import { ChatTitle, MessageStatus as LastMessageStatus } from '../../components'
 import { Message } from '../../@types'
-import { Muted as MutedIcon } from '../icons'
 import { LastMessageDate } from './last-message-date'
+import { Muted } from '../../icons'
 
 type ChatCardTitleProps = {
   sender: string
@@ -24,7 +24,7 @@ export const Title = ({
     <Box direction="row" align="center" justify="between">
       <Box direction="row" align="center" gap="4px">
         <ChatTitle chatAddress={receiver} online={online} />
-        {muted && <MutedIcon />}
+        {muted && <Muted color="#A7A7A7" />}
       </Box>
       <Box direction="row" align="center" gap="4px">
         {message && sender === message.sender && (

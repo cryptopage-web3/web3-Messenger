@@ -3,7 +3,7 @@ import { Status } from '../service/peer'
 import { useCeramic, useDID } from '../profile'
 import { isAddress } from 'ethers/lib/utils' //TODO: better extract all this Web3-related functionality out of here...
 import { Caip10Link } from '@ceramicnetwork/stream-caip10-link'
-import { useGlobalModalContext } from '../components/modals/useGLobalModalContext'
+import { useGlobalModalContext } from '../components'
 import { AddContactModalStyled } from './add-contact-modal-styled'
 
 const contactsChannel = new BroadcastChannel('peer:contacts')

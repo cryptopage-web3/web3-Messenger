@@ -2,7 +2,7 @@ import { Box, Text } from 'grommet'
 import styled from 'styled-components'
 import { PrimaryButton } from '../components'
 import { useContacts } from './contacts'
-import { useGlobalModalContext } from '../components/modals/useGLobalModalContext'
+import { useGlobalModalContext } from '../components'
 import { AddContactModal } from './add-contact-modal'
 import { useDID } from '../profile'
 
@@ -39,7 +39,7 @@ export const EmptyContactsPlaceholder = () => {
   return (
     <StyledContainer>
       <StyledText>
-        You don't have a single chat yet, click on the button to select an
+        You don&apos;t have a single chat yet, click on the button to select an
         interlocutor
       </StyledText>
       <PrimaryButton disabled={!sender} onClick={openAddContactModal}>

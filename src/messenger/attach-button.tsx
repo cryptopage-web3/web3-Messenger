@@ -1,7 +1,7 @@
 import * as React from 'react'
-import { Attach, File, Photo, Video } from './icons'
 import { DropButton } from '../components'
 import { MenuItemProps } from '../components/drop-button/MenuItem'
+import { Photo, Video, Attach, File } from '../icons'
 
 const menuConfig: MenuItemProps[] = [
   { key: 'Photo', icon: Photo, name: 'Photo' },
@@ -10,5 +10,10 @@ const menuConfig: MenuItemProps[] = [
 ]
 
 export const AttachButton = () => (
-  <DropButton icon={Attach} menuConfig={menuConfig} alignSelf="end" />
+  <DropButton
+    icon={Attach}
+    menuConfig={menuConfig}
+    alignSelf="end"
+    menuPosition={'topRight'}
+  />
 )

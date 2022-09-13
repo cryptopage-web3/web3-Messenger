@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 import { Box } from 'grommet'
-import { Close } from './icons'
+import { Close } from '../icons'
 import { ChatStatus, TextInput, ChatTitle, ChatAvatar } from '../components'
 import { useContacts } from './contacts'
 import styled from 'styled-components'

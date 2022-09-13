@@ -2,7 +2,7 @@ import React, { ReactElement, useState } from 'react'
 import { GlobalModalContext } from './useGLobalModalContext'
 
 // eslint-disable-next-line max-lines-per-function
-export const GlobalModal = ({ children }) => {
+export const GlobalModal: React.FC = ({ children }) => {
   const [store, setStore] = useState()
   const { modalComponent, modalProps } = store || {}
 

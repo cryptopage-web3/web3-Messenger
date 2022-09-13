@@ -1,11 +1,16 @@
 import * as React from 'react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import { Box } from 'grommet'
 import { ChatAvatar } from '../../components'
 import { useDID } from '../../profile'
 import * as DB from '../../service/db/actions'
 import { Captions } from './captions'
+import { DropButtonMenu } from './drop-button-menu'
+import { useGlobalModalContext } from '../../components'
+import { getMenuConfig } from './get-menu-config'
+import { ClearHistoryModal } from './clear-history-modal'
+import { DeleteChatModal } from './delete-chat-modal'
 
 const StyledChatCard = styled('li')`
   background: ${({ active }) => (active ? '#E4E4E4' : 'transparent')};
@@ -26,16 +31,20 @@ type ContactProps = {
   setActiveItem: (arg: string) => void
   key: string
   active?: boolean
+  muted?: boolean
 }
 
 const uiChannel = new BroadcastChannel('peer:ui')
 
-const useLastMessage = (sender, receiver_did, setLastMessage) => {
+// eslint-disable-next-line max-lines-per-function
+const useLastMessage = (sender, receiver) => {
+  const [lastMessage, setLastMessage] = useState(null)
+
   const updateLastMessage = useCallback(async () => {
-    const result = await DB.getLastMessage(sender, receiver_did)
+    const result = await DB.getLastMessage(sender, receiver)
 
     setLastMessage(result)
-  }, [receiver_did, sender, setLastMessage])
+  }, [receiver, sender, setLastMessage])
 
   useEffect(() => {
     updateLastMessage()
@@ -49,42 +58,108 @@ const useLastMessage = (sender, receiver_did, setLastMessage) => {
 
       if (message.type === 'handshake') return
 
-      updateLastMessage(sender, receiver_did)
+      updateLastMessage(sender, receiver)
     }
 
     uiChannel.addEventListener('message', listener)
-
     return () => {
       uiChannel.removeEventListener('message', listener)
     }
   })
+
+  return lastMessage
 }
 
+const useToggleContextMenu = () => {
+  const [open, setOpen] = useState(false)
+
+  const closeMenu = useCallback(() => setOpen(false), [])
+  const openMenu = useCallback(() => setOpen(true), [])
+
+  return [open, openMenu, closeMenu]
+}
+
+const useContextMenu = closeMenu => {
+  const { openModal } = useGlobalModalContext()
+
+  const openClearHistoryModal = useCallback(() => {
+    openModal(ClearHistoryModal, {
+      title: 'Clear history',
+      confirmBtnText: 'Yes',
+      rejectBtnText: 'No'
+    })
+
+    closeMenu()
+  }, [closeMenu, openModal])
+
+  const openDeleteChatModal = useCallback(() => {
+    openModal(DeleteChatModal, {
+      title: 'Delete chat',
+      confirmBtnText: 'Yes',
+      rejectBtnText: 'No'
+    })
+
+    closeMenu()
+  }, [closeMenu, openModal])
+
+  return useMemo(
+    () => getMenuConfig(openClearHistoryModal, openDeleteChatModal),
+    [openClearHistoryModal, openDeleteChatModal]
+  )
+}
+
+// eslint-disable-next-line max-lines-per-function
 export const Contact = ({
   active,
-  receiver_did,
+  receiver_did: receiver,
+  muted,
   setActiveItem
 }: ContactProps) => {
   const sender = useDID()
-  const [lastMessage, setLastMessage] = useState(null)
 
-  useLastMessage(sender, receiver_did, setLastMessage)
+  const lastMessage = useLastMessage(sender, receiver)
 
   const handleClick = useCallback(
-    () => setActiveItem(receiver_did),
-    [receiver_did, setActiveItem]
+    () => setActiveItem(receiver),
+    [receiver, setActiveItem]
   )
 
+  const [open, openMenu, closeMenu] = useToggleContextMenu()
+
+  const handleContextMenu = useCallback(
+    event => {
+      event.preventDefault()
+
+      openMenu()
+    },
+    [openMenu]
+  )
+
+  const menuConfig = useContextMenu(closeMenu)
+
   return (
-    <StyledChatCard onClick={handleClick} active={active}>
-      <Box direction="row" gap="10px" style={{ height: '46px' }}>
-        <ChatAvatar size="46px" showOnline={true} />
-        <Captions
-          sender={sender}
-          receiver={receiver_did}
-          message={lastMessage}
-        />
-      </Box>
-    </StyledChatCard>
+    <>
+      <StyledChatCard
+        onClick={handleClick}
+        active={active}
+        onContextMenu={handleContextMenu}
+      >
+        <Box direction="row" gap="10px" style={{ height: '46px' }}>
+          <ChatAvatar size="46px" showOnline={true} />
+          <Captions
+            sender={sender}
+            receiver={receiver}
+            message={lastMessage}
+            muted={muted}
+          />
+        </Box>
+      </StyledChatCard>
+      <DropButtonMenu
+        open={open}
+        openMenu={openMenu}
+        closeMenu={closeMenu}
+        menuConfig={menuConfig}
+      />
+    </>
   )
 }
