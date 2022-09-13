@@ -139,18 +139,30 @@ export const getAllContacts = async () => {
   }
 }
 
-export const getUserMessages = async (currentUser, activeContact) => {
+//with all types
+export const getAllUserMessages = async (currentUser, activeContact) => {
   if (!currentUser || !activeContact) return []
 
   try {
     const messages = await getAllMessages()
     return R.filter(
       item =>
-        ((item.receiver === activeContact && item.sender === currentUser) ||
-          (item.sender === activeContact && item.receiver === currentUser)) &&
-        item.type === MessageType.message,
+        (item.receiver === activeContact && item.sender === currentUser) ||
+        (item.sender === activeContact && item.receiver === currentUser),
       messages
     )
+  } catch (error) {
+    console.error('error getAllUserMessages :>> ', error)
+  }
+}
+
+//with type message
+export const getUserMessages = async (currentUser, activeContact) => {
+  if (!currentUser || !activeContact) return []
+
+  try {
+    const messages = await getAllUserMessages(currentUser, activeContact)
+    return R.filter(item => item.type === MessageType.message, messages)
   } catch (error) {
     console.error('error getUserMessages :>> ', error)
   }
@@ -166,7 +178,7 @@ export const getLastMessage = async (currentUser, activeContact) => {
 
     return messages[messages.length - 1]
   } catch (error) {
-    console.error('error getUserMessages :>> ', error)
+    console.error('error getLastMessage :>> ', error)
   }
 }
 
@@ -176,5 +188,31 @@ export const getAllContactsByDid = async currentDid => {
     return R.filter(R.propEq('sender_did', currentDid), contacts)
   } catch (error) {
     console.error('error getAllContactsByDid :>> ', error)
+  }
+}
+
+export const deleteContact = async DID => {
+  const { deleteRecord } = useIndexedDB('contacts')
+
+  try {
+    const contact = await getContactByDid(DID)
+
+    await deleteRecord(contact.id)
+  } catch (error) {
+    console.error('error deleteContact :>> ', error)
+  }
+}
+
+export const deleteMessages = async (sender, receiver) => {
+  const { deleteRecord } = useIndexedDB('messages')
+
+  try {
+    const messages = await getAllUserMessages(sender, receiver)
+
+    for (const message of messages) {
+      await deleteRecord(message.id)
+    }
+  } catch (error) {
+    console.error('error deleteMessages :>> ', error)
   }
 }

@@ -3,6 +3,7 @@ import * as DB from './db/actions'
 const messagesChannel = new BroadcastChannel('peer:messages')
 const contactsChannel = new BroadcastChannel('peer:contacts')
 const uiChannel = new BroadcastChannel('peer:ui')
+const uiContactsChannel = new BroadcastChannel('peer:ui:contacts')
 
 const addContact = async contact => {
   try {
@@ -11,18 +12,18 @@ const addContact = async contact => {
     if (!foundContact) {
       await DB.addContact(contact)
 
-      contactsChannel.postMessage({
+      uiContactsChannel.postMessage({
         type: 'newContactAdded',
         payload: contact
       })
     } else {
-      contactsChannel.postMessage({
-        type: 'setActiveContact',
+      uiContactsChannel.postMessage({
+        type: 'activeContact',
         payload: contact
       })
     }
   } catch (e) {
-    contactsChannel.postMessage({
+    uiContactsChannel.postMessage({
       type: 'error',
       payload: e
     })
@@ -39,6 +40,12 @@ const ContactsEventMap = {
       type: 'contactKeyUpdated',
       payload: message
     })
+  },
+  deleteContact: async message => {
+    await DB.deleteContact(message.receiver)
+    await DB.deleteMessages(message.sender, message.receiver)
+
+    uiContactsChannel.postMessage({ type: 'contactDeleted', payload: message })
   }
 }
 
@@ -69,6 +76,11 @@ const MessagesEventMap = {
 
     uiChannel.postMessage({ type: 'updateMessages' })
     uiChannel.postMessage({ type: 'lastMessageChanged', payload: message })
+  },
+  deleteMessages: async message => {
+    await DB.deleteMessages(message.sender, message.receiver)
+
+    uiChannel.postMessage({ type: 'updateMessages' })
   }
 }
 

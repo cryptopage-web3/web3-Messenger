@@ -1,13 +1,15 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import * as R from 'ramda'
 import { useDID } from '../profile'
 import * as DB from '../service/db'
 import { List, ScrollContainer } from '../components'
 import { DBContact } from '../@types'
 import { Contact } from './contact'
+import { useActiveContact } from '../messenger/useActiveContact'
 
 const statusChannel = new BroadcastChannel('peer:status')
 const contactsChannel = new BroadcastChannel('peer:contacts')
+const uiContactsChannel = new BroadcastChannel('peer:ui:contacts')
 
 const usePeerStatus = (list, setList) => {
   useEffect(() => {
@@ -21,72 +23,104 @@ const usePeerStatus = (list, setList) => {
   }, [list, setList])
 }
 
-const setActiveContact = (list, setList) => did => {
-  const newList = getNewList(list, did)
+const getListWithActiveContact = (list, did) =>
+  R.map(el => {
+    if (el.receiver_did === did) {
+      return { ...el, active: true }
+    }
+    return el?.active ? { ...el, active: false } : el
+  }, R.clone(list))
 
+const setActiveContact = (did, setList) => {
   contactsChannel.postMessage({
     type: 'activeContact',
     payload: did
   })
 
-  setList(newList)
+  setList(list => getListWithActiveContact(list, did))
 }
 
-const usePeerNewContact = (sender, list, setList) => {
-  useEffect(() => {
-    const listenNewContact = async ({ data }) => {
-      if (data.type !== 'newContactAdded' && data.type !== 'setActiveContact')
-        return
-
-      const newContact = data.payload.receiver
-      const newContactList = await DB.getAllContactsByDid(sender)
-
-      setActiveContact(newContactList, setList)(newContact)
-    }
-
-    contactsChannel.addEventListener('message', listenNewContact)
-
-    return () => {
-      contactsChannel.removeEventListener('message', listenNewContact)
-    }
-  }, [sender, list, setList])
-}
-
-const getNewList = (list, did) =>
-  R.map(el => {
-    if (el.receiver_did === did) {
-      return { ...el, active: !el.active }
-    }
-    return el?.active ? { ...el, active: false } : el
-  }, R.clone(list))
-
-const setContacts = async (sender: string, setList: (arg: []) => void) => {
+const updateContacts = async (sender: string, setList: (arg: []) => void) => {
   const allContacts = await DB.getAllContactsByDid(sender)
+
   setList(allContacts)
 }
 
-export const useContacts = (): [DBContact[], (arg: string) => void] => {
+const uiContactsEventMap = {
+  activeContact: async (message, setList) => {
+    const newContact = message.receiver
+
+    setActiveContact(newContact, setList)
+  },
+  contactDeleted: async (message, setList, currentActiveContact) => {
+    const { sender, receiver } = message
+
+    await updateContacts(sender, setList)
+
+    if (receiver !== currentActiveContact) {
+      await uiContactsEventMap.activeContact(
+        { receiver: currentActiveContact },
+        setList
+      )
+    }
+  },
+  newContactAdded: async (message, setList) => {
+    const { sender } = message
+
+    await updateContacts(sender, setList)
+    await uiContactsEventMap.activeContact(message, setList)
+  }
+}
+
+const usePeerNewContact = (sender, list, setList, currentActiveContact) => {
+  useEffect(() => {
+    const listenNewContact = async ({ data }) => {
+      if (uiContactsEventMap[data.type]) {
+        uiContactsEventMap[data.type](
+          data.payload,
+          setList,
+          currentActiveContact
+        )
+      }
+    }
+
+    uiContactsChannel.addEventListener('message', listenNewContact)
+
+    return () => {
+      uiContactsChannel.removeEventListener('message', listenNewContact)
+    }
+  }, [sender, list, setList, currentActiveContact])
+}
+
+export const useContacts = (
+  currentActiveContact
+): [DBContact[], (arg: string) => void] => {
   const sender = useDID()
 
   const [list, setList] = useState([])
-  const setActiveItem = useMemo(() => setActiveContact(list, setList), [list])
+
+  const setActiveItem = useCallback(
+    contact => setActiveContact(contact, setList),
+    []
+  )
 
   usePeerStatus(list, setList)
 
   useEffect(() => {
     if (!sender) return
 
-    setContacts(sender, setList)
+    updateContacts(sender, setList)
   }, [sender])
 
-  usePeerNewContact(sender, list, setList)
+  usePeerNewContact(sender, list, setList, currentActiveContact)
 
   return [list, setActiveItem]
 }
 
 export const Contacts = () => {
   const sender = useDID()
-  const [contacts, setActiveItem] = useContacts()
+  const currentActiveContact = useActiveContact()
+  const [contacts, setActiveItem] = useContacts(currentActiveContact)
 
   if (!contacts.length || !sender) return null
 

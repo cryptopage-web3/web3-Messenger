@@ -79,28 +79,41 @@ const useToggleContextMenu = () => {
   return [open, openMenu, closeMenu]
 }
 
-const useContextMenu = closeMenu => {
+// eslint-disable-next-line max-lines-per-function
+const useContextMenu = (sender, receiver, closeMenu) => {
   const { openModal } = useGlobalModalContext()
 
   const openClearHistoryModal = useCallback(() => {
     openModal(ClearHistoryModal, {
       title: 'Clear history',
       confirmBtnText: 'Yes',
-      rejectBtnText: 'No'
+      rejectBtnText: 'No',
+      payload: {
+        contact: {
+          sender,
+          receiver
+        }
+      }
     })
 
     closeMenu()
-  }, [closeMenu, openModal])
+  }, [closeMenu, openModal, receiver, sender])
 
   const openDeleteChatModal = useCallback(() => {
     openModal(DeleteChatModal, {
       title: 'Delete chat',
       confirmBtnText: 'Yes',
-      rejectBtnText: 'No'
+      rejectBtnText: 'No',
+      payload: {
+        contact: {
+          sender,
+          receiver
+        }
+      }
     })
 
     closeMenu()
-  }, [closeMenu, openModal])
+  }, [closeMenu, openModal, receiver, sender])
 
   return useMemo(
     () => getMenuConfig(openClearHistoryModal, openDeleteChatModal),
@@ -135,7 +148,7 @@ export const Contact = ({
     [openMenu]
   )
 
-  const menuConfig = useContextMenu(closeMenu)
+  const menuConfig = useContextMenu(sender, receiver, closeMenu)
 
   return (
     <>

@@ -25,7 +25,7 @@ import { useDID } from '../profile'
  </StyledScrollContainer>)
  */
 
-const contactsChannel = new BroadcastChannel('peer:contacts')
+const uiContactsChannel = new BroadcastChannel('peer:ui:contacts')
 
 const StyledFoundChat = styled(Box)`
   padding: 7.5px 10px;
@@ -48,7 +48,7 @@ const FoundChat = ({ receiver }: FoundChatProps) => (
 )
 
 const useChange = (setValue, setSuggestions) => {
-  const [chats] = useContacts()
+  const [chats] = useContacts('')
 
   return useCallback(
     event => {
@@ -82,8 +82,8 @@ const useSuggestionSelect = cleanValues => {
 
       cleanValues()
 
-      contactsChannel.postMessage({
-        type: 'setActiveContact',
+      uiContactsChannel.postMessage({
+        type: 'activeContact',
         payload: {
           receiver
         }

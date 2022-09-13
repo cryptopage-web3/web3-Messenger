@@ -9,6 +9,7 @@ export type Contact = {
 }
 
 export type DBContact = {
+  id: number
   sender_did: string
   receiver_did: string
   receiver_public_key?: string

@@ -22,7 +22,7 @@ const StyledContainer = styled(props => (
 `
 
 export const EmptyContactsPlaceholder = () => {
-  const [contacts] = useContacts()
+  const [contacts] = useContacts('')
   const sender = useDID()
 
   const { openModal } = useGlobalModalContext()
