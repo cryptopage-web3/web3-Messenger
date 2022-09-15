@@ -14,10 +14,7 @@ export const AddChatButton = () => {
   const { openModal } = useGlobalModalContext()
 
   const openAddContactModal = useCallback(() => {
-    openModal(AddContactModal, {
-      title: 'Create chat',
-      confirmBtnText: 'Create'
-    })
+    openModal(AddContactModal)
   }, [openModal])
 
   const menuConfig: MenuItemProps[] = useMemo(

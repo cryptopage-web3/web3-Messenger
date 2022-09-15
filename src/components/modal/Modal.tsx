@@ -27,7 +27,9 @@ export const Modal: React.FC<ModalProps> = ({
 }) => {
   return (
     <StyledModal onClickOutside={onClickOutside} onEsc={onEsc}>
-      <StyledModalContent width={width}>{children}</StyledModalContent>
+      <StyledModalContent width={width} gap="20px">
+        {children}
+      </StyledModalContent>
     </StyledModal>
   )
 }

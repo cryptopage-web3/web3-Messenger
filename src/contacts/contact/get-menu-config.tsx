@@ -1,4 +1,4 @@
-import { Archive, Close as ClearHistory, Muted, DeleteChat } from '../../icons'
+import { Archive, Close as ClearHistory, Muted, Delete } from '../../icons'
 
 export const getMenuConfig = (onClearHistory, onDeleteChat) => [
   {
@@ -19,7 +19,7 @@ export const getMenuConfig = (onClearHistory, onDeleteChat) => [
   },
   {
     key: 'Delete chat',
-    icon: DeleteChat,
+    icon: Delete,
     name: 'Delete chat',
     color: '#FF1818',
     onClick: onDeleteChat

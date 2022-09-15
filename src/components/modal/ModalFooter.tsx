@@ -8,9 +8,5 @@ export const ModalFooter = props => (
     direction="row"
     align="center"
     justify="center"
-    pad={{
-      top: 'medium',
-      bottom: 'none'
-    }}
   />
 )

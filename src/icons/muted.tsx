@@ -4,8 +4,8 @@ export const Muted = ({ size, color }: { size?: number; color?: string }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width={size || 16}
-      height={size || 14}
+      width={size ?? 16}
+      height={size ?? 14}
       viewBox="0 0 16 14"
       fill="none"
     >

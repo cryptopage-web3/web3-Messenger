@@ -17,6 +17,6 @@ export const Chat = props => (
   <StyledMain {...props}>
     <ChatInfo />
     <Messages />
-    <ChatForm direction="row" />
+    <ChatForm />
   </StyledMain>
 )

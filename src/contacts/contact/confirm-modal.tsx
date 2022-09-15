@@ -33,24 +33,17 @@ export const ConfirmModal = ({
   handleModalToggle
 }: ConfirmModalProps) => {
   return (
-    <>
-      {open && (
-        <Modal
-          onClickOutside={handleModalToggle}
-          onEsc={handleModalToggle}
-          width="360px"
-        >
-          <ModalHeader title={title} onClose={handleModalToggle} />
-          <StyledText>Are you sure?</StyledText>
-          <ModalFooter>
-            <SecondaryButton
-              label={rejectBtnText}
-              onClick={handleModalToggle}
-            />
-            <PrimaryButton label={confirmBtnText} onClick={handleOK} />
-          </ModalFooter>
-        </Modal>
-      )}
-    </>
+    <Modal
+      onClickOutside={handleModalToggle}
+      onEsc={handleModalToggle}
+      width="360px"
+    >
+      <ModalHeader title={title} onClose={handleModalToggle} />
+      <StyledText>Are you sure?</StyledText>
+      <ModalFooter>
+        <SecondaryButton label={rejectBtnText} onClick={handleModalToggle} />
+        <PrimaryButton label={confirmBtnText} onClick={handleOK} />
+      </ModalFooter>
+    </Modal>
   )
 }

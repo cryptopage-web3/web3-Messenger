@@ -3,8 +3,14 @@ import { Status } from '../service/peer'
 import { useCeramic, useDID } from '../profile'
 import { isAddress } from 'ethers/lib/utils' //TODO: better extract all this Web3-related functionality out of here...
 import { Caip10Link } from '@ceramicnetwork/stream-caip10-link'
-import { useGlobalModalContext } from '../components'
-import { AddContactModalStyled } from './add-contact-modal-styled'
+import {
+  Modal,
+  ModalFooter,
+  ModalHeader,
+  PrimaryButton,
+  TextInput,
+  useGlobalModalContext
+} from '../components'
 
 const contactsChannel = new BroadcastChannel('peer:contacts')
 
@@ -69,9 +75,7 @@ export const AddContactModal = () => {
 
   const { input, handleAdd, handleChange } = useAdd(sender)
 
-  const { closeModal, store } = useGlobalModalContext()
-  const { modalProps } = store || {}
-  const { title, confirmBtnText } = modalProps || {}
+  const { closeModal } = useGlobalModalContext()
 
   const onAdd = useCallback(() => {
     handleAdd()
@@ -81,15 +85,16 @@ export const AddContactModal = () => {
   const disabled = !sender || !input.length
 
   return (
-    <AddContactModalStyled
-      disabled={disabled}
-      sender={sender}
-      handleAdd={onAdd}
-      confirmBtnText={confirmBtnText}
-      title={title}
-      input={input}
-      handleModalToggle={closeModal}
-      handleChange={handleChange}
-    />
+    <Modal onClickOutside={closeModal} onEsc={closeModal}>
+      <ModalHeader title={'Create chat'} onClose={closeModal} />
+      <TextInput
+        placeholder="DID or Address"
+        value={input}
+        onChange={handleChange}
+      />
+      <ModalFooter>
+        <PrimaryButton label={'Add'} onClick={onAdd} disabled={disabled} />
+      </ModalFooter>
+    </Modal>
   )
 }

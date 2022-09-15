@@ -28,10 +28,7 @@ export const EmptyContactsPlaceholder = () => {
   const { openModal } = useGlobalModalContext()
 
   const openAddContactModal = () => {
-    openModal(AddContactModal, {
-      title: 'Create chat',
-      confirmBtnText: 'Add'
-    })
+    openModal(AddContactModal)
   }
 
   if (contacts.length && sender) return null

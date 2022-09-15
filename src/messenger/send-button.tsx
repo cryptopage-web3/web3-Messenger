@@ -1,7 +1,7 @@
 import * as React from 'react'
-import { Button } from 'grommet'
 import { Send } from '../icons'
+import { IconButton } from '../components'
 
 export const SendButton = props => (
-  <Button {...props} alignSelf="end" plain icon={<Send />} />
+  <IconButton {...props} alignSelf="end" icon={<Send />} />
 )
