@@ -6,8 +6,8 @@ import {
   ModalFooter,
   ModalHeader,
   useGlobalModalContext
-} from '../../components'
-import { File } from '../../icons'
+} from '../../../components'
+import { File } from '../../../icons'
 import { FileView } from './file-view'
 import { CaptionFormWithAttachment } from './caption-form-with-attachment'
 import { b64ToBlobUrl } from './b64ToBlobUrl'

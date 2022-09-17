@@ -1,5 +1,5 @@
-import { MenuItemProps } from '../components/drop-button/MenuItem'
-import { CreateGroupChat, CreateSingleChat } from '../icons'
+import { MenuItemProps } from '../../components/drop-button/MenuItem'
+import { CreateGroupChat, CreateSingleChat } from '../../icons'
 
 export const getMenuConfig = (openAddContactModal): MenuItemProps[] => [
   {

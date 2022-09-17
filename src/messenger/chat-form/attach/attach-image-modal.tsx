@@ -6,8 +6,8 @@ import {
   ModalFooter,
   ModalHeader as ModalHeaderUi,
   useGlobalModalContext
-} from '../../components'
-import { Image as ImageIcon, File } from '../../icons'
+} from '../../../components'
+import { Image as ImageIcon, File } from '../../../icons'
 import { FullImage } from './full-image'
 import { FileView } from './file-view'
 import { CaptionFormWithAttachment } from './caption-form-with-attachment'

@@ -1,7 +1,7 @@
-import { AutosizeInput, AutosizeInputProps, IconButton } from '../components'
+import { AutosizeInput, AutosizeInputProps, IconButton } from '../../components'
 import { AttachButton } from './attach'
 import { SendButton } from './send-button'
-import { Smiley } from '../icons'
+import { Smiley } from '../../icons'
 import { Box } from 'grommet'
 
 export const ChatInput = ({

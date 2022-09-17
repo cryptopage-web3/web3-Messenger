@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { Box } from 'grommet'
 import { ChatAvatar } from '../../components'
@@ -7,10 +7,7 @@ import { useDID } from '../../profile'
 import * as DB from '../../service/db/actions'
 import { Captions } from './captions'
 import { DropButtonMenu } from './drop-button-menu'
-import { useGlobalModalContext } from '../../components'
-import { getMenuConfig } from './get-menu-config'
-import { ClearHistoryModal } from './clear-history-modal'
-import { DeleteChatModal } from './delete-chat-modal'
+import { useContextMenu } from './useContextMenu'
 
 const StyledChatCard = styled('li')`
   background: ${({ active }) => (active ? '#E4E4E4' : 'transparent')};
@@ -77,48 +74,6 @@ const useToggleContextMenu = () => {
   const openMenu = useCallback(() => setOpen(true), [])
 
   return [open, openMenu, closeMenu]
-}
-
-// eslint-disable-next-line max-lines-per-function
-const useContextMenu = (sender, receiver, closeMenu) => {
-  const { openModal } = useGlobalModalContext()
-
-  const openClearHistoryModal = useCallback(() => {
-    openModal(ClearHistoryModal, {
-      title: 'Clear history',
-      confirmBtnText: 'Yes',
-      rejectBtnText: 'No',
-      payload: {
-        contact: {
-          sender,
-          receiver
-        }
-      }
-    })
-
-    closeMenu()
-  }, [closeMenu, openModal, receiver, sender])
-
-  const openDeleteChatModal = useCallback(() => {
-    openModal(DeleteChatModal, {
-      title: 'Delete chat',
-      confirmBtnText: 'Yes',
-      rejectBtnText: 'No',
-      payload: {
-        contact: {
-          sender,
-          receiver
-        }
-      }
-    })
-
-    closeMenu()
-  }, [closeMenu, openModal, receiver, sender])
-
-  return useMemo(
-    () => getMenuConfig(openClearHistoryModal, openDeleteChatModal),
-    [openClearHistoryModal, openDeleteChatModal]
-  )
 }
 
 // eslint-disable-next-line max-lines-per-function

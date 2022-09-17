@@ -7,7 +7,7 @@ const contactsChannel = new BroadcastChannel('peer:contacts')
 export const DeleteChatModal = () => {
   const { closeModal, store } = useGlobalModalContext()
   const { modalProps } = store || {}
-  const { title, confirmBtnText, rejectBtnText, payload } = modalProps || {}
+  const { payload } = modalProps || {}
 
   const handleDelete = useCallback(() => {
     contactsChannel.postMessage({
@@ -21,9 +21,7 @@ export const DeleteChatModal = () => {
   return (
     <ConfirmModal
       handleOK={handleDelete}
-      rejectBtnText={rejectBtnText}
-      confirmBtnText={confirmBtnText}
-      title={title}
+      title={'Delete chat'}
       handleModalToggle={closeModal}
     />
   )

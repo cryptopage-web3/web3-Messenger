@@ -1,10 +1,10 @@
 import { useCallback, useState } from 'react'
 import { Box } from 'grommet'
-import { Close } from '../icons'
-import { ChatStatus, TextInput, ChatTitle, ChatAvatar } from '../components'
-import { useContacts } from './contacts'
+import { Close } from '../../icons'
+import { ChatStatus, TextInput, ChatTitle, ChatAvatar } from '../../components'
+import { useContacts } from '../contacts'
 import styled from 'styled-components'
-import { useDID } from '../profile'
+import { useDID } from '../../profile'
 
 /**
  TODO template for custom search input with drop down items

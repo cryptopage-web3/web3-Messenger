@@ -19,16 +19,12 @@ const StyledText = styled(Text)`
 
 type ConfirmModalProps = {
   handleOK: () => void
-  confirmBtnText: string
-  rejectBtnText: string
   title: string
   handleModalToggle: () => void
 }
 
 export const ConfirmModal = ({
   handleOK,
-  confirmBtnText,
-  rejectBtnText,
   title,
   handleModalToggle
 }: ConfirmModalProps) => {
@@ -41,8 +37,8 @@ export const ConfirmModal = ({
       <ModalHeader title={title} onClose={handleModalToggle} />
       <StyledText>Are you sure?</StyledText>
       <ModalFooter>
-        <SecondaryButton label={rejectBtnText} onClick={handleModalToggle} />
-        <PrimaryButton label={confirmBtnText} onClick={handleOK} />
+        <SecondaryButton label="No" onClick={handleModalToggle} />
+        <PrimaryButton label="Yes" onClick={handleOK} />
       </ModalFooter>
     </Modal>
   )

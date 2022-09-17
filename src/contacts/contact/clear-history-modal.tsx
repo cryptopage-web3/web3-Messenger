@@ -7,7 +7,7 @@ const messagesChannel = new BroadcastChannel('peer:messages')
 export const ClearHistoryModal = () => {
   const { closeModal, store } = useGlobalModalContext()
   const { modalProps } = store || {}
-  const { title, confirmBtnText, rejectBtnText, payload } = modalProps || {}
+  const { payload } = modalProps || {}
 
   const handleDelete = useCallback(() => {
     messagesChannel.postMessage({
@@ -21,9 +21,7 @@ export const ClearHistoryModal = () => {
   return (
     <ConfirmModal
       handleOK={handleDelete}
-      rejectBtnText={rejectBtnText}
-      confirmBtnText={confirmBtnText}
-      title={title}
+      title={'Clear history'}
       handleModalToggle={closeModal}
     />
   )

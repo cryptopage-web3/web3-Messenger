@@ -1,7 +1,7 @@
 import { Box, Image } from 'grommet'
 import styled from 'styled-components'
-import { IconButton, Text } from '../../components'
-import { Delete } from '../../icons'
+import { IconButton, Text } from '../../../components'
+import { Delete } from '../../../icons'
 
 const StyledImage = styled(Image)`
   border-radius: 10px;

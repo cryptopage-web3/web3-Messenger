@@ -31,8 +31,8 @@ const theme = {
       family: 'SF Pro Display, Arial, system-ui',
       size: '12px'
     },
-    focus:{
-      outline:'none',
+    focus: {
+      outline: 'none',
       shadow: 'none'
     }
   },
