@@ -5,6 +5,10 @@ import { Message } from './message'
 import { Message as TMessage, Status } from '../@types'
 import { ScrollContainer } from '../components'
 import { useActiveContact } from './useActiveContact'
+import { Box } from 'grommet'
+import { SearchMessage } from './search-message'
+import styled from 'styled-components'
+import { scrollToMessage } from './scroll-to-message'
 
 const messagesChannel = new BroadcastChannel('peer:messages')
 const naclChannel = new BroadcastChannel('peer:nacl')
@@ -16,6 +20,10 @@ const useUpdateUi = updateMessages => {
       if (data.type === 'updateMessages') {
         await updateMessages()
         return
+      }
+
+      if (data.type === 'focusMessage') {
+        scrollToMessage(data.payload)
       }
     }
 
@@ -56,30 +64,65 @@ const updateStatus = (message, status: Status) => {
   })
 }
 
+const StyledMessages = styled(Box)`
+  flex: 1 1 auto;
+  position: relative;
+`
+
+const useSearch = () => {
+  const [show, setShow] = useState(false)
+
+  const showSearch = useCallback(() => setShow(true), [])
+  const hideSearch = useCallback(() => setShow(false), [])
+
+  useEffect(() => {
+    const listener = async ({ data }) => {
+      if (data.type !== 'showSearch') return
+
+      showSearch()
+    }
+
+    uiChannel.addEventListener('message', listener)
+
+    return () => {
+      uiChannel.removeEventListener('message', listener)
+    }
+  }, [showSearch])
+
+  return [show, hideSearch]
+}
+
+// eslint-disable-next-line max-lines-per-function
 export const Messages = () => {
   const currentUser = useDID()
   const activeContact = useActiveContact()
 
   const [messages] = useMessages(currentUser, activeContact)
 
-  return (
-    <ScrollContainer>
-      <ul>
-        {messages.map(message => {
-          currentUser === message.receiver &&
-            message.status !== Status.viewed &&
-            updateStatus(message, Status.viewed)
+  const [show, hideSearch] = useSearch()
 
-          return (
-            <Message
-              key={message.id}
-              currentUser={currentUser}
-              onClick={decryptMessage}
-              message={message}
-            />
-          )
-        })}
-      </ul>
-    </ScrollContainer>
+  return (
+    <StyledMessages id="messages-view-port">
+      {show && <SearchMessage messages={messages} hideSearch={hideSearch} />}
+      <ScrollContainer id="messages-scroll-container">
+        <ul>
+          {messages.map(message => {
+            currentUser === message.receiver &&
+              message.status !== Status.viewed &&
+              updateStatus(message, Status.viewed)
+
+            return (
+              <Message
+                id={message.date}
+                key={message.id}
+                currentUser={currentUser}
+                onClick={decryptMessage}
+                message={message}
+              />
+            )
+          })}
+        </ul>
+      </ScrollContainer>
+    </StyledMessages>
   )
 }

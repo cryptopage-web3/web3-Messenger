@@ -3,6 +3,8 @@ import { DropButton, IconButton } from '../../components'
 import { Menu, Search } from '../../icons'
 import { Box } from 'grommet'
 
+const uiChannel = new BroadcastChannel('peer:ui')
+
 type ContextMenuProps = {
   sender: string
   receiver: string
@@ -27,10 +29,20 @@ type ChatUtilsProps = {
   receiver: string
 }
 
+const showSearch = () => {
+  uiChannel.postMessage({
+    type: 'showSearch'
+  })
+}
+
 export const ChatUtils = ({ sender, receiver }: ChatUtilsProps) => {
   return (
     <Box direction="row" gap="10px">
-      <IconButton icon={<Search />} />
+      <IconButton
+        icon={<Search />}
+        onClick={showSearch}
+        disabled={!sender || !receiver}
+      />
       <ContextMenu sender={sender} receiver={receiver} />
     </Box>
   )

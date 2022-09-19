@@ -1,4 +1,4 @@
-import { Text } from 'grommet'
+import { Text } from '../text'
 
 type ChatStatusProps = {
   online?: boolean

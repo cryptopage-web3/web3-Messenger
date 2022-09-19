@@ -1,12 +1,6 @@
 import { Avatar, Box } from 'grommet'
 import styled from 'styled-components'
 
-type ChatAvatarProps = {
-  online?: boolean
-  showOnline?: boolean
-  size?: string
-}
-
 const Online = styled(Box)`
   border: 1.6px solid #fff;
   background: #27bc6a;
@@ -20,7 +14,15 @@ const Online = styled(Box)`
 
 const StyledAvatar = styled(Box)`
   position: relative;
+  min-width: unset;
 `
+
+type ChatAvatarProps = {
+  online?: boolean
+  showOnline?: boolean
+  size?: string
+}
+
 export const ChatAvatar = ({ size, showOnline, online }: ChatAvatarProps) => (
   <StyledAvatar>
     <Avatar size={size} background="#dedede">

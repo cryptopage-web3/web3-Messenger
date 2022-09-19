@@ -1,7 +1,11 @@
 import { useCallback, useState } from 'react'
-import { Box } from 'grommet'
-import { Close } from '../../icons'
-import { ChatStatus, TextInput, ChatTitle, ChatAvatar } from '../../components'
+import { Box, Button } from 'grommet'
+import {
+  ChatStatus,
+  SearchInput,
+  ChatTitle,
+  ChatAvatar
+} from '../../components'
 import { useContacts } from '../contacts'
 import styled from 'styled-components'
 import { useDID } from '../../profile'
@@ -27,8 +31,14 @@ import { useDID } from '../../profile'
 
 const uiContactsChannel = new BroadcastChannel('peer:ui:contacts')
 
-const StyledFoundChat = styled(Box)`
+const StyledFoundChat = styled(Button)`
   padding: 7.5px 10px;
+
+  background: white;
+
+  &:hover {
+    background: #e3e3e3;
+  }
 `
 
 type FoundChatProps = {
@@ -37,17 +47,39 @@ type FoundChatProps = {
   onClick?: (arg: string) => void
 }
 
-const FoundChat = ({ receiver }: FoundChatProps) => (
-  <StyledFoundChat direction="row" justify="between" align="center">
-    <Box direction="row" gap="10px" align="center">
-      <ChatAvatar size="24px" />
-      <ChatTitle chatAddress={receiver} />
+const FoundChat = ({ receiver, onClick }: FoundChatProps) => (
+  <StyledFoundChat onClick={onClick}>
+    <Box direction="row" justify="between" align="center">
+      <Box direction="row" gap="10px" align="center">
+        <ChatAvatar size="24px" />
+        <ChatTitle chatAddress={receiver} />
+      </Box>
+      <ChatStatus />
     </Box>
-    <ChatStatus />
   </StyledFoundChat>
 )
 
-const useChange = (setValue, setSuggestions) => {
+const selectSuggestion = (receiver, cleanValues) => {
+  cleanValues()
+
+  uiContactsChannel.postMessage({
+    type: 'activeContact',
+    payload: {
+      receiver
+    }
+  })
+}
+
+const mapToSuggestionView = ({ receiver_did }, cleanValues) => ({
+  Component: FoundChat,
+  props: {
+    key: receiver_did,
+    receiver: receiver_did,
+    onClick: () => selectSuggestion(receiver_did, cleanValues)
+  }
+})
+
+const useChange = (setValue, setSuggestions, cleanValues) => {
   const [chats] = useContacts('')
 
   return useCallback(
@@ -64,33 +96,20 @@ const useChange = (setValue, setSuggestions) => {
         setSuggestions(
           chats
             .filter(chat => regexp.test(chat.receiver_did))
-            .map(({ receiver_did }) => ({
-              label: <FoundChat key={receiver_did} receiver={receiver_did} />,
-              value: receiver_did
-            }))
+            .map(chat => mapToSuggestionView(chat, cleanValues))
         )
       }
     },
-    [chats, setSuggestions, setValue]
+    [chats, cleanValues, setSuggestions, setValue]
   )
 }
 
-const useSuggestionSelect = cleanValues => {
-  return useCallback(
-    event => {
-      const receiver = event.suggestion.value
-
-      cleanValues()
-
-      uiContactsChannel.postMessage({
-        type: 'activeContact',
-        payload: {
-          receiver
-        }
-      })
-    },
-    [cleanValues]
-  )
+//TODO temporary solution. fix as part of the task to fix the output of the list of contacts
+const dropDownStyle = {
+  background: 'white',
+  position: 'absolute',
+  zIndex: 1,
+  maxHeight: '100%'
 }
 
 export const SearchChat = () => {
@@ -104,20 +123,16 @@ export const SearchChat = () => {
     setSuggestions([])
   }, [])
 
-  const onChange = useChange(setValue, setSuggestions)
-  const onSuggestionSelect = useSuggestionSelect(cleanValues)
+  const onChange = useChange(setValue, setSuggestions, cleanValues)
 
   return (
-    <TextInput
+    <SearchInput
       disabled={!sender}
       value={value}
       onChange={onChange}
-      onSuggestionSelect={onSuggestionSelect}
       suggestions={suggestions}
-      showCleanIcon={true}
-      onClickIcon={cleanValues}
-      icon={Close}
-      pad={{ bottom: '10px' }}
+      cleanValue={cleanValues}
+      dropDownStyle={dropDownStyle}
     />
   )
 }

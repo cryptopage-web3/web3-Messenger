@@ -1,7 +1,10 @@
 import { Box } from 'grommet'
-import { ChatTitle, MessageStatus as LastMessageStatus } from '../../components'
+import {
+  ChatTitle,
+  MessageDate,
+  MessageStatus as LastMessageStatus
+} from '../../components'
 import { Message } from '../../@types'
-import { LastMessageDate } from './last-message-date'
 import { Muted } from '../../icons'
 
 type ChatCardTitleProps = {
@@ -30,7 +33,7 @@ export const Title = ({
         {message && sender === message.sender && (
           <LastMessageStatus status={message.status} />
         )}
-        {message && <LastMessageDate date={message.date} />}
+        {message && <MessageDate date={message.date} />}
       </Box>
     </Box>
   )

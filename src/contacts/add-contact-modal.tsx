@@ -8,7 +8,7 @@ import {
   ModalFooter,
   ModalHeader,
   PrimaryButton,
-  TextInput,
+  SearchInput,
   useGlobalModalContext
 } from '../components'
 
@@ -45,6 +45,8 @@ const getDid = async (input: string, ceramic) => {
 const useAdd = sender => {
   const [input, setInput] = useState('')
   const handleChange = useCallback(event => setInput(event.target.value), [])
+  const cleanValue = useCallback(() => setInput(''), [])
+
   const ceramic = useCeramic()
 
   const handleAdd = useCallback(async () => {
@@ -67,13 +69,13 @@ const useAdd = sender => {
     }
   }, [ceramic, input, sender])
 
-  return { input, handleAdd, handleChange }
+  return { input, handleAdd, handleChange, cleanValue }
 }
 
 export const AddContactModal = () => {
   const sender = useDID()
 
-  const { input, handleAdd, handleChange } = useAdd(sender)
+  const { input, handleAdd, handleChange, cleanValue } = useAdd(sender)
 
   const { closeModal } = useGlobalModalContext()
 
@@ -87,10 +89,11 @@ export const AddContactModal = () => {
   return (
     <Modal onClickOutside={closeModal} onEsc={closeModal}>
       <ModalHeader title={'Create chat'} onClose={closeModal} />
-      <TextInput
+      <SearchInput
         placeholder="DID or Address"
         value={input}
         onChange={handleChange}
+        cleanValue={cleanValue}
       />
       <ModalFooter>
         <PrimaryButton label={'Add'} onClick={onAdd} disabled={disabled} />

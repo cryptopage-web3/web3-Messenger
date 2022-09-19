@@ -1,9 +1,9 @@
 import styled from 'styled-components'
 import { Box } from 'grommet'
 import { Title } from './title'
-import { LastMessage } from './last-message'
 import { SubtitleBadge } from './subtitle-badge'
 import { Message } from '../../@types'
+import { MessageTextPreview } from '../../components'
 
 const StyledContainer = styled(Box)`
   flex: 1;
@@ -35,7 +35,7 @@ export const Captions = ({
       online={online}
       muted={muted}
     />
-    <LastMessage message={message} />
+    {message && <MessageTextPreview text={message.text} />}
     <SubtitleBadge muted={muted}>{unreadMessages}</SubtitleBadge>
   </StyledContainer>
 )

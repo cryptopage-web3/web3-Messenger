@@ -1,19 +1,42 @@
 import { useCallback } from 'react'
 import { Message as TMessage } from '../@types'
+import styled, { keyframes } from 'styled-components'
+
+const fadeOut = keyframes`
+  from {
+    background: #c7e1fc;
+  }
+
+  to {
+    background: transparent;
+  }
+`
+
+const StyledMessage = styled('li')`
+  & > .focus {
+    animation: ${fadeOut} 2s linear;
+  }
+`
 
 type MessageProps = {
   message: TMessage
   onClick: (arg0: TMessage) => void
   currentUser: string
   key: string
+  id: number
 }
 
-export const Message = ({ message, onClick, currentUser }: MessageProps) => {
+export const Message = ({
+  message,
+  onClick,
+  currentUser,
+  id
+}: MessageProps) => {
   const handleClick = useCallback(() => onClick(message), [message, onClick])
 
   return (
-    <li>
-      <div>
+    <StyledMessage>
+      <div id={id}>
         <div>messageId: {message.messageId}</div>
         <div>date: {new Date(message.date).toLocaleTimeString('ru-RU')}</div>
         <div>sender: {message.sender}</div>
@@ -23,6 +46,6 @@ export const Message = ({ message, onClick, currentUser }: MessageProps) => {
         )}
         {message.sender === currentUser && <div>status: {message.status}</div>}
       </div>
-    </li>
+    </StyledMessage>
   )
 }
