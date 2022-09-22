@@ -3,6 +3,8 @@ import { Box, TextInput, TextInputProps } from 'grommet'
 import styled from 'styled-components'
 import { Suggestion, Suggestions } from './Suggestions'
 import { ButtonControl } from './ButtonControl'
+import { useEffect } from 'react'
+import { clickOutside } from './click-outside'
 
 const StyledTextInput = styled(TextInput)`
   border: none;
@@ -37,6 +39,18 @@ const StyledControls = styled(Box)`
   right: 0;
 `
 
+const useOutsideClick = cleanValue => {
+  useEffect(() => {
+    const listenClickOutside = clickOutside(cleanValue)
+
+    document.addEventListener('click', listenClickOutside)
+
+    return () => {
+      document.removeEventListener('click', listenClickOutside)
+    }
+  }, [cleanValue])
+}
+
 type SearchInputProps = Omit<TextInputProps, 'suggestions'> & {
   value: string
   suggestions?: Suggestion[]
@@ -50,8 +64,10 @@ export const SearchInput: React.FC = ({
   dropDownStyle,
   ...props
 }: SearchInputProps) => {
+  useOutsideClick(cleanValue)
+
   return (
-    <div className={props.className}>
+    <div id="search-component" className={props.className}>
       <StyledSearchInputContainer direction="row" className={props.className}>
         <StyledTextInput {...props} value={value} reverse />
         <StyledControls>

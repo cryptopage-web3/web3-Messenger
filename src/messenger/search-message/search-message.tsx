@@ -1,25 +1,23 @@
 import { useCallback, useState } from 'react'
 import { SearchInput } from '../../components'
 import styled from 'styled-components'
-import { FoundMessage } from './found-message'
 import { ButtonsControl } from './buttons-control'
 import { Message } from '../../@types'
 import { Box } from 'grommet'
+import { scrollToNext, scrollToPrev, selectSuggestion } from './utils'
+import { Suggestion } from './suggestion'
 
-const uiChannel = new BroadcastChannel('peer:ui')
-
-const selectSuggestion = value => {
-  uiChannel.postMessage({
-    type: 'focusMessage',
-    payload: value
-  })
-}
-
-const mapToSuggestionView = ({ receiver_did, text, date }) => {
-  const onSelect = () => selectSuggestion(date)
+const mapToSuggestionView = (
+  { receiver_did, text, date },
+  index,
+  setSuggestionIndex,
+  setSuggestions
+) => {
+  const onSelect = () =>
+    selectSuggestion(date, index, setSuggestionIndex, setSuggestions)
 
   return {
-    Component: FoundMessage,
+    Component: Suggestion,
     props: {
       key: date,
       receiver: receiver_did,
@@ -29,7 +27,7 @@ const mapToSuggestionView = ({ receiver_did, text, date }) => {
   }
 }
 
-const useChange = (messages, setValue, setSuggestions) => {
+const useChange = (messages, setValue, setSuggestions, setSuggestionIndex) => {
   return useCallback(
     event => {
       const nextValue = event.target.value
@@ -44,23 +42,50 @@ const useChange = (messages, setValue, setSuggestions) => {
         setSuggestions(
           messages
             .filter(message => regexp.test(message.text))
-            .map(mapToSuggestionView)
+            .map((message, index) =>
+              mapToSuggestionView(
+                message,
+                index,
+                setSuggestionIndex,
+                setSuggestions
+              )
+            )
         )
       }
     },
-    [messages, setSuggestions, setValue]
+    [messages, setSuggestionIndex, setSuggestions, setValue]
   )
 }
 
-const useSuggestionSelect = () => {
-  return useCallback(event => {
-    const value = event.suggestion.value
+const useScroll = (
+  suggestionIndex,
+  setSuggestionIndex,
+  suggestions,
+  setSuggestions
+) => {
+  const scrollToPrevMemo = useCallback(
+    () =>
+      scrollToPrev(
+        suggestionIndex,
+        setSuggestionIndex,
+        suggestions,
+        setSuggestions
+      ),
+    [setSuggestionIndex, setSuggestions, suggestionIndex, suggestions]
+  )
 
-    uiChannel.postMessage({
-      type: 'focusMessage',
-      payload: value
-    })
-  }, [])
+  const scrollToNextMemo = useCallback(
+    () =>
+      scrollToNext(
+        suggestionIndex,
+        setSuggestionIndex,
+        suggestions,
+        setSuggestions
+      ),
+    [setSuggestionIndex, setSuggestions, suggestionIndex, suggestions]
+  )
+
+  return [scrollToPrevMemo, scrollToNextMemo]
 }
 
 const StyledSearchInputContainer = styled(Box)`
@@ -89,28 +114,47 @@ type SearchMessageProps = {
   hideSearch: () => void
 }
 
+// eslint-disable-next-line max-lines-per-function
 export const SearchMessage = ({ messages, hideSearch }: SearchMessageProps) => {
   const [suggestions, setSuggestions] = useState([])
-  const [value, setValue] = useState('')
+  const [suggestionIndex, setSuggestionIndex] = useState()
+  const [searchValue, setSearchValue] = useState('')
 
   const cleanValue = useCallback(() => {
-    setValue('')
+    setSearchValue('')
     setSuggestions([])
+    setSuggestionIndex()
     hideSearch()
   }, [hideSearch])
 
-  const onChange = useChange(messages, setValue, setSuggestions)
-  const onSuggestionSelect = useSuggestionSelect()
+  const onChange = useChange(
+    messages,
+    setSearchValue,
+    setSuggestions,
+    setSuggestionIndex
+  )
+
+  const [scrollToPrev, scrollToNext] = useScroll(
+    suggestionIndex,
+    setSuggestionIndex,
+    suggestions,
+    setSuggestions
+  )
 
   return (
     <StyledSearchInputContainer>
       <StyledSearchInput
-        value={value}
+        value={searchValue}
         onChange={onChange}
-        onSuggestionSelect={onSuggestionSelect}
         suggestions={suggestions}
+        cleanValue={cleanValue}
       >
-        <ButtonsControl cleanValue={cleanValue} />
+        <ButtonsControl
+          onUpArrowClick={scrollToPrev}
+          onDownArrowClick={scrollToNext}
+          cleanValue={cleanValue}
+          suggestionsAmount={suggestions.length}
+        />
       </StyledSearchInput>
     </StyledSearchInputContainer>
   )

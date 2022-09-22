@@ -9,7 +9,7 @@ import {
 import styled from 'styled-components'
 
 const StyledButton = styled(Button)`
-  background: #f5f9fd;
+  background: ${({ active }) => (active ? '#e3e3e3' : '#f5f9fd')};
 
   &:hover {
     background: #e3e3e3;
@@ -26,14 +26,16 @@ type FoundMessageProps = {
   text: string
   receiver: string
   onClick?: (arg: string) => void
+  active?: boolean
 }
 
-export const FoundMessage: React.FC = ({
+export const Suggestion: React.FC = ({
   receiver,
   text,
-  onClick
+  onClick,
+  active
 }: FoundMessageProps) => (
-  <StyledButton onClick={onClick}>
+  <StyledButton onClick={onClick} active={active}>
     <Box direction="row" justify="between">
       <Box direction="row" gap="10px" width="100%">
         <ChatAvatar size="36px" />

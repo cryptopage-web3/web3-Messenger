@@ -3,8 +3,15 @@ import { Box } from 'grommet'
 import styled from 'styled-components'
 
 const SuggestionsDropBox = styled(Box)`
-  padding: 5px 0;
-  max-height: 280px;
+  --heightOfElement: 46px;
+  --maxElements: 5;
+  --gap: 10px;
+  --padding: 5px;
+
+  padding: var(--padding) 0;
+  max-height: calc(
+    var(--heightOfElement) * var(--maxElements) + 2 * var(--padding)
+  );
   overflow-y: auto;
 `
 
@@ -24,8 +31,8 @@ export const Suggestions = ({
 }: SuggestionsProps) => (
   <SuggestionsDropBox
     direction="column"
-    gap={'10px'}
     style={dropDownStyle || {}}
+    id="drop-down-suggestions-container"
   >
     {suggestions.map(({ Component, props }) => (
       <Component key={props.key} {...props} />
