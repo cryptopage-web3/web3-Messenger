@@ -15,6 +15,7 @@ const GlobalStyle = createGlobalStyle`
 
   body {
     margin: 0;
+    color: #1F1F1F;
   }
 `
 

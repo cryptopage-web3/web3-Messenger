@@ -46,33 +46,43 @@ const useKeyPress = (sender, receiver, message, handleSubmit) => {
   )
 }
 
+const useMessage = (sender, receiver) => {
+  const [message, setMessage] = useState('')
+
+  const handleMessage = useCallback(event => setMessage(event.target.value), [])
+
+  const handleSubmit = useCallback(
+    event => {
+      event.preventDefault()
+
+      const text = message.trim()
+
+      if (text.length) sendMessage(sender, receiver, text)
+
+      setMessage('')
+    },
+    [sender, receiver, message]
+  )
+
+  return [message, handleMessage, handleSubmit]
+}
+
+type WrappedInputContentProps = {
+  chatReceiver?: string
+  onEmptyChatReceiver?: () => void
+}
+
 // eslint-disable-next-line max-lines-per-function
 export const WithSendMessage = InputContent => {
-  // eslint-disable-next-line max-lines-per-function
-  const WrappedInputContent = () => {
+  const WrappedInputContent = ({
+    chatReceiver,
+    onEmptyChatReceiver
+  }: WrappedInputContentProps) => {
     const sender = useDID()
     const receiver = useActiveContact()
     const contact = { sender, receiver }
 
-    const [message, setMessage] = useState('')
-
-    const handleMessage = useCallback(
-      event => setMessage(event.target.value),
-      []
-    )
-
-    const handleSubmit = useCallback(
-      event => {
-        event.preventDefault()
-
-        const text = message.trim()
-
-        if (text.length) sendMessage(sender, receiver, text)
-
-        setMessage('')
-      },
-      [sender, receiver, message]
-    )
+    const [message, handleMessage, handleSubmit] = useMessage(sender, receiver)
 
     const handleKeyPress = useKeyPress(sender, receiver, message, handleSubmit)
 
@@ -87,6 +97,8 @@ export const WithSendMessage = InputContent => {
             onKeyPress={handleKeyPress}
             disabled={disabled}
             contact={contact}
+            withForwarded={chatReceiver === receiver}
+            onHideForwarded={onEmptyChatReceiver}
           />
         </Box>
       </StyledForm>

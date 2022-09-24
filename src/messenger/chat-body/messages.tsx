@@ -1,14 +1,15 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { useDID } from '../profile'
-import * as DB from './../service/db'
+import { useDID } from '../../profile'
+import * as DB from '../../service/db'
 import { Message } from './message'
-import { Message as TMessage, Status } from '../@types'
-import { ScrollContainer } from '../components'
-import { useActiveContact } from './useActiveContact'
+import { Message as TMessage, Status } from '../../@types'
+import { ScrollContainer } from '../../components'
+import { useActiveContact } from '../useActiveContact'
 import { Box } from 'grommet'
-import { SearchMessage } from './search-message'
+import { SearchMessage } from '../search-message'
 import styled from 'styled-components'
 import { scrollToMessage } from './scroll-to-message'
+import { useSelectMode } from '../useSelectMode'
 
 const messagesChannel = new BroadcastChannel('peer:messages')
 const naclChannel = new BroadcastChannel('peer:nacl')
@@ -92,14 +93,77 @@ const useSearch = () => {
   return [show, hideSearch]
 }
 
+const updateSelectedMessages = selectedMessagesAmount => {
+  uiChannel.postMessage({
+    type: 'updateSelectedMessagesAmount',
+    payload: selectedMessagesAmount
+  })
+}
+
+// eslint-disable-next-line max-lines-per-function
+const useSelectedMessages = (selectModeReceiver, activeContact) => {
+  const [selectedMessageIds, setSelectedMessageIds] = useState(new Set())
+
+  useEffect(() => {
+    if (selectModeReceiver === activeContact) {
+      updateSelectedMessages(selectedMessageIds.size)
+    }
+  }, [activeContact, selectModeReceiver, selectedMessageIds])
+
+  useEffect(() => {
+    const listener = async ({ data }) => {
+      if (data.type === 'selectModeOn') {
+        setSelectedMessageIds(new Set())
+      } else if (data.type === 'selectModeOff') {
+        setSelectedMessageIds(new Set())
+      }
+    }
+
+    uiChannel.addEventListener('message', listener)
+
+    return () => {
+      uiChannel.removeEventListener('message', listener)
+    }
+  }, [])
+
+  const hasMessageId = useCallback(
+    messageId => {
+      return selectedMessageIds.has(messageId)
+    },
+    [selectedMessageIds]
+  )
+
+  const addMessageId = useCallback(messageId => {
+    setSelectedMessageIds(prev => new Set(prev.add(messageId)))
+  }, [])
+
+  const removeMessageId = useCallback(messageId => {
+    setSelectedMessageIds(prev => {
+      const newSet = new Set(prev)
+
+      newSet.delete(messageId)
+
+      return newSet
+    })
+  }, [])
+
+  return [addMessageId, removeMessageId, hasMessageId]
+}
+
 // eslint-disable-next-line max-lines-per-function
 export const Messages = () => {
   const currentUser = useDID()
   const activeContact = useActiveContact()
+  const [selectModeReceiver] = useSelectMode()
 
   const [messages] = useMessages(currentUser, activeContact)
 
   const [show, hideSearch] = useSearch()
+
+  const [addMessageId, removeMessageId, hasMessageId] = useSelectedMessages(
+    selectModeReceiver,
+    activeContact
+  )
 
   return (
     <StyledMessages id="messages-view-port">
@@ -118,6 +182,13 @@ export const Messages = () => {
                 currentUser={currentUser}
                 onClick={decryptMessage}
                 message={message}
+                selectMode={
+                  selectModeReceiver !== undefined &&
+                  selectModeReceiver === activeContact
+                }
+                addMessageId={addMessageId}
+                removeMessageId={removeMessageId}
+                checked={hasMessageId(message.messageId)}
               />
             )
           })}

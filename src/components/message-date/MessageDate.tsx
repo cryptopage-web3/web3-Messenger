@@ -3,6 +3,7 @@ import styled from 'styled-components'
 
 const StyledMessageDate = styled(Text)`
   white-space: nowrap;
+  color: #687684;
 `
 
 type MessageDateProps = {
@@ -11,7 +12,7 @@ type MessageDateProps = {
 }
 
 export const MessageDate = ({ date, className }: MessageDateProps) => (
-  <StyledMessageDate size="xsmall" className={className}>
+  <StyledMessageDate className={className}>
     {date || 'Last seen recently'}
   </StyledMessageDate>
 )

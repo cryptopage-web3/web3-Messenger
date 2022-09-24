@@ -5,7 +5,5 @@ type ChatStatusProps = {
 }
 
 export const ChatStatus = ({ online }: ChatStatusProps) => (
-  <Text size="xsmall" color={online ? '#27BC6A' : '#687684'}>
-    Last seen recently
-  </Text>
+  <Text color={online ? '#27BC6A' : '#687684'}>Last seen recently</Text>
 )

@@ -1,6 +1,7 @@
 import React from 'react'
-import { Box, Button, Text } from 'grommet'
+import { Box, Button } from 'grommet'
 import styled from 'styled-components'
+import { Text } from '../text'
 
 const MenuItemButton = styled(Button)`
   transition: 0.1s ease-out;
@@ -40,7 +41,7 @@ export const MenuItem = ({
     <MenuItemButton plain onClick={onClick} color={color}>
       <MenuItemBox direction="row" align="center" gap="10px">
         <IconComponent />
-        <Text size="xsmall">{name}</Text>
+        <Text>{name}</Text>
       </MenuItemBox>
     </MenuItemButton>
   )

@@ -10,8 +10,9 @@ const StyledText = styled(Text)`
   overflow: hidden;
   white-space: nowrap;
   width: 90%;
+  color: #687684;
 `
 
 export const MessageTextPreview = ({ text }: MessageTextPreviewProps) => (
-  <StyledText size="xsmall">{text}</StyledText>
+  <StyledText>{text}</StyledText>
 )

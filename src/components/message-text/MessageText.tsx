@@ -1,9 +1,7 @@
 import { Text } from '../text'
 
 type MessageTextProps = {
-  date?: number
+  text?: string
 }
 
-export const MessageText = ({ date }: MessageTextProps) => (
-  <Text size="xsmall">{date || 'Last seen recently'}</Text>
-)
+export const MessageText = ({ text }: MessageTextProps) => <Text>{text}</Text>

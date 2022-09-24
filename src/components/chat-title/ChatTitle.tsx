@@ -1,4 +1,5 @@
-import { Box, Text } from 'grommet'
+import { Box } from 'grommet'
+import { Text } from '../text'
 
 const getShortText = (text: string) => {
   const maxCharactersToDisplay = 11
@@ -16,9 +17,7 @@ type ChatAddressProps = {
 }
 
 const ChatAddress = ({ address, online }: ChatAddressProps) => (
-  <Text size="xsmall" color={online ? '#007bff' : '#1F1F1F'}>
-    {getShortText(address)}
-  </Text>
+  <Text color={online ? '#007bff' : '#1F1F1F'}>{getShortText(address)}</Text>
 )
 
 //TODO change after setting up contact object fields
@@ -35,7 +34,7 @@ export const ChatTitle = ({
 }: ChatTitleProps) => (
   <Box direction="row" gap="2px">
     {chatAddress && <ChatAddress address={chatAddress} online={online} />}
-    {chatAddress && <Text size="xsmall">/</Text>}
-    <Text size="xsmall">{chatName || 'ChatName'}</Text>
+    {chatAddress && <Text>/</Text>}
+    <Text>{chatName || 'ChatName'}</Text>
   </Box>
 )

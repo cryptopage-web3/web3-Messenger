@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
-import { Message as TMessage } from '../@types'
+import { Message as TMessage } from '../../@types'
 import styled, { keyframes } from 'styled-components'
+import { CheckBox } from './check-box'
 
 const fadeOut = keyframes`
   from {
@@ -24,15 +25,32 @@ type MessageProps = {
   currentUser: string
   key: string
   id: number
+  selectMode: boolean
+  removeMessageId: (arg: string) => void
+  addMessageId: (arg: string) => void
+  checked: boolean
 }
 
+// eslint-disable-next-line max-lines-per-function
 export const Message = ({
   message,
   onClick,
   currentUser,
-  id
+  id,
+  selectMode,
+  removeMessageId,
+  addMessageId,
+  checked
 }: MessageProps) => {
   const handleClick = useCallback(() => onClick(message), [message, onClick])
+
+  const handleChange = useCallback(() => {
+    if (checked) {
+      removeMessageId(message.messageId)
+    } else {
+      addMessageId(message.messageId)
+    }
+  }, [addMessageId, checked, message.messageId, removeMessageId])
 
   return (
     <StyledMessage>
@@ -46,6 +64,7 @@ export const Message = ({
         )}
         {message.sender === currentUser && <div>status: {message.status}</div>}
       </div>
+      {selectMode && <CheckBox checked={checked} onChange={handleChange} />}
     </StyledMessage>
   )
 }

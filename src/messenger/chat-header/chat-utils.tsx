@@ -1,7 +1,9 @@
 import { useContextMenu } from './useContextMenu'
 import { DropButton, IconButton } from '../../components'
 import { Menu, Search } from '../../icons'
-import { Box } from 'grommet'
+import { Box, Button } from 'grommet'
+import { useSelectMode } from '../useSelectMode'
+import { useCallback } from 'react'
 
 const uiChannel = new BroadcastChannel('peer:ui')
 
@@ -29,21 +31,46 @@ type ChatUtilsProps = {
   receiver: string
 }
 
-const showSearch = () => {
+const SearchUtil = ({ sender, receiver }: ChatUtilsProps) => {
+  const showSearch = useCallback(() => {
+    uiChannel.postMessage({
+      type: 'showSearch',
+      payload: { receiver }
+    })
+  }, [receiver])
+
+  return (
+    <IconButton
+      icon={<Search />}
+      onClick={showSearch}
+      disabled={!sender || !receiver}
+    />
+  )
+}
+
+const selectModeOff = () => {
   uiChannel.postMessage({
-    type: 'showSearch'
+    type: 'selectModeOff'
   })
 }
 
 export const ChatUtils = ({ sender, receiver }: ChatUtilsProps) => {
+  const [selectModeReceiver] = useSelectMode()
+
   return (
     <Box direction="row" gap="10px">
-      <IconButton
-        icon={<Search />}
-        onClick={showSearch}
-        disabled={!sender || !receiver}
-      />
-      <ContextMenu sender={sender} receiver={receiver} />
+      <SearchUtil sender={sender} receiver={receiver} />
+      {selectModeReceiver !== undefined && selectModeReceiver === receiver ? (
+        <Button
+          label="Done"
+          onClick={selectModeOff}
+          plain
+          color="brand"
+          size="14px"
+        />
+      ) : (
+        <ContextMenu sender={sender} receiver={receiver} />
+      )}
     </Box>
   )
 }

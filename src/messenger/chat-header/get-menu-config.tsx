@@ -1,6 +1,6 @@
 import { Close as ClearHistory, Delete, Muted, Select } from '../../icons'
 
-export const getMenuConfig = (onClearHistory, onDeleteChat) => {
+export const getMenuConfig = (onSelectModeOn, onClearHistory, onDeleteChat) => {
   return [
     {
       key: 'Mute',
@@ -10,7 +10,8 @@ export const getMenuConfig = (onClearHistory, onDeleteChat) => {
     {
       key: 'Select',
       icon: Select,
-      name: 'Select'
+      name: 'Select',
+      onClick: onSelectModeOn
     },
     {
       key: 'Clear history',

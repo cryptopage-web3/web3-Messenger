@@ -4,6 +4,9 @@ import { getMenuConfig } from './get-menu-config'
 import { useCallback, useMemo } from 'react'
 import { useGlobalModalContext } from '../../components'
 
+const uiChannel = new BroadcastChannel('peer:ui')
+
+// eslint-disable-next-line max-lines-per-function
 export const useContextMenu = (sender, receiver) => {
   const { openModal } = useGlobalModalContext()
 
@@ -29,8 +32,18 @@ export const useContextMenu = (sender, receiver) => {
     })
   }, [openModal, receiver, sender])
 
+  const selectModeOn = useCallback(() => {
+    uiChannel.postMessage({
+      type: 'selectModeOn',
+      payload: {
+        receiver
+      }
+    })
+  }, [receiver])
+
   return useMemo(
-    () => getMenuConfig(openClearHistoryModal, openDeleteChatModal),
-    [openClearHistoryModal, openDeleteChatModal]
+    () =>
+      getMenuConfig(selectModeOn, openClearHistoryModal, openDeleteChatModal),
+    [openClearHistoryModal, openDeleteChatModal, selectModeOn]
   )
 }
