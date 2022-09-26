@@ -1,63 +1,10 @@
 import { useCallback, useState } from 'react'
-import { Box, Button } from 'grommet'
-import {
-  ChatStatus,
-  SearchInput,
-  ChatTitle,
-  ChatAvatar
-} from '../../components'
+import { SearchBar } from '../../components'
 import { useContacts } from '../contacts'
-import styled from 'styled-components'
 import { useDID } from '../../profile'
-
-/**
- TODO template for custom search input with drop down items
- const StyledScrollContainer = styled(ScrollContainer)`
- position: absolute;
- top: 40px;
- background: white;
- z-index: 1;
- height: 100%;
- width: 100%;
- `
- const FoundChatList = ({list, onClick}) => (<StyledScrollContainer>
- <List>
- {list.map(item => (
-      <FoundChat key={item.receiver_did} receiver={item.receiver_did} onClick={onClick}/>
-    ))}
- </List>
- </StyledScrollContainer>)
- */
+import { SearchResult } from './search-result'
 
 const uiContactsChannel = new BroadcastChannel('peer:ui:contacts')
-
-const StyledFoundChat = styled(Button)`
-  padding: 7.5px 10px;
-
-  background: white;
-
-  &:hover {
-    background: #e3e3e3;
-  }
-`
-
-type FoundChatProps = {
-  key: string
-  receiver: string
-  onClick?: (arg: string) => void
-}
-
-const FoundChat = ({ receiver, onClick }: FoundChatProps) => (
-  <StyledFoundChat onClick={onClick}>
-    <Box direction="row" justify="between" align="center">
-      <Box direction="row" gap="10px" align="center">
-        <ChatAvatar size="24px" />
-        <ChatTitle chatAddress={receiver} />
-      </Box>
-      <ChatStatus />
-    </Box>
-  </StyledFoundChat>
-)
 
 const selectSuggestion = (receiver, cleanValues) => {
   cleanValues()
@@ -71,7 +18,7 @@ const selectSuggestion = (receiver, cleanValues) => {
 }
 
 const mapToSuggestionView = ({ receiver_did }, cleanValues) => ({
-  Component: FoundChat,
+  Component: SearchResult,
   props: {
     key: receiver_did,
     receiver: receiver_did,
@@ -79,7 +26,13 @@ const mapToSuggestionView = ({ receiver_did }, cleanValues) => ({
   }
 })
 
-const useChange = (setValue, setSuggestions, cleanValues) => {
+// eslint-disable-next-line max-lines-per-function
+const useChange = (
+  setValue,
+  setSuggestions,
+  cleanValues,
+  setSearchChatMode
+) => {
   const [chats] = useContacts('')
 
   return useCallback(
@@ -90,7 +43,9 @@ const useChange = (setValue, setSuggestions, cleanValues) => {
 
       if (!nextValue) {
         setSuggestions([])
+        setSearchChatMode(false)
       } else {
+        setSearchChatMode(true)
         const regexp = new RegExp(`${nextValue}`)
 
         setSuggestions(
@@ -100,19 +55,28 @@ const useChange = (setValue, setSuggestions, cleanValues) => {
         )
       }
     },
-    [chats, cleanValues, setSuggestions, setValue]
+    [chats, cleanValues, setSearchChatMode, setSuggestions, setValue]
   )
 }
 
-//TODO temporary solution. fix as part of the task to fix the output of the list of contacts
 const dropDownStyle = {
   background: 'white',
-  position: 'absolute',
-  zIndex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  marginTop: '20px',
   maxHeight: '100%'
 }
 
-export const SearchChat = () => {
+const inputStyle = {
+  width: 'calc(100% - 40px)'
+}
+
+type SearchChatProps = {
+  setSearchChatMode: (arg: boolean) => void
+}
+
+// eslint-disable-next-line max-lines-per-function
+export const SearchChat = ({ setSearchChatMode }: SearchChatProps) => {
   const sender = useDID()
 
   const [suggestions, setSuggestions] = useState([])
@@ -121,18 +85,25 @@ export const SearchChat = () => {
   const cleanValues = useCallback(() => {
     setValue('')
     setSuggestions([])
-  }, [])
+    setSearchChatMode(false)
+  }, [setSearchChatMode])
 
-  const onChange = useChange(setValue, setSuggestions, cleanValues)
+  const onChange = useChange(
+    setValue,
+    setSuggestions,
+    cleanValues,
+    setSearchChatMode
+  )
 
   return (
-    <SearchInput
+    <SearchBar
       disabled={!sender}
       value={value}
       onChange={onChange}
-      suggestions={suggestions}
+      searchResults={suggestions}
       cleanValue={cleanValues}
       dropDownStyle={dropDownStyle}
+      inputStyle={inputStyle}
     />
   )
 }

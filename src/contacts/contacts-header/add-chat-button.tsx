@@ -6,6 +6,13 @@ import { AddChat } from '../../icons'
 import { MenuItemProps } from '../../components/drop-button/MenuItem'
 import { useCallback, useMemo } from 'react'
 import { getMenuConfig } from './get-menu-config'
+import styled from 'styled-components'
+
+const StyledDropButton = styled(DropButton)`
+  position: absolute;
+  margin-top: 8px;
+  right: 0;
+`
 
 export const AddChatButton = () => {
   const sender = useDID()
@@ -22,12 +29,12 @@ export const AddChatButton = () => {
   )
 
   return (
-    <DropButton
+    <StyledDropButton
       icon={AddChat}
       menuConfig={menuConfig}
       disabled={!sender}
       menuPosition={'bottomRight'}
-      alignSelf="center"
+      alignSelf="start"
     />
   )
 }

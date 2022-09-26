@@ -8,7 +8,7 @@ import {
   ModalFooter,
   ModalHeader,
   PrimaryButton,
-  SearchInput,
+  SearchBar,
   useGlobalModalContext
 } from '../components'
 
@@ -89,7 +89,7 @@ export const AddContactModal = () => {
   return (
     <Modal onClickOutside={closeModal} onEsc={closeModal}>
       <ModalHeader title={'Create chat'} onClose={closeModal} />
-      <SearchInput
+      <SearchBar
         placeholder="DID or Address"
         value={input}
         onChange={handleChange}

@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { SearchInput } from '../../components'
+import { SearchBar } from '../../components'
 import styled from 'styled-components'
 import { ButtonsControl } from './buttons-control'
 import { Message } from '../../@types'
@@ -88,23 +88,16 @@ const useScroll = (
   return [scrollToPrevMemo, scrollToNextMemo]
 }
 
-const StyledSearchInputContainer = styled(Box)`
+const Container = styled(Box)`
   position: absolute;
   border: none;
   width: 100%;
-`
 
-const StyledSearchInput = styled(SearchInput)`
-  background: #f5f9fd;
-  border-radius: 0;
-  border: none;
-  border-bottom: 1.6px solid #eee;
-
-  &:focus-within {
+  & > div > div:focus-within {
     box-shadow: none;
   }
 
-  & > div > input {
+  & > div > div > div > input {
     padding-right: 110px;
   }
 `
@@ -112,6 +105,18 @@ const StyledSearchInput = styled(SearchInput)`
 type SearchMessageProps = {
   messages: Message[]
   hideSearch: () => void
+}
+
+const dropDownStyle = {
+  background: '#f5f9fd',
+  borderBottom: '1.6px solid #eee'
+}
+
+const inputStyle = {
+  background: '#f5f9fd',
+  borderRadius: 0,
+  border: 'none',
+  borderBottom: '1.6px solid #eee'
 }
 
 // eslint-disable-next-line max-lines-per-function
@@ -142,20 +147,23 @@ export const SearchMessage = ({ messages, hideSearch }: SearchMessageProps) => {
   )
 
   return (
-    <StyledSearchInputContainer>
-      <StyledSearchInput
+    <Container>
+      <SearchBar
         value={searchValue}
         onChange={onChange}
-        suggestions={suggestions}
+        searchResults={suggestions}
         cleanValue={cleanValue}
-      >
-        <ButtonsControl
-          onUpArrowClick={scrollToPrev}
-          onDownArrowClick={scrollToNext}
-          cleanValue={cleanValue}
-          suggestionsAmount={suggestions.length}
-        />
-      </StyledSearchInput>
-    </StyledSearchInputContainer>
+        dropDownStyle={dropDownStyle}
+        inputStyle={inputStyle}
+        searchControl={
+          <ButtonsControl
+            onUpArrowClick={scrollToPrev}
+            onDownArrowClick={scrollToNext}
+            cleanValue={cleanValue}
+            suggestionsAmount={suggestions.length}
+          />
+        }
+      />
+    </Container>
   )
 }

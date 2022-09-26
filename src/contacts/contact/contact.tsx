@@ -21,6 +21,10 @@ const StyledChatCard = styled('li')`
   &:hover {
     background: ${({ active }) => (active ? '#E4E4E4' : '#f5f9fd')};
   }
+
+  &:first-of-type {
+    border-top: 1.6px #eee solid;
+  }
 `
 
 type ContactProps = {

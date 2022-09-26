@@ -8,6 +8,7 @@ import * as R from 'ramda'
 import React, { useEffect } from 'react'
 import { Status } from './service/peer'
 import * as Service from './service'
+import styled from 'styled-components'
 
 const keyChannel = new BroadcastChannel('peer:key')
 
@@ -62,10 +63,14 @@ export const Connect = () => {
   )
 }
 
+const StyledHeading = styled(Heading)`
+  overflow-wrap: break-word;
+`
+
 export const Name = () => (
-  <Heading level="3" size="small">
+  <StyledHeading level="3" size="small">
     {useName()} {useDID()}
-  </Heading>
+  </StyledHeading>
 )
 
 export const Avatar = () => <AvatarPlaceholder did={useDID()} size={120} />

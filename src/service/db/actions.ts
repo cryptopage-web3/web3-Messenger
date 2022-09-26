@@ -96,6 +96,7 @@ export const addContact = async (contact: Contact) => {
   }
 }
 
+//TODO bug! if client has few profiles and at least one profile added contact A, it is not possible to add contact A for another profile
 export const getContactByDid = async (
   DID: string
 ): Promise<DBContact | undefined> => {

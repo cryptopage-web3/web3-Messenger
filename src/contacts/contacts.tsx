@@ -6,6 +6,7 @@ import { List, ScrollContainer } from '../components'
 import { DBContact } from '../@types'
 import { Contact } from './contact'
 import { useActiveContact } from '../messenger/useActiveContact'
+import styled from 'styled-components'
 
 const statusChannel = new BroadcastChannel('peer:status')
 const contactsChannel = new BroadcastChannel('peer:contacts')
@@ -117,7 +118,20 @@ export const useContacts = (
   return [list, setActiveItem]
 }
 
-export const Contacts = () => {
+const StyledScrollContainer = styled(ScrollContainer)`
+  margin-top: 20px;
+  display: none;
+
+  &.active {
+    display: block;
+  }
+`
+
+type ContactsProps = {
+  searchChatMode: boolean
+}
+
+export const Contacts = ({ searchChatMode }: ContactsProps) => {
   const sender = useDID()
   const currentActiveContact = useActiveContact()
   const [contacts, setActiveItem] = useContacts(currentActiveContact)
@@ -125,7 +139,7 @@ export const Contacts = () => {
   if (!contacts.length || !sender) return null
 
   return (
-    <ScrollContainer>
+    <StyledScrollContainer className={!searchChatMode && 'active'}>
       <List>
         {contacts.map(item => (
           <Contact
@@ -135,6 +149,6 @@ export const Contacts = () => {
           />
         ))}
       </List>
-    </ScrollContainer>
+    </StyledScrollContainer>
   )
 }

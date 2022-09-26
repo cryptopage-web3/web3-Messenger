@@ -1,9 +1,8 @@
 import React from 'react'
 import { Avatar, Connect, Name } from './profile'
-import { Grid, Header, Sidebar } from 'grommet'
+import { Grid, Header } from 'grommet'
 import { Chat } from './messenger'
-import { Contacts, EmptyContactsPlaceholder } from './contacts'
-import { ContactsHeader } from './contacts/contacts-header'
+import { ChatListSidebar } from './contacts'
 
 const rows = ['auto', 'flex']
 const columns = ['auto', 'flex']
@@ -13,13 +12,6 @@ const areas = [
   { name: 'main', start: [1, 1], end: [1, 1] }
 ]
 
-//TODO template for custom search input with drop down items
-// const StyledContactsSidebar = styled(Sidebar)`
-//   & > div {
-//     position: relative
-//   }
-// `
-
 export const App = () => (
   <Grid fill rows={rows} columns={columns} areas={areas}>
     <Header gridArea="header" pad="small">
@@ -28,11 +20,7 @@ export const App = () => (
       <Connect />
     </Header>
 
-    <Sidebar gridArea="nav" width="medium" pad={{ right: '40px' }}>
-      <ContactsHeader />
-      <Contacts />
-      <EmptyContactsPlaceholder />
-    </Sidebar>
+    <ChatListSidebar gridArea="nav" />
 
     <Chat gridArea="main" />
   </Grid>

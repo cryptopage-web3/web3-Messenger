@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import {
   Modal,
   ModalHeader,
-  SearchInput,
+  SearchBar,
   useGlobalModalContext,
   Text,
   SubTitle,
@@ -10,8 +10,8 @@ import {
   ChatTitle
 } from '../../components'
 import { Box, Button } from 'grommet'
-import { useContacts } from '../../contacts'
 import styled from 'styled-components'
+import { useContacts } from '../../contacts/contacts'
 
 const uiChannel = new BroadcastChannel('peer:ui')
 
@@ -155,9 +155,9 @@ export const ChooseChatModal = () => {
   return (
     <Modal onClickOutside={closeModal} onEsc={closeModal}>
       <ModalHeader title={<Title />} onClose={closeModal} />
-      <SearchInput
+      <SearchBar
         placeholder="DID or Address"
-        suggestions={suggestions}
+        searchResults={suggestions}
         value={searchValue}
         onChange={onChange}
         cleanValue={cleanValue}
