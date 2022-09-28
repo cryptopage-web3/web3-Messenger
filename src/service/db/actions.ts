@@ -217,3 +217,23 @@ export const deleteMessages = async (sender, receiver) => {
     console.error('error deleteMessages :>> ', error)
   }
 }
+
+export const deleteMessagesByIds = async (
+  sender,
+  receiver,
+  ids: Set<string>
+) => {
+  const { deleteRecord } = useIndexedDB('messages')
+
+  try {
+    const messages = await getAllUserMessages(sender, receiver)
+
+    for (const message of messages) {
+      if (ids.has(message.messageId)) {
+        await deleteRecord(message.id)
+      }
+    }
+  } catch (error) {
+    console.error('error deleteMessagesByIds :>> ', error)
+  }
+}

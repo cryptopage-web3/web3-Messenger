@@ -81,6 +81,11 @@ const MessagesEventMap = {
     await DB.deleteMessages(message.sender, message.receiver)
 
     uiChannel.postMessage({ type: 'updateMessages' })
+  },
+  deleteSelectedMessages: async message => {
+    await DB.deleteMessagesByIds(message.sender, message.receiver, message.ids)
+
+    uiChannel.postMessage({ type: 'updateMessages' })
   }
 }
 

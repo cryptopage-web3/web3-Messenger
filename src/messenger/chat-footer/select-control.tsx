@@ -4,6 +4,7 @@ import { IconButton, Text, useGlobalModalContext } from '../../components'
 import { Delete, Forward } from '../../icons'
 import { ChooseChatModal } from './choose-chat-modal'
 import { useEffect, useState } from 'react'
+import { DeleteMessagesModal } from './delete-messages-modal'
 
 const uiChannel = new BroadcastChannel('peer:ui')
 
@@ -41,15 +42,16 @@ const StyledSelectControl: React.FC = ({ children }) => (
 
 type ButtonProps = {
   disabled: boolean
-  onClick?: () => void
+  onClick: () => void
 }
-const DeleteButton = ({ disabled }: ButtonProps) => (
+const DeleteButton = ({ disabled, onClick }: ButtonProps) => (
   <IconButton
     disabled={disabled}
     color="#FF1818"
     icon={<Delete />}
     label="Delete"
     gap="5px"
+    onClick={onClick}
   />
 )
 
@@ -65,6 +67,7 @@ const ForwardButton = ({ disabled, onClick }: ButtonProps) => (
   />
 )
 
+// eslint-disable-next-line max-lines-per-function
 export const SelectControl = () => {
   const { openModal } = useGlobalModalContext()
 
@@ -72,11 +75,18 @@ export const SelectControl = () => {
     openModal(ChooseChatModal)
   }, [openModal])
 
+  const openDeleteMessagesModal = useCallback(() => {
+    openModal(DeleteMessagesModal)
+  }, [openModal])
+
   const [selectedMessageAmount] = useSelectedMessages()
 
   return (
     <StyledSelectControl>
-      <DeleteButton disabled={selectedMessageAmount < 1} />
+      <DeleteButton
+        disabled={selectedMessageAmount < 1}
+        onClick={openDeleteMessagesModal}
+      />
       <Text>
         {selectedMessageAmount} message{selectedMessageAmount !== 1 && 's'}{' '}
         select

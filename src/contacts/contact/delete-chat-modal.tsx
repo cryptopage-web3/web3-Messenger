@@ -1,5 +1,4 @@
-import { useGlobalModalContext } from '../../components'
-import { ConfirmModal } from './confirm-modal'
+import { ConfirmModal, useGlobalModalContext } from '../../components'
 import { useCallback } from 'react'
 
 const contactsChannel = new BroadcastChannel('peer:contacts')

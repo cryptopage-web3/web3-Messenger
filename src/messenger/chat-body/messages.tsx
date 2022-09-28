@@ -101,20 +101,31 @@ const updateSelectedMessages = selectedMessagesAmount => {
 }
 
 // eslint-disable-next-line max-lines-per-function
-const useSelectedMessages = (selectModeReceiver, activeContact) => {
+const useSelectedMessages = (selectModeReceiver, sender, receiver) => {
   const [selectedMessageIds, setSelectedMessageIds] = useState(new Set())
 
   useEffect(() => {
-    if (selectModeReceiver === activeContact) {
+    if (selectModeReceiver === receiver) {
       updateSelectedMessages(selectedMessageIds.size)
     }
-  }, [activeContact, selectModeReceiver, selectedMessageIds])
+  }, [receiver, selectModeReceiver, selectedMessageIds])
 
   useEffect(() => {
     const listener = async ({ data }) => {
       if (data.type === 'selectModeOn') {
         setSelectedMessageIds(new Set())
       } else if (data.type === 'selectModeOff') {
+        setSelectedMessageIds(new Set())
+      } else if (data.type === 'deleteSelectedMessages') {
+        messagesChannel.postMessage({
+          type: 'deleteSelectedMessages',
+          payload: {
+            sender,
+            receiver,
+            ids: selectedMessageIds
+          }
+        })
+
         setSelectedMessageIds(new Set())
       }
     }
@@ -124,7 +135,7 @@ const useSelectedMessages = (selectModeReceiver, activeContact) => {
     return () => {
       uiChannel.removeEventListener('message', listener)
     }
-  }, [])
+  }, [receiver, selectedMessageIds, sender])
 
   const hasMessageId = useCallback(
     messageId => {
@@ -152,17 +163,18 @@ const useSelectedMessages = (selectModeReceiver, activeContact) => {
 
 // eslint-disable-next-line max-lines-per-function
 export const Messages = () => {
-  const currentUser = useDID()
-  const activeContact = useActiveContact()
+  const sender = useDID()
+  const receiver = useActiveContact()
   const [selectModeReceiver] = useSelectMode()
 
-  const [messages] = useMessages(currentUser, activeContact)
+  const [messages] = useMessages(sender, receiver)
 
   const [show, hideSearch] = useSearch()
 
   const [addMessageId, removeMessageId, hasMessageId] = useSelectedMessages(
     selectModeReceiver,
-    activeContact
+    sender,
+    receiver
   )
 
   return (
@@ -171,7 +183,7 @@ export const Messages = () => {
       <ScrollContainer id="messages-scroll-container">
         <ul>
           {messages.map(message => {
-            currentUser === message.receiver &&
+            sender === message.receiver &&
               message.status !== Status.viewed &&
               updateStatus(message, Status.viewed)
 
@@ -179,12 +191,12 @@ export const Messages = () => {
               <Message
                 id={message.date}
                 key={message.id}
-                currentUser={currentUser}
+                sender={sender}
                 onClick={decryptMessage}
                 message={message}
                 selectMode={
                   selectModeReceiver !== undefined &&
-                  selectModeReceiver === activeContact
+                  selectModeReceiver === receiver
                 }
                 addMessageId={addMessageId}
                 removeMessageId={removeMessageId}

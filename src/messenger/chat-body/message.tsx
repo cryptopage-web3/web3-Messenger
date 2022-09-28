@@ -22,7 +22,7 @@ const StyledMessage = styled('li')`
 type MessageProps = {
   message: TMessage
   onClick: (arg0: TMessage) => void
-  currentUser: string
+  sender: string
   key: string
   id: number
   selectMode: boolean
@@ -35,7 +35,7 @@ type MessageProps = {
 export const Message = ({
   message,
   onClick,
-  currentUser,
+  sender,
   id,
   selectMode,
   removeMessageId,
@@ -59,10 +59,10 @@ export const Message = ({
         <div>date: {new Date(message.date).toLocaleTimeString('ru-RU')}</div>
         <div>sender: {message.sender}</div>
         <div>text: {message.text}</div>
-        {message.sender !== currentUser && !message.encrypted && (
+        {message.sender !== sender && !message.encrypted && (
           <button onClick={handleClick}>decrypt</button>
         )}
-        {message.sender === currentUser && <div>status: {message.status}</div>}
+        {message.sender === sender && <div>status: {message.status}</div>}
       </div>
       {selectMode && <CheckBox checked={checked} onChange={handleChange} />}
     </StyledMessage>
