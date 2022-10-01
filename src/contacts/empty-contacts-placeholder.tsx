@@ -1,7 +1,7 @@
 import { Box, Text } from 'grommet'
 import styled from 'styled-components'
 import { PrimaryButton } from '../components'
-import { useContacts } from './contacts'
+import { useArchivedChats, useContacts } from './contacts'
 import { useGlobalModalContext } from '../components'
 import { AddContactModal } from './add-contact-modal'
 import { useDID } from '../profile'
@@ -23,6 +23,7 @@ const StyledContainer = styled(props => (
 
 export const EmptyContactsPlaceholder = () => {
   const [contacts] = useContacts('')
+  const [archiveChats] = useArchivedChats('')
   const sender = useDID()
 
   const { openModal } = useGlobalModalContext()
@@ -31,7 +32,7 @@ export const EmptyContactsPlaceholder = () => {
     openModal(AddContactModal)
   }
 
-  if (contacts.length && sender) return null
+  if ((contacts.length || archiveChats.length) && sender) return null
 
   return (
     <StyledContainer>

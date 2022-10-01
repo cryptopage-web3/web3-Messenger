@@ -11,12 +11,12 @@ const StyledBox = styled(props => (
 `
 
 type ContactsHeaderProps = {
-  setSearchChatMode: (arg: boolean) => void
+  setSidebarMode: (arg: string) => void
 }
 
-export const ContactsHeader = ({ setSearchChatMode }: ContactsHeaderProps) => (
+export const ContactsHeader = ({ setSidebarMode }: ContactsHeaderProps) => (
   <StyledBox>
-    <SearchChat setSearchChatMode={setSearchChatMode} />
+    <SearchChat setSidebarMode={setSidebarMode} />
     <AddChatButton />
   </StyledBox>
 )

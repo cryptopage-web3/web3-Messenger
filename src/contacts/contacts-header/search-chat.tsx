@@ -27,12 +27,7 @@ const mapToSuggestionView = ({ receiver_did }, cleanValues) => ({
 })
 
 // eslint-disable-next-line max-lines-per-function
-const useChange = (
-  setValue,
-  setSuggestions,
-  cleanValues,
-  setSearchChatMode
-) => {
+const useChange = (setValue, setSuggestions, cleanValues, setSidebarMode) => {
   const [chats] = useContacts('')
 
   return useCallback(
@@ -43,9 +38,9 @@ const useChange = (
 
       if (!nextValue) {
         setSuggestions([])
-        setSearchChatMode(false)
+        setSidebarMode('contacts')
       } else {
-        setSearchChatMode(true)
+        setSidebarMode('chats-search')
         const regexp = new RegExp(`${nextValue}`)
 
         setSuggestions(
@@ -55,7 +50,7 @@ const useChange = (
         )
       }
     },
-    [chats, cleanValues, setSearchChatMode, setSuggestions, setValue]
+    [chats, cleanValues, setSidebarMode, setSuggestions, setValue]
   )
 }
 
@@ -72,11 +67,11 @@ const inputStyle = {
 }
 
 type SearchChatProps = {
-  setSearchChatMode: (arg: boolean) => void
+  setSidebarMode: (arg: string) => void
 }
 
 // eslint-disable-next-line max-lines-per-function
-export const SearchChat = ({ setSearchChatMode }: SearchChatProps) => {
+export const SearchChat = ({ setSidebarMode }: SearchChatProps) => {
   const sender = useDID()
 
   const [suggestions, setSuggestions] = useState([])
@@ -85,14 +80,14 @@ export const SearchChat = ({ setSearchChatMode }: SearchChatProps) => {
   const cleanValues = useCallback(() => {
     setValue('')
     setSuggestions([])
-    setSearchChatMode(false)
-  }, [setSearchChatMode])
+    setSidebarMode('contacts')
+  }, [setSidebarMode])
 
   const onChange = useChange(
     setValue,
     setSuggestions,
     cleanValues,
-    setSearchChatMode
+    setSidebarMode
   )
 
   return (

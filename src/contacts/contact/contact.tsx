@@ -33,6 +33,7 @@ type ContactProps = {
   key: string
   active?: boolean
   muted?: boolean
+  archived?: boolean
 }
 
 const uiChannel = new BroadcastChannel('peer:ui')
@@ -85,7 +86,8 @@ export const Contact = ({
   active,
   receiver_did: receiver,
   muted,
-  setActiveItem
+  setActiveItem,
+  archived
 }: ContactProps) => {
   const sender = useDID()
 
@@ -107,7 +109,7 @@ export const Contact = ({
     [openMenu]
   )
 
-  const menuConfig = useContextMenu(sender, receiver, closeMenu)
+  const menuConfig = useContextMenu(sender, receiver, closeMenu, archived)
 
   return (
     <>

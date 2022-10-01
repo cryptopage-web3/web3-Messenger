@@ -46,6 +46,14 @@ const ContactsEventMap = {
     await DB.deleteMessages(message.sender, message.receiver)
 
     uiContactsChannel.postMessage({ type: 'contactDeleted', payload: message })
+  },
+  updateContactArchived: async message => {
+    await DB.updateContactArchived(message.receiver, message.archived)
+
+    uiContactsChannel.postMessage({
+      type: 'updateArchivedContacts',
+      payload: message
+    })
   }
 }
 
