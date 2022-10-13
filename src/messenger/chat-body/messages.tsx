@@ -3,13 +3,13 @@ import { useDID } from '../../profile'
 import * as DB from '../../service/db'
 import { Message } from './message'
 import { Message as TMessage, Status } from '../../@types'
-import { ScrollContainer } from '../../components'
 import { useActiveContact } from '../useActiveContact'
 import { Box } from 'grommet'
 import { SearchMessage } from '../search-message'
 import styled from 'styled-components'
 import { scrollToMessage } from './scroll-to-message'
 import { useSelectMode } from '../useSelectMode'
+import { ScrollContainer } from '../../components'
 
 const messagesChannel = new BroadcastChannel('peer:messages')
 const naclChannel = new BroadcastChannel('peer:nacl')

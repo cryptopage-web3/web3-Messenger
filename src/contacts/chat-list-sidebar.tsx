@@ -1,17 +1,38 @@
+import React, { useMemo } from 'react'
 import { Sidebar } from 'grommet'
 import { ContactsHeader } from './contacts-header'
 import { Contacts } from './contacts'
 import { EmptyContactsPlaceholder } from './empty-contacts-placeholder'
 import { useState } from 'react'
+import styled from 'styled-components'
+import { ArchivedChatsHeader } from './archived/archived-chats-header'
+import { SidebarMode } from '../@types'
+import { Context, ContextProps } from './context'
+
+const SidebarContainer = styled(Sidebar)`
+  padding: 0 40px 0 0;
+`
 
 export const ChatListSidebar = props => {
-  const [searchChatMode, setSearchChatMode] = useState(false)
+  const [uiConfig, setUiConfig] = useState<ContextProps>({
+    sidebarMode: SidebarMode.CONTACTS,
+    hasArchivedChats: false,
+    hasUnarchivedChats: false
+  })
+
+  const value = useMemo(() => ({ uiConfig, setUiConfig }), [uiConfig])
 
   return (
-    <Sidebar {...props} width="medium" pad={{ right: '40px' }}>
-      <ContactsHeader setSearchChatMode={setSearchChatMode} />
-      <Contacts searchChatMode={searchChatMode} />
-      <EmptyContactsPlaceholder />
-    </Sidebar>
+    <Context.Provider value={value}>
+      <SidebarContainer {...props} width="medium">
+        {uiConfig.sidebarMode !== SidebarMode.ARCHIVED_CHATS ? (
+          <ContactsHeader />
+        ) : (
+          <ArchivedChatsHeader />
+        )}
+        <Contacts />
+        <EmptyContactsPlaceholder />
+      </SidebarContainer>
+    </Context.Provider>
   )
 }

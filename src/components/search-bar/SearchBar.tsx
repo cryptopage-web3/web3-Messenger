@@ -8,7 +8,9 @@ import { SearchInput } from './SearchInput'
 
 const useOutsideClick = cleanValue => {
   useEffect(() => {
-    const listenClickOutside = clickOutside(cleanValue)
+    const listenClickOutside = () => {
+      cleanValue && clickOutside(cleanValue)
+    }
 
     document.addEventListener('click', listenClickOutside)
 
@@ -32,6 +34,7 @@ type SearchBarProps = TextInputProps & {
   dropDownStyle?: { [arg: string]: string | number }
 }
 
+// eslint-disable-next-line max-lines-per-function
 export const SearchBar: React.FC = ({
   value,
   onChange,
@@ -43,7 +46,12 @@ export const SearchBar: React.FC = ({
   inputStyle,
   dropDownStyle
 }: SearchBarProps) => {
-  useOutsideClick(cleanValue)
+  //TODO when switching chat, the search does not disappear
+  //it is necessary to refine the solution to hide the search
+  // when clicking outside the search, for example,
+  // do not process all clicks and also take into account that there can be several
+  // search components on the page
+  // useOutsideClick(cleanSuggestions)
 
   return (
     <Container id="search-component">

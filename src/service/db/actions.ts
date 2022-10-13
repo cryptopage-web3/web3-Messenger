@@ -130,6 +130,20 @@ export const updateContactKey = async (
   }
 }
 
+export const updateContactArchived = async (contactDid, archived) => {
+  const { update, getByIndex } = useIndexedDB('contacts')
+
+  try {
+    const foundContact = await getByIndex('receiver_did', contactDid)
+
+    if (!foundContact) throw Error('No contact with provided did')
+
+    await update({ ...foundContact, archived })
+  } catch (error) {
+    console.error('error updateContact :>> ', error)
+  }
+}
+
 export const getAllContacts = async () => {
   const { getAll } = useIndexedDB('contacts')
 
@@ -183,12 +197,30 @@ export const getLastMessage = async (currentUser, activeContact) => {
   }
 }
 
-export const getAllContactsByDid = async currentDid => {
+export const getAllContactsByDid = async sender => {
+  const isSenderUnarchivedContact = contact => {
+    return contact.sender_did === sender && !contact.archived
+  }
+
   try {
     const contacts = await getAllContacts()
-    return R.filter(R.propEq('sender_did', currentDid), contacts)
+
+    return R.filter(isSenderUnarchivedContact, contacts)
   } catch (error) {
     console.error('error getAllContactsByDid :>> ', error)
+  }
+}
+
+export const getAllArchivedContactsByDid = async sender => {
+  const isSenderArchivedContact = contact =>
+    contact.sender_did === sender && contact.archived
+
+  try {
+    const contacts = await getAllContacts()
+
+    return R.filter(isSenderArchivedContact, contacts)
+  } catch (error) {
+    console.error('error getAllArchivedContactsByDid :>> ', error)
   }
 }
 

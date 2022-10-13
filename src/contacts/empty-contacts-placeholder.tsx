@@ -1,10 +1,12 @@
 import { Box, Text } from 'grommet'
 import styled from 'styled-components'
 import { PrimaryButton } from '../components'
-import { useContacts } from './contacts'
 import { useGlobalModalContext } from '../components'
 import { AddContactModal } from './add-contact-modal'
 import { useDID } from '../profile'
+import { useCallback, useContext } from 'react'
+import { Context } from './context'
+import { SidebarMode } from '../@types'
 
 const StyledText = styled(props => <Text {...props} small />)`
   color: #687684;
@@ -21,17 +23,32 @@ const StyledContainer = styled(props => (
   height: 100%;
 `
 
+const hidePlaceholder = ({
+  hasUnarchivedChats,
+  hasArchivedChats,
+  sidebarMode
+}) => {
+  return (
+    hasUnarchivedChats ||
+    hasArchivedChats ||
+    sidebarMode === SidebarMode.ARCHIVED_CHATS
+  )
+}
+
 export const EmptyContactsPlaceholder = () => {
-  const [contacts] = useContacts('')
+  const { uiConfig } = useContext(Context)
+
   const sender = useDID()
 
   const { openModal } = useGlobalModalContext()
 
-  const openAddContactModal = () => {
+  const openAddContactModal = useCallback(() => {
     openModal(AddContactModal)
-  }
+  }, [openModal])
 
-  if (contacts.length && sender) return null
+  if (hidePlaceholder(uiConfig) && sender) {
+    return null
+  }
 
   return (
     <StyledContainer>

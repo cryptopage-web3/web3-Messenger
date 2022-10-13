@@ -1,8 +1,10 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useState, useContext } from 'react'
 import { SearchBar } from '../../components'
 import { useContacts } from '../contacts'
 import { useDID } from '../../profile'
 import { SearchResult } from './search-result'
+import { Context } from '../context'
+import { SidebarMode } from '../../@types'
 
 const uiContactsChannel = new BroadcastChannel('peer:ui:contacts')
 
@@ -27,13 +29,9 @@ const mapToSuggestionView = ({ receiver_did }, cleanValues) => ({
 })
 
 // eslint-disable-next-line max-lines-per-function
-const useChange = (
-  setValue,
-  setSuggestions,
-  cleanValues,
-  setSearchChatMode
-) => {
-  const [chats] = useContacts('')
+const useChange = (setValue, setSuggestions, cleanValues) => {
+  const [chats] = useContacts()
+  const { setUiConfig } = useContext(Context)
 
   return useCallback(
     event => {
@@ -43,9 +41,13 @@ const useChange = (
 
       if (!nextValue) {
         setSuggestions([])
-        setSearchChatMode(false)
+        setUiConfig(prev => ({ ...prev, sidebarMode: SidebarMode.CONTACTS }))
       } else {
-        setSearchChatMode(true)
+        setUiConfig(prev => ({
+          ...prev,
+          sidebarMode: SidebarMode.CHATS_SEARCH
+        }))
+
         const regexp = new RegExp(`${nextValue}`)
 
         setSuggestions(
@@ -55,7 +57,7 @@ const useChange = (
         )
       }
     },
-    [chats, cleanValues, setSearchChatMode, setSuggestions, setValue]
+    [chats, cleanValues, setSuggestions, setUiConfig, setValue]
   )
 }
 
@@ -71,13 +73,9 @@ const inputStyle = {
   width: 'calc(100% - 40px)'
 }
 
-type SearchChatProps = {
-  setSearchChatMode: (arg: boolean) => void
-}
-
-// eslint-disable-next-line max-lines-per-function
-export const SearchChat = ({ setSearchChatMode }: SearchChatProps) => {
+export const SearchChat = () => {
   const sender = useDID()
+  const { setUiConfig } = useContext(Context)
 
   const [suggestions, setSuggestions] = useState([])
   const [value, setValue] = useState('')
@@ -85,15 +83,10 @@ export const SearchChat = ({ setSearchChatMode }: SearchChatProps) => {
   const cleanValues = useCallback(() => {
     setValue('')
     setSuggestions([])
-    setSearchChatMode(false)
-  }, [setSearchChatMode])
+    setUiConfig(prev => ({ ...prev, sidebarMode: SidebarMode.CONTACTS }))
+  }, [setUiConfig])
 
-  const onChange = useChange(
-    setValue,
-    setSuggestions,
-    cleanValues,
-    setSearchChatMode
-  )
+  const onChange = useChange(setValue, setSuggestions, cleanValues)
 
   return (
     <SearchBar

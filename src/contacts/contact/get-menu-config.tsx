@@ -1,10 +1,18 @@
 import { Archive, Close as ClearHistory, Muted, Delete } from '../../icons'
 
-export const getMenuConfig = (onClearHistory, onDeleteChat) => [
+// eslint-disable-next-line max-lines-per-function
+export const getMenuConfig = ({
+  onClearHistory,
+  onDeleteChat,
+  onArchiveChat,
+  onUnarchiveChat,
+  archived
+}) => [
   {
     key: 'Archive',
     icon: Archive,
-    name: 'Archive'
+    name: archived ? 'Unarchive' : 'Archive',
+    onClick: archived ? onUnarchiveChat : onArchiveChat
   },
   {
     key: 'Mute',
