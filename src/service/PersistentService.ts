@@ -54,6 +54,22 @@ const ContactsEventMap = {
       type: 'updateArchivedContacts',
       payload: message
     })
+  },
+  updateContactMuted: async message => {
+    await DB.updateContactMuted(message.receiver, message.muted)
+
+    uiContactsChannel.postMessage({
+      type: 'updateMutedContacts',
+      payload: message
+    })
+  },
+  updateContactUnmuted: async message => {
+    await DB.updateContactMuted(message.receiver, message.muted)
+
+    uiContactsChannel.postMessage({
+      type: 'updateMutedContacts',
+      payload: message
+    })
   }
 }
 

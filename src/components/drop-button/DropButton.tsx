@@ -6,15 +6,15 @@ import { MenuItemProps } from './MenuItem'
 
 const Position = {
   topRight: {
-    dropAlign: { bottom: 'top', right: 'right' },
+    dropAlign: { bottom: 'bottom', right: 'right' },
     dropProps: {
-      margin: { bottom: '8px' },
+      margin: { bottom: '73px' },
       round: '10px',
       elevation: 'medium'
     }
   },
   bottomRight: {
-    dropAlign: { top: 'bottom', right: 'right' },
+    dropAlign: { top: 'top', right: 'right' },
     dropProps: {
       margin: { top: '8px' },
       round: '10px',

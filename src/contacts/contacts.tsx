@@ -114,6 +114,11 @@ const uiContactsEventMap = {
     const { sender } = message
 
     await updateContacts(sender, setList, uiConfig, setUiConfig)
+  },
+  updateMutedContacts: async (message, setList, uiConfig, setUiConfig) => {
+    const { sender } = message
+
+    await updateContacts(sender, setList, uiConfig, setUiConfig)
   }
 }
 

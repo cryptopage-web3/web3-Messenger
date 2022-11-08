@@ -5,9 +5,10 @@ import { useCallback, useMemo } from 'react'
 import { useGlobalModalContext } from '../../components'
 
 const uiChannel = new BroadcastChannel('peer:ui')
+const contactsChannel = new BroadcastChannel('peer:contacts')
 
 // eslint-disable-next-line max-lines-per-function
-export const useContextMenu = (sender, receiver) => {
+export const useContextMenu = (sender, receiver, muted) => {
   const { openModal } = useGlobalModalContext()
 
   const openClearHistoryModal = useCallback(() => {
@@ -41,9 +42,43 @@ export const useContextMenu = (sender, receiver) => {
     })
   }, [receiver])
 
+  const muteChat = useCallback(() => {
+    contactsChannel.postMessage({
+      type: 'updateContactMuted',
+      payload: {
+        receiver,
+        muted: true
+      }
+    })
+  }, [receiver])
+
+  const unmuteChat = useCallback(() => {
+    contactsChannel.postMessage({
+      type: 'updateContactUnmuted',
+      payload: {
+        receiver,
+        muted: false
+      }
+    })
+  }, [receiver])
+
   return useMemo(
     () =>
-      getMenuConfig(selectModeOn, openClearHistoryModal, openDeleteChatModal),
-    [openClearHistoryModal, openDeleteChatModal, selectModeOn]
+      getMenuConfig({
+        onSelectModeOn: selectModeOn,
+        onClearHistory: openClearHistoryModal,
+        onDeleteChat: openDeleteChatModal,
+        onMuteChat: muteChat,
+        onUnmuteChat: unmuteChat,
+        muted
+      }),
+    [
+      openClearHistoryModal,
+      openDeleteChatModal,
+      selectModeOn,
+      muted,
+      muteChat,
+      unmuteChat
+    ]
   )
 }

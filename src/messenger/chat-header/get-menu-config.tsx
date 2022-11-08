@@ -1,11 +1,20 @@
 import { Close as ClearHistory, Delete, Muted, Select } from '../../icons'
 
-export const getMenuConfig = (onSelectModeOn, onClearHistory, onDeleteChat) => {
+// eslint-disable-next-line max-lines-per-function
+export const getMenuConfig = ({
+  onSelectModeOn,
+  onClearHistory,
+  onDeleteChat,
+  onMuteChat,
+  onUnmuteChat,
+  muted,
+}) => {
   return [
     {
       key: 'Mute',
       icon: () => <Muted size={24} />,
-      name: 'Mute'
+      name: muted ? 'Unmute' : 'Mute',
+      onClick: muted ? onUnmuteChat : onMuteChat
     },
     {
       key: 'Select',
@@ -14,13 +23,13 @@ export const getMenuConfig = (onSelectModeOn, onClearHistory, onDeleteChat) => {
       onClick: onSelectModeOn
     },
     {
-      key: 'Clear history',
+      key: 'Clear history',//TODO: redundancy
       icon: ClearHistory,
       name: 'Clear history',
       onClick: onClearHistory
     },
     {
-      key: 'Delete chat',
+      key: 'Delete chat',//TODO: redundancy
       icon: Delete,
       name: 'Delete chat',
       color: '#FF1818',
