@@ -6,7 +6,10 @@ export const getMenuConfig = ({
   onDeleteChat,
   onArchiveChat,
   onUnarchiveChat,
-  archived
+  archived,
+  onMuteChat,
+  onUnmuteChat,
+  muted,
 }) => [
   {
     key: 'Archive',
@@ -17,7 +20,8 @@ export const getMenuConfig = ({
   {
     key: 'Mute',
     icon: () => <Muted size={24} />,
-    name: 'Mute'
+    name: muted ? 'Unmute' : 'Mute',
+    onClick: muted ? onUnmuteChat : onMuteChat
   },
   {
     key: 'Clear history',

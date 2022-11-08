@@ -11,7 +11,7 @@ type ChatCardTitleProps = {
   sender: string
   receiver: string
   message: Message
-  muted?: boolean
+  muted: boolean
   online?: boolean
 }
 

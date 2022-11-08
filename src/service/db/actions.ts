@@ -84,7 +84,8 @@ export const addContact = async (contact: Contact) => {
     const _contact = {
       sender_did: contact.sender,
       receiver_did: contact.receiver,
-      receiver_public_key: contact.receiverEncryptionPublicKey
+      receiver_public_key: contact.receiverEncryptionPublicKey,
+      muted: false,
     }
 
     return await add(_contact)
@@ -139,6 +140,21 @@ export const updateContactArchived = async (contactDid, archived) => {
     if (!foundContact) throw Error('No contact with provided did')
 
     await update({ ...foundContact, archived })
+  } catch (error) {
+    console.error('error updateContact :>> ', error)
+  }
+}
+
+export const updateContactMuted = async (contactDid, muted) => {//TODO: is not here we see redundancy?
+  const { update, getByIndex } = useIndexedDB('contacts')
+
+  console.info('updateContactMuted muted :>> ', muted)
+  try {
+    const foundContact = await getByIndex('receiver_did', contactDid)
+
+    if (!foundContact) throw Error('No contact with provided did')
+
+    await update({ ...foundContact, muted })
   } catch (error) {
     console.error('error updateContact :>> ', error)
   }

@@ -7,7 +7,13 @@ import { useCallback, useMemo } from 'react'
 const contactsChannel = new BroadcastChannel('peer:contacts')
 
 // eslint-disable-next-line max-lines-per-function
-export const useContextMenu = (sender, receiver, closeMenu, archived) => {
+export const useContextMenu = (
+  sender,
+  receiver,
+  closeMenu,
+  archived,
+  muted
+) => {
   const { openModal } = useGlobalModalContext()
 
   const openClearHistoryModal = useCallback(() => {
@@ -49,6 +55,30 @@ export const useContextMenu = (sender, receiver, closeMenu, archived) => {
     closeMenu()
   }, [closeMenu, receiver, sender])
 
+  const muteChat = useCallback(() => {
+    contactsChannel.postMessage({
+      type: 'updateContactMuted',
+      payload: {
+        receiver,
+        muted: true
+      }
+    })
+
+    closeMenu()
+  }, [closeMenu, receiver])
+
+  const unmuteChat = useCallback(() => {
+    contactsChannel.postMessage({
+      type: 'updateContactUnmuted',
+      payload: {
+        receiver,
+        muted: false
+      }
+    })
+
+    closeMenu()
+  }, [closeMenu, receiver])
+
   const unarchiveChat = useCallback(() => {
     contactsChannel.postMessage({
       type: 'updateContactArchived',
@@ -69,14 +99,20 @@ export const useContextMenu = (sender, receiver, closeMenu, archived) => {
         onDeleteChat: openDeleteChatModal,
         archived,
         onArchiveChat: archiveChat,
-        onUnarchiveChat: unarchiveChat
+        onUnarchiveChat: unarchiveChat,
+        muted,
+        onMuteChat: muteChat,
+        onUnmuteChat: unmuteChat
       }),
     [
       archiveChat,
       archived,
       openClearHistoryModal,
       openDeleteChatModal,
-      unarchiveChat
+      unarchiveChat,
+      muted,
+      muteChat,
+      unmuteChat
     ]
   )
 }

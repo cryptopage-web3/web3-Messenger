@@ -54,7 +54,8 @@ const useAdd = sender => {
       const did = await getDid(input, ceramic)
       const contact = {
         sender: sender,
-        receiver: did
+        receiver: did,
+        muted: false,
       }
 
       contactsChannel.postMessage({

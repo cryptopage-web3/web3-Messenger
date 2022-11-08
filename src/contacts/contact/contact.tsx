@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState} from 'react'
 import styled from 'styled-components'
 import { Box } from 'grommet'
 import { ChatAvatar } from '../../components'
@@ -32,7 +32,7 @@ type ContactProps = {
   setActiveItem: (arg: string) => void
   key: string
   active?: boolean
-  muted?: boolean
+  muted: boolean
   archived?: boolean
 }
 
@@ -109,11 +109,24 @@ export const Contact = ({
     [openMenu]
   )
 
-  const menuConfig = useContextMenu(sender, receiver, closeMenu, archived)
+  const menuConfig = useContextMenu(sender, receiver, closeMenu, archived, muted)
+
+  const [dropUp, setDropUp] = useState(false)
+
+  const ref = useRef()
+  useEffect(()=>{
+    if (!ref.current)
+      return
+
+    const limit = window.innerHeight - ref.current.getBoundingClientRect().bottom < 180
+    console.info('limit', limit)
+    setDropUp(limit)
+  }, [])
 
   return (
     <>
       <StyledChatCard
+        ref={ref}
         onClick={handleClick}
         active={active}
         onContextMenu={handleContextMenu}
@@ -133,6 +146,7 @@ export const Contact = ({
         openMenu={openMenu}
         closeMenu={closeMenu}
         menuConfig={menuConfig}
+        dropUp={dropUp}
       />
     </>
   )

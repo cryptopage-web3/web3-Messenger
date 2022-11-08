@@ -4,6 +4,7 @@ import { Menu, Search } from '../../icons'
 import { Box, Button } from 'grommet'
 import { useSelectMode } from '../useSelectMode'
 import { useCallback } from 'react'
+import { useMuted } from "../useMuted";
 
 const uiChannel = new BroadcastChannel('peer:ui')
 
@@ -13,7 +14,8 @@ type ContextMenuProps = {
 }
 
 const ContextMenu = ({ sender, receiver }: ContextMenuProps) => {
-  const menuConfig = useContextMenu(sender, receiver)
+  const muted = useMuted(receiver)
+  const menuConfig = useContextMenu(sender, receiver, muted)
 
   return (
     <DropButton
