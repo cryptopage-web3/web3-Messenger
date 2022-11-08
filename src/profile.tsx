@@ -27,7 +27,7 @@ export const useCeramic = () => {
 
 export const useDID = () => {
   const result = useConnection()
-  console.debug('(useDID) result', result)
+
   return getDID(result)
 }
 

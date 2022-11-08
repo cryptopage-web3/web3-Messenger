@@ -1,44 +1,38 @@
+import React, { useMemo } from 'react'
 import { Sidebar } from 'grommet'
 import { ContactsHeader } from './contacts-header'
 import { Contacts } from './contacts'
 import { EmptyContactsPlaceholder } from './empty-contacts-placeholder'
 import { useState } from 'react'
-import { ArchivedChats } from './archived-chats'
 import styled from 'styled-components'
-import { ActiveContainer } from '../components/container'
+import { ArchivedChatsHeader } from './archived/archived-chats-header'
+import { SidebarMode } from '../@types'
+import { Context, ContextProps } from './context'
 
-//test delete
 const SidebarContainer = styled(Sidebar)`
-  padding-right: 40px;
+  padding: 0 40px 0 0;
 `
-
-const ChatsContainer = styled(ActiveContainer)`
-  flex-grow: 1;
-`
-
-type ChatsProps = {
-  setSidebarMode: (arg: string) => void
-  sidebarMode: string
-}
-
-const Chats = ({ sidebarMode, setSidebarMode }: ChatsProps) => (
-  <ChatsContainer className={sidebarMode !== 'archived-chats' && 'active'}>
-    <ContactsHeader setSidebarMode={setSidebarMode} />
-    <Contacts sidebarMode={sidebarMode} setSidebarMode={setSidebarMode} />
-    <EmptyContactsPlaceholder />
-  </ChatsContainer>
-)
 
 export const ChatListSidebar = props => {
-  const [sidebarMode, setSidebarMode] = useState('contacts')
+  const [uiConfig, setUiConfig] = useState<ContextProps>({
+    sidebarMode: SidebarMode.CONTACTS,
+    hasArchivedChats: false,
+    hasUnarchivedChats: false
+  })
+
+  const value = useMemo(() => ({ uiConfig, setUiConfig }), [uiConfig])
 
   return (
-    <SidebarContainer {...props} width="medium">
-      <Chats sidebarMode={sidebarMode} setSidebarMode={setSidebarMode} />
-      <ArchivedChats
-        sidebarMode={sidebarMode}
-        setSidebarMode={setSidebarMode}
-      />
-    </SidebarContainer>
+    <Context.Provider value={value}>
+      <SidebarContainer {...props} width="medium">
+        {uiConfig.sidebarMode !== SidebarMode.ARCHIVED_CHATS ? (
+          <ContactsHeader />
+        ) : (
+          <ArchivedChatsHeader />
+        )}
+        <Contacts />
+        <EmptyContactsPlaceholder />
+      </SidebarContainer>
+    </Context.Provider>
   )
 }

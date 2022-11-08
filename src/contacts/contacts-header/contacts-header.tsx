@@ -10,13 +10,9 @@ const StyledBox = styled(props => (
   max-height: 100%;
 `
 
-type ContactsHeaderProps = {
-  setSidebarMode: (arg: string) => void
-}
-
-export const ContactsHeader = ({ setSidebarMode }: ContactsHeaderProps) => (
+export const ContactsHeader = () => (
   <StyledBox>
-    <SearchChat setSidebarMode={setSidebarMode} />
+    <SearchChat />
     <AddChatButton />
   </StyledBox>
 )

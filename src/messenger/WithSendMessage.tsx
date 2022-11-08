@@ -67,6 +67,14 @@ const useMessage = (sender, receiver) => {
   return [message, handleMessage, handleSubmit]
 }
 
+const isActiveContactEqualChosenReceiver = (activeContact, receiver) => {
+  return (
+    activeContact === receiver &&
+    activeContact !== undefined &&
+    receiver !== undefined
+  )
+}
+
 type WrappedInputContentProps = {
   chatReceiver?: string
   onEmptyChatReceiver?: () => void
@@ -97,7 +105,10 @@ export const WithSendMessage = InputContent => {
             onKeyPress={handleKeyPress}
             disabled={disabled}
             contact={contact}
-            withForwarded={chatReceiver === receiver}
+            withForwarded={isActiveContactEqualChosenReceiver(
+              chatReceiver,
+              receiver
+            )}
             onHideForwarded={onEmptyChatReceiver}
           />
         </Box>

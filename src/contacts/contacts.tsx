@@ -1,14 +1,14 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useContext, useEffect, useState } from 'react'
 import * as R from 'ramda'
 import { useDID } from '../profile'
 import * as DB from '../service/db'
-import { DefaultButton, List } from '../components'
-import { DBContact } from '../@types'
+import { ActiveContainer, List, ScrollContainer } from '../components'
+import { DBContact, SidebarMode } from '../@types'
 import { Contact } from './contact'
 import { useActiveContact } from '../messenger/useActiveContact'
 import styled from 'styled-components'
-import { Box } from 'grommet'
-import { ActiveContainer, ScrollContainer } from '../components/container'
+import { ArchivedButton } from './archived'
+import { Context } from './context'
 
 const statusChannel = new BroadcastChannel('peer:status')
 const contactsChannel = new BroadcastChannel('peer:contacts')
@@ -43,72 +43,91 @@ export const setActiveContact = (did, setList) => {
   setList(list => getListWithActiveContact(list, did))
 }
 
-const updateContacts = async (sender: string, setList: (arg: []) => void) => {
-  const allContacts = await DB.getAllContactsByDid(sender)
+const updateHasArchivedChats = (archivedChats, uiConfig, setUiConfig) => {
+  const setHasArchivedChats = hasArchivedChats => {
+    setUiConfig(prev => ({ ...prev, hasArchivedChats }))
+  }
 
-  setList(allContacts)
+  if (archivedChats.length && !uiConfig.hasArchivedChats) {
+    setHasArchivedChats(true)
+  } else if (!archivedChats.length && uiConfig.hasArchivedChats) {
+    setHasArchivedChats(false)
+  }
+}
+
+const updateHasUnarchivedChats = (unarchivedChats, uiConfig, setUiConfig) => {
+  const setHasUnarchivedChats = hasUnarchivedChats => {
+    setUiConfig(prev => ({ ...prev, hasUnarchivedChats }))
+  }
+
+  if (unarchivedChats.length && !uiConfig.hasUnarchivedChats) {
+    setHasUnarchivedChats(true)
+  } else if (!unarchivedChats.length && uiConfig.hasUnarchivedChats) {
+    setHasUnarchivedChats(false)
+  }
+}
+
+const updateContacts = async (
+  sender: string,
+  setList: (arg: []) => void,
+  uiConfig,
+  setUiConfig
+) => {
+  const archivedChats = await DB.getAllArchivedContactsByDid(sender)
+  const unarchivedChats = await DB.getAllContactsByDid(sender)
+
+  updateHasArchivedChats(archivedChats, uiConfig, setUiConfig)
+  updateHasUnarchivedChats(unarchivedChats, uiConfig, setUiConfig)
+
+  setList(
+    uiConfig.sidebarMode === SidebarMode.ARCHIVED_CHATS
+      ? archivedChats
+      : unarchivedChats
+  )
 }
 
 const uiContactsEventMap = {
   activeContact: async (message, setList) => {
-    const newContact = message.receiver
+    const contact = message.receiver
 
-    setActiveContact(newContact, setList)
+    setActiveContact(contact, setList)
   },
-  contactDeleted: async (message, setList, currentActiveContact) => {
+  contactDeleted: async (message, setList, uiConfig, setUiConfig) => {
     const { sender, receiver } = message
 
-    await updateContacts(sender, setList)
+    await updateContacts(sender, setList, uiConfig, setUiConfig)
 
-    if (receiver !== currentActiveContact) {
+    if (receiver !== uiConfig.activeContact) {
       await uiContactsEventMap.activeContact(
-        { receiver: currentActiveContact },
+        { receiver: uiConfig.activeContact },
         setList
       )
     }
   },
-  newContactAdded: async (message, setList) => {
+  newContactAdded: async (message, setList, uiConfig, setUiConfig) => {
     const { sender } = message
 
-    await updateContacts(sender, setList)
+    await updateContacts(sender, setList, uiConfig, setUiConfig)
     await uiContactsEventMap.activeContact(message, setList)
   },
-  updateArchivedContacts: async (message, setList) => {
+  updateArchivedContacts: async (message, setList, uiConfig, setUiConfig) => {
     const { sender } = message
 
-    await updateContacts(sender, setList)
+    await updateContacts(sender, setList, uiConfig, setUiConfig)
   }
 }
 
-const useArchivedContactUpdate = (
-  sender,
-  list,
-  setList,
-  currentActiveContact
-) => {
-  useEffect(() => {
-    const listenNewContact = async ({ data }) => {
-      if (data.type === 'updateArchivedContacts') {
-        await updateArchivedContacts(data.payload.sender, setList)
-      }
-    }
+const useContactUpdate = (sender, list, setList) => {
+  const { uiConfig, setUiConfig } = useContext(Context)
 
-    uiContactsChannel.addEventListener('message', listenNewContact)
-
-    return () => {
-      uiContactsChannel.removeEventListener('message', listenNewContact)
-    }
-  }, [sender, list, setList, currentActiveContact])
-}
-
-const useContactUpdate = (sender, list, setList, currentActiveContact) => {
   useEffect(() => {
     const listenNewContact = async ({ data }) => {
       if (uiContactsEventMap[data.type]) {
         uiContactsEventMap[data.type](
           data.payload,
           setList,
-          currentActiveContact
+          uiConfig,
+          setUiConfig
         )
       }
     }
@@ -118,47 +137,17 @@ const useContactUpdate = (sender, list, setList, currentActiveContact) => {
     return () => {
       uiContactsChannel.removeEventListener('message', listenNewContact)
     }
-  }, [sender, list, setList, currentActiveContact])
+  }, [sender, list, setList, uiConfig, setUiConfig])
 }
 
-const updateArchivedContacts = async (
-  sender: string,
-  setList: (arg: []) => void
-) => {
-  const allArchivedContacts = await DB.getAllArchivedContactsByDid(sender)
+type UseContactsReturn = [DBContact[], (arg: string) => void]
 
-  setList(allArchivedContacts)
-}
-
-export const useArchivedChats = (
-  currentActiveContact
-): [DBContact[], (arg: string) => void] => {
+export const useContacts = (): UseContactsReturn => {
   const sender = useDID()
 
   const [list, setList] = useState([])
 
-  const setActiveItem = useCallback(
-    contact => setActiveContact(contact, setList),
-    []
-  )
-
-  useEffect(() => {
-    if (!sender) return
-
-    updateArchivedContacts(sender, setList)
-  }, [sender])
-
-  useArchivedContactUpdate(sender, list, setList, currentActiveContact)
-
-  return [list, setActiveItem]
-}
-
-export const useContacts = (
-  currentActiveContact
-): [DBContact[], (arg: string) => void] => {
-  const sender = useDID()
-
-  const [list, setList] = useState([])
+  const { uiConfig, setUiConfig } = useContext(Context)
 
   const setActiveItem = useCallback(
     contact => setActiveContact(contact, setList),
@@ -170,10 +159,10 @@ export const useContacts = (
   useEffect(() => {
     if (!sender) return
 
-    updateContacts(sender, setList)
-  }, [sender])
+    updateContacts(sender, setList, uiConfig, setUiConfig)
+  }, [sender, setUiConfig, uiConfig])
 
-  useContactUpdate(sender, list, setList, currentActiveContact)
+  useContactUpdate(sender, list, setList)
 
   return [list, setActiveItem]
 }
@@ -182,56 +171,60 @@ const StyledScrollContainer = styled(ScrollContainer)`
   margin-top: 20px;
 `
 
-type ContactsProps = {
-  sidebarMode: string
-  setSidebarMode: (arg: string) => void
-  archived?: boolean
+const isSearchChatMode = sidebarMode => {
+  return sidebarMode === SidebarMode.CHATS_SEARCH
 }
 
-const ButtonContainer = styled(Box)`
-  padding-top: 10px;
-  min-height: unset;
-`
+const setArchivedMode = prevState => ({
+  ...prevState,
+  sidebarMode: SidebarMode.ARCHIVED_CHATS
+})
 
-const StyledButton = styled(DefaultButton)`
-  color: #a7a7a7;
-`
-// eslint-disable-next-line max-lines-per-function
-export const Contacts = ({ sidebarMode, setSidebarMode }: ContactsProps) => {
+type ContactListProps = {
+  contacts: DBContact[]
+  setActiveItem: (arg: string) => void
+  currentActiveContact: string
+}
+
+const ContactsList = ({
+  contacts,
+  setActiveItem,
+  currentActiveContact
+}: ContactListProps) => (
+  <List>
+    {contacts.map(item => (
+      <Contact
+        key={item.receiver_did}
+        setActiveItem={setActiveItem}
+        active={currentActiveContact === item.receiver_did}
+        {...item}
+      />
+    ))}
+  </List>
+)
+
+export const Contacts = () => {
   const sender = useDID()
   const currentActiveContact = useActiveContact()
-  const [contacts, setActiveItem] = useContacts(currentActiveContact)
-  const [archivedChats] = useArchivedChats('')
 
+  const { uiConfig, setUiConfig } = useContext(Context)
+  const { hasArchivedChats, sidebarMode } = uiConfig
+  const [contacts, setActiveItem] = useContacts()
   const openArchivedChats = useCallback(() => {
-    setSidebarMode('archived-chats')
-  }, [setSidebarMode])
+    setUiConfig(setArchivedMode)
+  }, [setUiConfig])
 
-  if ((!archivedChats.length && !contacts.length) || !sender) return null
+  if ((!contacts.length && !hasArchivedChats) || !sender) return null
 
   return (
-    <ActiveContainer className={sidebarMode === 'contacts' && 'active'}>
-      {archivedChats.length > 0 && (
-        <ButtonContainer>
-          <StyledButton
-            size="xsmall"
-            label="Archived chats"
-            color="#E4E4E4"
-            onClick={openArchivedChats}
-          />
-        </ButtonContainer>
-      )}
-
+    <ActiveContainer className={!isSearchChatMode(sidebarMode) && 'active'}>
+      <ArchivedButton handleClick={openArchivedChats} />
       <StyledScrollContainer>
-        <List>
-          {contacts.map(item => (
-            <Contact
-              key={item.receiver_did}
-              setActiveItem={setActiveItem}
-              {...item}
-            />
-          ))}
-        </List>
+        <ContactsList
+          contacts={contacts}
+          setActiveItem={setActiveItem}
+          currentActiveContact={currentActiveContact}
+        />
       </StyledScrollContainer>
     </ActiveContainer>
   )

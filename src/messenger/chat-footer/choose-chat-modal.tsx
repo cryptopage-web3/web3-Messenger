@@ -128,7 +128,10 @@ const dropDownStyle = {
 
 // eslint-disable-next-line max-lines-per-function
 export const ChooseChatModal = () => {
-  const [chats] = useContacts('')
+  //TODO attempting to call forward in archived chats mode will return a list of archived chats
+  //this may not be expected behavior for the user. when setting the expected behavior,
+  //make the appropriate fix on the front)
+  const [chats] = useContacts()
   const { closeModal } = useGlobalModalContext()
 
   const [searchValue, setSearchValue] = useState('')
