@@ -1,7 +1,7 @@
 import * as React from 'react'
+import { useEffect } from 'react'
 import { TextInputProps } from 'grommet'
 import styled from 'styled-components'
-import { useEffect } from 'react'
 import { clickOutside } from './click-outside'
 import { SearchResult, SearchResults } from './SearchResults'
 import { SearchInput } from './SearchInput'
@@ -24,6 +24,7 @@ const Container = styled('div')`
   width: 100%;
   display: flex;
   flex-direction: column;
+  z-index: 1;
 `
 
 type SearchBarProps = TextInputProps & {

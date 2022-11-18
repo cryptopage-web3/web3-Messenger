@@ -68,7 +68,7 @@ export const ChatUtils = ({ sender, receiver }: ChatUtilsProps) => {
           onClick={selectModeOff}
           plain
           color="brand"
-          size="14px"
+          size="small"
         />
       ) : (
         <ContextMenu sender={sender} receiver={receiver} />

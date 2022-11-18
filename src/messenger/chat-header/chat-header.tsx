@@ -6,7 +6,6 @@ import styled from 'styled-components'
 import { ChatUtils } from './chat-utils'
 
 const StyledChatHeader = styled(Box)`
-  min-height: unset;
   padding: 10px 15px;
 `
 

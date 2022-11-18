@@ -14,7 +14,6 @@ const Online = styled(Box)`
 
 const StyledAvatar = styled(Box)`
   position: relative;
-  min-width: unset;
 `
 
 type ChatAvatarProps = {

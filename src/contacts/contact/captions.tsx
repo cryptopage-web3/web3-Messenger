@@ -8,6 +8,7 @@ import { MessageTextPreview } from '../../components'
 const StyledContainer = styled(Box)`
   flex: 1;
   justify-content: space-between;
+  overflow: hidden;
 `
 
 type ChatCardCaptionsProps = {

@@ -3,13 +3,13 @@ import { useDID } from '../../profile'
 import * as DB from '../../service/db'
 import { Message } from './message'
 import { Message as TMessage, Status } from '../../@types'
+import { List, ScrollContainer } from '../../components'
 import { useActiveContact } from '../useActiveContact'
 import { Box } from 'grommet'
 import { SearchMessage } from '../search-message'
 import styled from 'styled-components'
 import { scrollToMessage } from './scroll-to-message'
 import { useSelectMode } from '../useSelectMode'
-import { ScrollContainer } from '../../components'
 
 const messagesChannel = new BroadcastChannel('peer:messages')
 const naclChannel = new BroadcastChannel('peer:nacl')
@@ -68,6 +68,7 @@ const updateStatus = (message, status: Status) => {
 const StyledMessages = styled(Box)`
   flex: 1 1 auto;
   position: relative;
+  overflow: hidden;
 `
 
 const useSearch = () => {
@@ -177,11 +178,14 @@ export const Messages = () => {
     receiver
   )
 
+  const selectMode =
+    selectModeReceiver !== undefined && selectModeReceiver === receiver
+
   return (
     <StyledMessages id="messages-view-port">
       {show && <SearchMessage messages={messages} hideSearch={hideSearch} />}
       <ScrollContainer id="messages-scroll-container">
-        <ul>
+        <List>
           {messages.map(message => {
             sender === message.receiver &&
               message.status !== Status.viewed &&
@@ -189,22 +193,18 @@ export const Messages = () => {
 
             return (
               <Message
-                id={message.date}
                 key={message.id}
                 sender={sender}
                 onClick={decryptMessage}
                 message={message}
-                selectMode={
-                  selectModeReceiver !== undefined &&
-                  selectModeReceiver === receiver
-                }
+                selectMode={selectMode}
                 addMessageId={addMessageId}
                 removeMessageId={removeMessageId}
                 checked={hasMessageId(message.messageId)}
               />
             )
           })}
-        </ul>
+        </List>
       </ScrollContainer>
     </StyledMessages>
   )

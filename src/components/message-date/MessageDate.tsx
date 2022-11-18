@@ -11,8 +11,14 @@ type MessageDateProps = {
   className?: string
 }
 
-export const MessageDate = ({ date, className }: MessageDateProps) => (
-  <StyledMessageDate className={className}>
-    {date || 'Last seen recently'}
-  </StyledMessageDate>
-)
+export const MessageDate = ({ date, className }: MessageDateProps) => {
+  const time = new Date(date).toLocaleTimeString('ru-RU', {
+    timeStyle: 'short'
+  })
+
+  return (
+    <StyledMessageDate className={className}>
+      {time || 'Last seen recently'}
+    </StyledMessageDate>
+  )
+}

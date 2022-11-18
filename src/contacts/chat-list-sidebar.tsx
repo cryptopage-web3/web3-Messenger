@@ -1,9 +1,8 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { Sidebar } from 'grommet'
 import { ContactsHeader } from './contacts-header'
 import { Contacts } from './contacts'
 import { EmptyContactsPlaceholder } from './empty-contacts-placeholder'
-import { useState } from 'react'
 import styled from 'styled-components'
 import { ArchivedChatsHeader } from './archived/archived-chats-header'
 import { SidebarMode } from '../@types'
@@ -11,6 +10,11 @@ import { Context, ContextProps } from './context'
 
 const SidebarContainer = styled(Sidebar)`
   padding: 0 40px 0 0;
+  overflow: hidden;
+
+  & > div {
+    overflow: hidden;
+  }
 `
 
 export const ChatListSidebar = props => {

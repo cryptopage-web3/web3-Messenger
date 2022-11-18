@@ -1,12 +1,8 @@
 import * as React from 'react'
-import { Box, Button } from 'grommet'
-import {
-  ChatAvatar,
-  ChatTitle,
-  MessageDate,
-  MessageTextPreview
-} from '../../components'
+import { Button } from 'grommet'
+import { MessageDate } from '../../components'
 import styled from 'styled-components'
+import { MessagePreview } from './message-preview'
 
 const StyledButton = styled(Button)`
   background: ${({ active }) => (active ? '#e3e3e3' : '#f5f9fd')};
@@ -20,6 +16,12 @@ const StyledButton = styled(Button)`
 
 const StyledMessageDate = styled(MessageDate)`
   align-self: center;
+`
+
+const Container = styled('div')`
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
 `
 
 type FoundMessageProps = {
@@ -36,15 +38,9 @@ export const Suggestion: React.FC = ({
   active
 }: FoundMessageProps) => (
   <StyledButton onClick={onClick} active={active}>
-    <Box direction="row" justify="between">
-      <Box direction="row" gap="10px" width="100%">
-        <ChatAvatar size="36px" />
-        <Box justify="center" direction="column" width="100%">
-          <ChatTitle chatAddress={receiver} />
-          <MessageTextPreview text={text} />
-        </Box>
-      </Box>
+    <Container>
+      <MessagePreview receiver={receiver} text={text} />
       <StyledMessageDate />
-    </Box>
+    </Container>
   </StyledButton>
 )

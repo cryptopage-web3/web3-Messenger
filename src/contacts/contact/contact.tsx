@@ -33,6 +33,7 @@ type ContactProps = {
   key: string
   muted: boolean
   archived?: boolean
+  active: boolean
 }
 
 const uiChannel = new BroadcastChannel('peer:ui')

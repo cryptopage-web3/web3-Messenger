@@ -6,5 +6,6 @@ export const ActiveContainer = styled(Box)`
 
   &.active {
     display: flex;
+    overflow: hidden;
   }
 `

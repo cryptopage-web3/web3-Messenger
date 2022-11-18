@@ -4,7 +4,6 @@ import { ArrowDown, ArrowUp, Close } from '../../icons'
 import styled from 'styled-components'
 
 const StyledButtonsControl = styled(Box)`
-  min-width: unset;
   padding-right: 15px;
 `
 

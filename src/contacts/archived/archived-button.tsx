@@ -30,7 +30,6 @@ export const ArchivedButton = ({ handleClick }: ArchivedButtonProps) => {
   return (
     <Container>
       <StyledButton
-        size="xsmall"
         label="Archived chats"
         color="#E4E4E4"
         onClick={handleClick}

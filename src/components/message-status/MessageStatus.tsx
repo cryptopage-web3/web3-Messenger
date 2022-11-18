@@ -1,10 +1,11 @@
 import { Status } from '../../@types'
-import { Sent as SentIcon, Viewed as ViewedIcon } from './icons'
+import { Pending, Sent as SentIcon, Viewed as ViewedIcon } from './icons'
 
 const STATUSES = {
   [Status.sent]: SentIcon,
   [Status.delivered]: SentIcon,
-  [Status.viewed]: ViewedIcon
+  [Status.viewed]: ViewedIcon,
+  [Status.pending]: Pending
 }
 
 export const MessageStatus = ({ status }: { status: Status }) => {

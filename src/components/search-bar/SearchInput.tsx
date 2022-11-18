@@ -11,7 +11,6 @@ const StyledTextInput = styled(TextInput)`
 `
 
 const Container = styled(Box)`
-  min-height: unset;
   position: relative;
   width: 100%;
   border-radius: 5px;

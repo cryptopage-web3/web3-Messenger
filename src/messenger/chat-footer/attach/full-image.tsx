@@ -22,7 +22,6 @@ const DeleteButton = styled(IconButton)`
 const StyledBox = styled(Box)`
   position: relative;
   max-height: 250px;
-  min-height: unset;
 
   & > button {
     display: none;

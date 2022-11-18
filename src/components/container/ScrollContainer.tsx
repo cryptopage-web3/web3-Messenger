@@ -5,5 +5,5 @@ export const ScrollContainer = styled(Box)`
   flex: 1 1 auto;
   word-wrap: break-word;
   overflow-x: hidden;
+  overflow-y: auto;
 `
-
