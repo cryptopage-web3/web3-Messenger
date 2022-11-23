@@ -22,9 +22,9 @@ type FooterProps = {
 
 export const Footer = ({ message, sender }: FooterProps) => {
   return (
-    <Box direction="row" justify="between" align="center">
+    <Box direction="row" justify="between" align="center" >
       <EditedMark edited={false} />
-      <Box direction="row" justify="end" gap="4px" align="center">
+      <Box direction="row" justify="end" gap="4px" align="center" fill="horizontal" >
         <MessageDate date={message.date} />
         <Status message={message} sender={sender} />
       </Box>
