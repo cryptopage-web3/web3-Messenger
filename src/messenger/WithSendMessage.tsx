@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
-import { useDID } from '../profile'
+import { useDID } from '../WalletConnect'
 import { Box } from 'grommet'
 import { Message as TMessage, MessageType, Status } from '../@types'
 import { useActiveContact } from './useActiveContact'

@@ -35,6 +35,9 @@
     "url": "^0.11.0"
   },
   "dependencies": {
+    "@web3modal/ethereum": "^2.0.0-beta.7",
+    "@web3modal/react": "^2.0.0-beta.7",
+    "wagmi": "^0.8.6",
     "@metamask/eth-sig-util": "^4.0.1",
     "@self.id/framework": "^0.2.0",
     "crypto": "^1.0.1",

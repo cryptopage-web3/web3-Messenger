@@ -3,7 +3,6 @@ import * as DB from './db'
 import * as NaCl from './nacl'
 
 export const subscribe = DID => {
-  //peer.subscribe(DID)
   server.subscribe(DID)
   console.log(`message subscribe ${DID}`)
 }

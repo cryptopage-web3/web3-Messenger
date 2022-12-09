@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { useDID } from '../../profile'
+import { useDID } from '../../WalletConnect'
 import * as DB from '../../service/db'
 import { Message } from './message'
 import { Message as TMessage, Status } from '../../@types'

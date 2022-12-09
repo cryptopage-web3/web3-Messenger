@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { useCallback, useMemo } from 'react'
 import { DropButton, useGlobalModalContext } from '../../components'
-import { useDID } from '../../profile'
+import { useDID } from '../../WalletConnect'
 import { AddContactModal } from '../add-contact-modal'
 import { AddChat } from '../../icons'
 import { MenuItemProps } from '../../components/drop-button/MenuItem'

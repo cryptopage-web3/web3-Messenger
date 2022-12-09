@@ -1,8 +1,8 @@
 import React from 'react'
-import { Avatar, Connect, Name } from './profile'
 import { Grid, Header } from 'grommet'
 import { Chat } from './messenger'
 import { ChatListSidebar } from './contacts'
+import { WalletConnect } from './WalletConnect'
 
 const rows = ['auto', 'flex']
 const columns = ['auto', 'flex']
@@ -15,9 +15,7 @@ const areas = [
 export const App = () => (
   <Grid fill rows={rows} columns={columns} areas={areas}>
     <Header gridArea="header" pad="small">
-      <Avatar />
-      <Name />
-      <Connect />
+      <WalletConnect />
     </Header>
 
     <ChatListSidebar gridArea="nav" />

@@ -1,7 +1,7 @@
 import { useCallback, useState, useContext } from 'react'
 import { SearchBar } from '../../components'
 import { useContacts } from '../contacts'
-import { useDID } from '../../profile'
+import { useDID } from '../../WalletConnect'
 import { SearchResult } from './search-result'
 import { Context } from '../context'
 import { SidebarMode } from '../../@types'

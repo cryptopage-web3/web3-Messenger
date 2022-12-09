@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import * as R from 'ramda'
-import { useDID } from '../profile'
+import { useDID } from '../WalletConnect'
 import * as DB from '../service/db'
 import { ActiveContainer, List, ScrollContainer } from '../components'
 import { DBContact, SidebarMode } from '../@types'

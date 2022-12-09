@@ -1,4 +1,4 @@
-import { useDID } from '../../profile'
+import { useDID } from '../../WalletConnect'
 import { useActiveContact } from '../useActiveContact'
 import { ChatInfo } from './chat-info'
 import { Box } from 'grommet'
