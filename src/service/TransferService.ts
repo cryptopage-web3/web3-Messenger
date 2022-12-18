@@ -151,7 +151,7 @@ const MessagesEventMap = {
       })
     } else if (!contact.receiver_public_key) {
       contactsChannel.postMessage({
-        type: 'updateContactKey',
+        type: 'updateEncryptionPublicKey',
         payload: {
           sender: message.receiver,
           receiver: message.sender,

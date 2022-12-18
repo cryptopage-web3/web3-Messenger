@@ -31,10 +31,30 @@ const addContact = async contact => {
 }
 
 const ContactsEventMap = {
-  incomingAddContact: async message => await addContact(message),
+  incomingAddContact: async message => {
+    console.debug('ContactsEventMap incomingAddContact() message', message)
+    return await addContact(message)
+  },
   addContact: async message => await addContact(message),
-  updateContactKey: async message => {
-    await DB.updateContactKey(message.receiver, message.encryptionPublicKey)
+  incomingRequestEncryptionPublicKey: async contact => {
+    console.debug(
+      'ContactsEventMap incomingRequestEncryptionPublicKey() contact',
+      contact
+    )
+    //TODO: return await getEncryptionPublicKey()
+  },
+  requestEncryptionPublicKey: async contact => {
+    console.debug(
+      'ContactsEventMap requestEncryptionPublicKey() contact',
+      contact
+    )
+    //TODO: return await requestEncryptionPublicKey(contact)
+  },
+  updateEncryptionPublicKey: async message => {
+    await DB.updateEncryptionPublicKey(
+      message.receiver,
+      message.encryptionPublicKey
+    )
 
     contactsChannel.postMessage({
       type: 'contactKeyUpdated',

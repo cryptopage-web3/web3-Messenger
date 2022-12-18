@@ -112,7 +112,7 @@ export const getContactByDid = async (
   }
 }
 
-export const updateContactKey = async (
+export const updateEncryptionPublicKey = async (
   contactDid: string,
   encryptionPublicKey
 ) => {
