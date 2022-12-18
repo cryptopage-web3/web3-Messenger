@@ -1,4 +1,5 @@
 import * as DB from './db/actions'
+import { requestEncryptionPublicKey } from './TransferService'
 
 const messagesChannel = new BroadcastChannel('peer:messages')
 const contactsChannel = new BroadcastChannel('peer:contacts')
@@ -33,23 +34,12 @@ const addContact = async contact => {
 const ContactsEventMap = {
   incomingAddContact: async message => {
     console.debug('ContactsEventMap incomingAddContact() message', message)
-    return await addContact(message)
+    await addContact(message)
+
+    //TODO: where would be a better place for having this invocation? since it's a "persistent" service, I doubt...
+    await requestEncryptionPublicKey(message)
   },
   addContact: async message => await addContact(message),
-  incomingRequestEncryptionPublicKey: async contact => {
-    console.debug(
-      'ContactsEventMap incomingRequestEncryptionPublicKey() contact',
-      contact
-    )
-    //TODO: return await getEncryptionPublicKey()
-  },
-  requestEncryptionPublicKey: async contact => {
-    console.debug(
-      'ContactsEventMap requestEncryptionPublicKey() contact',
-      contact
-    )
-    //TODO: return await requestEncryptionPublicKey(contact)
-  },
   updateEncryptionPublicKey: async message => {
     await DB.updateEncryptionPublicKey(
       message.receiver,

@@ -44,7 +44,7 @@ const sendInPendingMessages = async (sender: string, receiver: string) => {
   }
 }
 
-const requestKey = async ({ receiver, sender }) => {
+export const requestEncryptionPublicKey = async ({ receiver, sender }) => {
   const contact = await DB.getContactByDid(receiver)
 
   if (!contact.receiver_public_key) {
@@ -78,7 +78,7 @@ const MessagesEventMap = {
           payload: message
         })
 
-        await requestKey(message)
+        await requestEncryptionPublicKey(message)
       } else {
         message.status = Status.sent
 
