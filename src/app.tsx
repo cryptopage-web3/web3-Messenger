@@ -3,6 +3,7 @@ import { Grid, Header } from 'grommet'
 import { Chat } from './messenger'
 import { ChatListSidebar } from './contacts'
 import { WalletConnect } from './WalletConnect'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
 const rows = ['auto', 'flex']
 const columns = ['auto', 'flex']
@@ -13,13 +14,30 @@ const areas = [
 ]
 
 export const App = () => (
-  <Grid fill rows={rows} columns={columns} areas={areas}>
-    <Header gridArea="header" pad="small">
-      <WalletConnect />
-    </Header>
+  <BrowserRouter>
+    <Routes>
+      <Route
+        path="/ChatListSidebar"
+        element={
+          <Grid fill rows={rows} columns={columns} areas={areas}>
+            <ChatListSidebar gridArea="nav" />
+          </Grid>
+        }
+      />
+      <Route
+        path="/"
+        element={
+          <Grid fill rows={rows} columns={columns} areas={areas}>
+            <Header gridArea="header" pad="small">
+              <WalletConnect />
+            </Header>
 
-    <ChatListSidebar gridArea="nav" />
+            <ChatListSidebar gridArea="nav" />
 
-    <Chat gridArea="main" />
-  </Grid>
+            <Chat gridArea="main" />
+          </Grid>
+        }
+      />
+    </Routes>
+  </BrowserRouter>
 )
