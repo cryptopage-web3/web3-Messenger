@@ -16,14 +16,7 @@ const areas = [
 export const App = () => (
   <BrowserRouter>
     <Routes>
-      <Route
-        path="/ChatListSidebar"
-        element={
-          <Grid fill rows={rows} columns={columns} areas={areas}>
-            <ChatListSidebar gridArea="nav" />
-          </Grid>
-        }
-      />
+      <Route path="/ChatListSidebar" element={<ChatListSidebar adaptive />} />
       <Route
         path="/"
         element={

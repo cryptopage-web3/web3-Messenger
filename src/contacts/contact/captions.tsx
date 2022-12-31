@@ -18,9 +18,11 @@ type ChatCardCaptionsProps = {
   muted: boolean
   online?: boolean
   unreadMessages?: number
+  adaptive?: boolean
 }
 
 export const Captions = ({
+  adaptive,
   sender,
   receiver,
   message,
@@ -30,6 +32,7 @@ export const Captions = ({
 }: ChatCardCaptionsProps) => (
   <StyledContainer>
     <Title
+      adaptive={adaptive}
       sender={sender}
       receiver={receiver}
       message={message}
