@@ -189,9 +189,11 @@ type ContactListProps = {
   contacts: DBContact[]
   setActiveItem: (arg: string) => void
   currentActiveContact: string
+  adaptive?: boolean
 }
 
 const ContactsList = ({
+  adaptive,
   contacts,
   setActiveItem,
   currentActiveContact
@@ -199,6 +201,7 @@ const ContactsList = ({
   <List>
     {contacts.map(item => (
       <Contact
+        adaptive={adaptive}
         key={item.receiver_did}
         setActiveItem={setActiveItem}
         active={currentActiveContact === item.receiver_did}
@@ -207,8 +210,11 @@ const ContactsList = ({
     ))}
   </List>
 )
+type ContactsProps = {
+  adaptive?: boolean
+}
 
-export const Contacts = () => {
+export const Contacts = ({ adaptive = false }: ContactsProps) => {
   const sender = useDID()
   const currentActiveContact = useActiveContact()
 
@@ -226,6 +232,7 @@ export const Contacts = () => {
       <ArchivedButton handleClick={openArchivedChats} />
       <StyledScrollContainer>
         <ContactsList
+          adaptive={adaptive}
           contacts={contacts}
           setActiveItem={setActiveItem}
           currentActiveContact={currentActiveContact}

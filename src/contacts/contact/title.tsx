@@ -13,10 +13,12 @@ type ChatCardTitleProps = {
   message: Message
   muted: boolean
   online?: boolean
+  adaptive?: boolean
 }
 
 //TODO move contact configuration to contacts table or contacts configuration table. for example 'muted'
 export const Title = ({
+  adaptive,
   sender,
   receiver,
   message,
@@ -27,13 +29,13 @@ export const Title = ({
     <Box direction="row" align="center" justify="between">
       <Box direction="row" align="center" gap="4px">
         <ChatTitle chatAddress={receiver} online={online} />
-        {muted && <Muted color="#A7A7A7" />}
+        {!adaptive && muted && <Muted color="#A7A7A7" />}
       </Box>
       <Box direction="row" align="center" gap="4px">
-        {message && sender === message.sender && (
+        {!adaptive && message && sender === message.sender && (
           <LastMessageStatus status={message.status} />
         )}
-        {message && <MessageDate date={message.date} />}
+        {!adaptive && message && <MessageDate date={message.date} />}
       </Box>
     </Box>
   )

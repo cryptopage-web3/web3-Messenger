@@ -11,7 +11,7 @@ import { useContextMenu } from './useContextMenu'
 
 const StyledChatCard = styled('li')`
   background: ${({ active }) => (active ? '#E4E4E4' : 'transparent')};
-  padding: 10px;
+  padding: ${({ adaptive }) => (adaptive ? '10px 0' : '10px')};
   overflow-x: auto;
   overflow-y: hidden;
   cursor: pointer;
@@ -34,6 +34,7 @@ type ContactProps = {
   muted: boolean
   archived?: boolean
   active: boolean
+  adaptive: boolean
 }
 
 const uiChannel = new BroadcastChannel('peer:ui')
@@ -83,6 +84,7 @@ const useToggleContextMenu = () => {
 
 // eslint-disable-next-line max-lines-per-function
 export const Contact = ({
+  adaptive,
   active,
   receiver_did: receiver,
   muted,
@@ -132,6 +134,7 @@ export const Contact = ({
   return (
     <>
       <StyledChatCard
+        adaptive={adaptive}
         ref={ref}
         onClick={handleClick}
         active={active}
@@ -140,6 +143,7 @@ export const Contact = ({
         <Box direction="row" gap="10px" style={{ height: '46px' }}>
           <ChatAvatar size="46px" showOnline={true} />
           <Captions
+            adaptive={adaptive}
             sender={sender}
             receiver={receiver}
             message={lastMessage}

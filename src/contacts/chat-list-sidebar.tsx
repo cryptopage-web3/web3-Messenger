@@ -17,7 +17,22 @@ const SidebarContainer = styled(Sidebar)`
   }
 `
 
-export const ChatListSidebar = props => {
+const SidebarContainerAdaptive = styled(Sidebar)`
+  padding: 0;
+  overflow: hidden;
+
+  & > div {
+    overflow: hidden;
+  }
+`
+
+type ChatListSidebarProps = {
+  adaptive?: boolean
+  gridArea?: string
+  width?: string
+}
+
+export const ChatListSidebar = (props: ChatListSidebarProps) => {
   const [uiConfig, setUiConfig] = useState<ContextProps>({
     sidebarMode: SidebarMode.CONTACTS,
     hasArchivedChats: false,
@@ -28,15 +43,23 @@ export const ChatListSidebar = props => {
 
   return (
     <Context.Provider value={value}>
-      <SidebarContainer {...props} width="medium">
-        {uiConfig.sidebarMode !== SidebarMode.ARCHIVED_CHATS ? (
+      {props.adaptive ? (
+        <SidebarContainerAdaptive {...props}>
           <ContactsHeader />
-        ) : (
-          <ArchivedChatsHeader />
-        )}
-        <Contacts />
-        <EmptyContactsPlaceholder />
-      </SidebarContainer>
+          <Contacts adaptive />
+          <EmptyContactsPlaceholder />
+        </SidebarContainerAdaptive>
+      ) : (
+        <SidebarContainer {...props} width="medium">
+          {uiConfig.sidebarMode !== SidebarMode.ARCHIVED_CHATS ? (
+            <ContactsHeader />
+          ) : (
+            <ArchivedChatsHeader />
+          )}
+          <Contacts />
+          <EmptyContactsPlaceholder />
+        </SidebarContainer>
+      )}
     </Context.Provider>
   )
 }
