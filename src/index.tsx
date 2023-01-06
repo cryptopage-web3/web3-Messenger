@@ -15,6 +15,12 @@ const GlobalStyle = createGlobalStyle`
 
   body {
     margin: 0;
+    color: #1F1F1F;
+  }
+
+  #root * {
+    min-height: unset;
+    min-width: unset;
   }
 `
 
@@ -32,6 +38,7 @@ const theme = {
       size: '12px'
     },
     focus: {
+      outline: 'none',
       shadow: 'none'
     }
   },

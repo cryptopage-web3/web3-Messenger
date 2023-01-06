@@ -3,7 +3,6 @@ import * as DB from './db'
 import * as NaCl from './nacl'
 
 export const subscribe = DID => {
-  //peer.subscribe(DID)
   server.subscribe(DID)
   console.log(`message subscribe ${DID}`)
 }
@@ -20,6 +19,10 @@ export const publish = message => {
 export const getEncryptedMessage = async message => {
   const contact = await DB.getContactByDid(message.receiver)
   const encryptionPublicKey = contact.receiver_public_key
+  if (!encryptionPublicKey) {
+    throw new Error('No encryptionPublicKey')
+    //TODO: request the encryptionPublicKey
+  }
   const encryptedText = await NaCl.encrypt(message.text, encryptionPublicKey)
   return { ...message, text: encryptedText }
 }

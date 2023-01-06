@@ -1,48 +1,72 @@
 import * as React from 'react'
-import { ReactElement, useCallback, useState } from 'react'
-import { DropButton as DropButtonUi } from 'grommet'
+import { useCallback, useState } from 'react'
+import { DropButton as DropButtonUi, DropButtonExtendedProps } from 'grommet'
 import { Menu } from './Menu'
 import { MenuItemProps } from './MenuItem'
 
-const dropPropsDefault = {
-  margin: { bottom: '8px' },
-  round: '10px',
-  elevation: 'medium'
+const Position = {
+  topRight: {
+    dropAlign: { bottom: 'bottom', right: 'right' },
+    dropProps: {
+      margin: { bottom: '73px' },
+      round: '10px',
+      elevation: 'medium'
+    }
+  },
+  bottomRight: {
+    dropAlign: { top: 'top', right: 'right' },
+    dropProps: {
+      margin: { top: '8px' },
+      round: '10px',
+      elevation: 'medium'
+    }
+  }
 }
-const dropAlignDefault = { bottom: 'top', right: 'right' }
+
+export type DropAlignProps = {
+  top?: 'top' | 'bottom'
+  bottom?: 'top' | 'bottom'
+  right?: 'left' | 'right'
+  left?: 'left' | 'right'
+}
 
 type DropButtonProps = {
-  icon: ReactElement
-  disabled?: boolean
-  dropAlign?: { [arg: string]: string }
-  dropProps?: { [arg: string]: string | { [arg: string]: string } }
   menuConfig: MenuItemProps[]
-}
+  menuPosition?: 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight'
+} & Omit<DropButtonExtendedProps, 'dropContent'>
 
-export const DropButton = ({
-  icon: IconComponent,
-  menuConfig,
-  dropAlign,
-  dropProps,
-  disabled,
-  ...props
-}: DropButtonProps) => {
+const useToggle = () => {
   const [open, setOpen] = useState(false)
 
   const closeMenu = useCallback(() => setOpen(false), [])
   const openMenu = useCallback(() => setOpen(true), [])
 
+  return [open, openMenu, closeMenu]
+}
+
+export const DropButton = ({
+  icon: IconComponent,
+  menuConfig,
+  disabled,
+  menuPosition,
+  open: _open,
+  openMenu: _openMenu,
+  closeMenu: _closeMenu,
+  ...props
+}: DropButtonProps) => {
+  const [open, openMenu, closeMenu] = useToggle()
+
+  const position = Position[menuPosition] || Position.bottomRight
+
   return (
     <DropButtonUi
       {...props}
-      onOpen={openMenu}
-      onClose={closeMenu}
-      open={open}
-      icon={<IconComponent />}
+      {...position}
+      onOpen={_openMenu ? _openMenu : openMenu}
+      onClose={_closeMenu ? _closeMenu : closeMenu}
+      open={_open !== undefined ? _open : open}
+      icon={IconComponent && <IconComponent />}
       dropContent={<Menu menuConfig={menuConfig} closeMenu={closeMenu} />}
-      dropProps={dropProps || dropPropsDefault}
-      dropAlign={dropAlign || dropAlignDefault}
-      alignSelf="end"
       disabled={disabled}
       plain
     />

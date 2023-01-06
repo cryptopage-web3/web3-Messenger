@@ -1,8 +1,10 @@
 import * as DB from './db/actions'
+import { requestEncryptionPublicKey } from './TransferService'
 
 const messagesChannel = new BroadcastChannel('peer:messages')
 const contactsChannel = new BroadcastChannel('peer:contacts')
 const uiChannel = new BroadcastChannel('peer:ui')
+const uiContactsChannel = new BroadcastChannel('peer:ui:contacts')
 
 const addContact = async contact => {
   try {
@@ -10,14 +12,19 @@ const addContact = async contact => {
 
     if (!foundContact) {
       await DB.addContact(contact)
-    }
 
-    contactsChannel.postMessage({
-      type: 'newContactAdded',
-      payload: contact
-    })
+      uiContactsChannel.postMessage({
+        type: 'newContactAdded',
+        payload: contact
+      })
+    } else {
+      uiContactsChannel.postMessage({
+        type: 'activeContact',
+        payload: contact
+      })
+    }
   } catch (e) {
-    contactsChannel.postMessage({
+    uiContactsChannel.postMessage({
       type: 'error',
       payload: e
     })
@@ -25,13 +32,52 @@ const addContact = async contact => {
 }
 
 const ContactsEventMap = {
-  incomingAddContact: async message => await addContact(message),
+  incomingAddContact: async message => {
+    console.debug('ContactsEventMap incomingAddContact() message', message)
+    await addContact(message)
+
+    //TODO: where would be a better place for having this invocation? since it's a "persistent" service, I doubt...
+    await requestEncryptionPublicKey(message)
+  },
   addContact: async message => await addContact(message),
-  updateContactKey: async message => {
-    await DB.updateContactKey(message.receiver, message.encryptionPublicKey)
+  updateEncryptionPublicKey: async message => {
+    await DB.updateEncryptionPublicKey(
+      message.receiver,
+      message.encryptionPublicKey
+    )
 
     contactsChannel.postMessage({
       type: 'contactKeyUpdated',
+      payload: message
+    })
+  },
+  deleteContact: async message => {
+    await DB.deleteContact(message.receiver)
+    await DB.deleteMessages(message.sender, message.receiver)
+
+    uiContactsChannel.postMessage({ type: 'contactDeleted', payload: message })
+  },
+  updateContactArchived: async message => {
+    await DB.updateContactArchived(message.receiver, message.archived)
+
+    uiContactsChannel.postMessage({
+      type: 'updateArchivedContacts',
+      payload: message
+    })
+  },
+  updateContactMuted: async message => {
+    await DB.updateContactMuted(message.receiver, message.muted)
+
+    uiContactsChannel.postMessage({
+      type: 'updateMutedContacts',
+      payload: message
+    })
+  },
+  updateContactUnmuted: async message => {
+    await DB.updateContactMuted(message.receiver, message.muted)
+
+    uiContactsChannel.postMessage({
+      type: 'updateMutedContacts',
       payload: message
     })
   }
@@ -42,11 +88,13 @@ const MessagesEventMap = {
     await DB.addMessage(message)
 
     uiChannel.postMessage({ type: 'updateMessages' })
+    uiChannel.postMessage({ type: 'lastMessageChanged', payload: message })
   },
   addIncomingMessage: async message => {
     await DB.addMessage(message)
 
     uiChannel.postMessage({ type: 'updateMessages' })
+    uiChannel.postMessage({ type: 'lastMessageChanged', payload: message })
   },
   updateMessageStatus: async message => {
     await DB.updateStatus({
@@ -55,9 +103,21 @@ const MessagesEventMap = {
     })
 
     uiChannel.postMessage({ type: 'updateMessages' })
+    uiChannel.postMessage({ type: 'lastMessageChanged', payload: message })
   },
   updateMessageText: async message => {
     await DB.updateText(message)
+
+    uiChannel.postMessage({ type: 'updateMessages' })
+    uiChannel.postMessage({ type: 'lastMessageChanged', payload: message })
+  },
+  deleteMessages: async message => {
+    await DB.deleteMessages(message.sender, message.receiver)
+
+    uiChannel.postMessage({ type: 'updateMessages' })
+  },
+  deleteSelectedMessages: async message => {
+    await DB.deleteMessagesByIds(message.sender, message.receiver, message.ids)
 
     uiChannel.postMessage({ type: 'updateMessages' })
   }

@@ -44,7 +44,7 @@ const sendInPendingMessages = async (sender: string, receiver: string) => {
   }
 }
 
-const requestKey = async ({ receiver, sender }) => {
+export const requestEncryptionPublicKey = async ({ receiver, sender }) => {
   const contact = await DB.getContactByDid(receiver)
 
   if (!contact.receiver_public_key) {
@@ -56,7 +56,7 @@ const requestKey = async ({ receiver, sender }) => {
     })
 
     await Service.publish({
-      type: 'incomingHandshake',
+      type: 'handshake',
       receiver: message.receiver,
       payload: message
     })
@@ -78,7 +78,7 @@ const MessagesEventMap = {
           payload: message
         })
 
-        await requestKey(message)
+        await requestEncryptionPublicKey(message)
       } else {
         message.status = Status.sent
 
@@ -127,7 +127,7 @@ const MessagesEventMap = {
     })
   },
   // eslint-disable-next-line max-lines-per-function
-  incomingHandshake: async message => {
+  handshake: async message => {
     if (!validateSignature(message)) {
       messagesChannel.postMessage({
         type: 'error',
@@ -151,7 +151,7 @@ const MessagesEventMap = {
       })
     } else if (!contact.receiver_public_key) {
       contactsChannel.postMessage({
-        type: 'updateContactKey',
+        type: 'updateEncryptionPublicKey',
         payload: {
           sender: message.receiver,
           receiver: message.sender,
@@ -173,7 +173,7 @@ const MessagesEventMap = {
       })
 
       await Service.publish({
-        type: 'incomingHandshake',
+        type: 'handshake',
         receiver: message.sender,
         payload: signedMessage
       })

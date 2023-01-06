@@ -1,8 +1,8 @@
-import { ChatInfo } from './chat-info'
-import { Messages } from './messages'
-import { ChatForm } from './chat-form'
 import { Main } from 'grommet'
 import styled from 'styled-components'
+import { ChatHeader } from './chat-header'
+import { Messages } from './chat-body/messages'
+import { ChatFooter } from './chat-footer'
 
 const StyledMain = styled(Main)`
   background-color: #f5f9fd;
@@ -15,8 +15,8 @@ const StyledMain = styled(Main)`
 
 export const Chat = props => (
   <StyledMain {...props}>
-    <ChatInfo />
+    <ChatHeader />
     <Messages />
-    <ChatForm direction="row" />
+    <ChatFooter />
   </StyledMain>
 )

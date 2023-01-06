@@ -84,7 +84,8 @@ export const addContact = async (contact: Contact) => {
     const _contact = {
       sender_did: contact.sender,
       receiver_did: contact.receiver,
-      receiver_public_key: contact.receiverEncryptionPublicKey
+      receiver_public_key: contact.receiverEncryptionPublicKey,
+      muted: false
     }
 
     return await add(_contact)
@@ -96,6 +97,7 @@ export const addContact = async (contact: Contact) => {
   }
 }
 
+//TODO bug! if client has few profiles and at least one profile added contact A, it is not possible to add contact A for another profile
 export const getContactByDid = async (
   DID: string
 ): Promise<DBContact | undefined> => {
@@ -110,7 +112,7 @@ export const getContactByDid = async (
   }
 }
 
-export const updateContactKey = async (
+export const updateEncryptionPublicKey = async (
   contactDid: string,
   encryptionPublicKey
 ) => {
@@ -129,6 +131,36 @@ export const updateContactKey = async (
   }
 }
 
+export const updateContactArchived = async (contactDid, archived) => {
+  const { update, getByIndex } = useIndexedDB('contacts')
+
+  try {
+    const foundContact = await getByIndex('receiver_did', contactDid)
+
+    if (!foundContact) throw Error('No contact with provided did')
+
+    await update({ ...foundContact, archived })
+  } catch (error) {
+    console.error('error updateContact :>> ', error)
+  }
+}
+
+export const updateContactMuted = async (contactDid, muted) => {
+  //TODO: is not here we see redundancy?
+  const { update, getByIndex } = useIndexedDB('contacts')
+
+  console.info('updateContactMuted muted :>> ', muted)
+  try {
+    const foundContact = await getByIndex('receiver_did', contactDid)
+
+    if (!foundContact) throw Error('No contact with provided did')
+
+    await update({ ...foundContact, muted })
+  } catch (error) {
+    console.error('error updateContact :>> ', error)
+  }
+}
+
 export const getAllContacts = async () => {
   const { getAll } = useIndexedDB('contacts')
 
@@ -139,28 +171,118 @@ export const getAllContacts = async () => {
   }
 }
 
-export const getUserMessages = async (currentUser, activeContact) => {
+//with all types
+export const getAllUserMessages = async (currentUser, activeContact) => {
   if (!currentUser || !activeContact) return []
 
   try {
     const messages = await getAllMessages()
     return R.filter(
       item =>
-        ((item.receiver === activeContact && item.sender === currentUser) ||
-          (item.sender === activeContact && item.receiver === currentUser)) &&
-        item.type === MessageType.message,
+        (item.receiver === activeContact && item.sender === currentUser) ||
+        (item.sender === activeContact && item.receiver === currentUser),
       messages
     )
+  } catch (error) {
+    console.error('error getAllUserMessages :>> ', error)
+  }
+}
+
+//with type message
+export const getUserMessages = async (currentUser, activeContact) => {
+  if (!currentUser || !activeContact) return []
+
+  try {
+    const messages = await getAllUserMessages(currentUser, activeContact)
+    return R.filter(item => item.type === MessageType.message, messages)
   } catch (error) {
     console.error('error getUserMessages :>> ', error)
   }
 }
 
-export const getAllContactsByDid = async currentDid => {
+export const getLastMessage = async (currentUser, activeContact) => {
+  if (!currentUser || !activeContact) return []
+
+  try {
+    const messages = await getUserMessages(currentUser, activeContact)
+
+    if (!messages?.length) return null
+
+    return messages[messages.length - 1]
+  } catch (error) {
+    console.error('error getLastMessage :>> ', error)
+  }
+}
+
+export const getAllContactsByDid = async sender => {
+  const isSenderUnarchivedContact = contact => {
+    return contact.sender_did === sender && !contact.archived
+  }
+
   try {
     const contacts = await getAllContacts()
-    return R.filter(R.propEq('sender_did', currentDid), contacts)
+
+    return R.filter(isSenderUnarchivedContact, contacts)
   } catch (error) {
     console.error('error getAllContactsByDid :>> ', error)
+  }
+}
+
+export const getAllArchivedContactsByDid = async sender => {
+  const isSenderArchivedContact = contact =>
+    contact.sender_did === sender && contact.archived
+
+  try {
+    const contacts = await getAllContacts()
+
+    return R.filter(isSenderArchivedContact, contacts)
+  } catch (error) {
+    console.error('error getAllArchivedContactsByDid :>> ', error)
+  }
+}
+
+export const deleteContact = async DID => {
+  const { deleteRecord } = useIndexedDB('contacts')
+
+  try {
+    const contact = await getContactByDid(DID)
+
+    await deleteRecord(contact.id)
+  } catch (error) {
+    console.error('error deleteContact :>> ', error)
+  }
+}
+
+export const deleteMessages = async (sender, receiver) => {
+  const { deleteRecord } = useIndexedDB('messages')
+
+  try {
+    const messages = await getAllUserMessages(sender, receiver)
+
+    for (const message of messages) {
+      await deleteRecord(message.id)
+    }
+  } catch (error) {
+    console.error('error deleteMessages :>> ', error)
+  }
+}
+
+export const deleteMessagesByIds = async (
+  sender,
+  receiver,
+  ids: Set<string>
+) => {
+  const { deleteRecord } = useIndexedDB('messages')
+
+  try {
+    const messages = await getAllUserMessages(sender, receiver)
+
+    for (const message of messages) {
+      if (ids.has(message.messageId)) {
+        await deleteRecord(message.id)
+      }
+    }
+  } catch (error) {
+    console.error('error deleteMessagesByIds :>> ', error)
   }
 }

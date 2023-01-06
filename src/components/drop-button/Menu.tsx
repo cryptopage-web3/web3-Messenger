@@ -10,7 +10,7 @@ export type MenuProps = {
 export const Menu = ({ menuConfig, closeMenu }: MenuProps) => {
   return (
     <Box pad="none" width="160px">
-      {menuConfig.map(({ key, icon, name, onClick }) => (
+      {menuConfig.map(({ key, icon, name, onClick, color }) => (
         <MenuItem
           key={key}
           icon={icon}
@@ -19,6 +19,7 @@ export const Menu = ({ menuConfig, closeMenu }: MenuProps) => {
             if (onClick) onClick()
             closeMenu()
           }}
+          color={color}
         />
       ))}
     </Box>

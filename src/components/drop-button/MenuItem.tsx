@@ -1,12 +1,13 @@
 import React from 'react'
-import { Box, Button, Text } from 'grommet'
+import { Box, Button } from 'grommet'
 import styled from 'styled-components'
+import { Text } from '../text'
 
 const MenuItemButton = styled(Button)`
   transition: 0.1s ease-out;
 
   background: #fff;
-  color: #1f1f1f;
+  color: ${({ color }) => color ?? '#1f1f1f'};
 
   &:not(:last-child) {
     border-bottom: 1.6px solid #f1f1f1;
@@ -14,8 +15,12 @@ const MenuItemButton = styled(Button)`
 
   &:hover {
     background: #f5f9fd;
-    color: #1886ff;
+    color: ${({ color }) => color ?? '#1886ff'};
   }
+`
+
+const MenuItemBox = styled(Box)`
+  padding: 10px 15px;
 `
 
 export type MenuItemProps = {
@@ -23,19 +28,21 @@ export type MenuItemProps = {
   icon: React.ReactElement
   name: string
   onClick?: () => void
+  color?: string
 }
 
 export const MenuItem = ({
   icon: IconComponent,
   name,
-  onClick
+  onClick,
+  color
 }: MenuItemProps) => {
   return (
-    <MenuItemButton plain onClick={onClick}>
-      <Box pad="15px" direction="row" align="center" gap="10px">
+    <MenuItemButton plain onClick={onClick} color={color}>
+      <MenuItemBox direction="row" align="center" gap="10px">
         <IconComponent />
-        <Text size="xsmall">{name}</Text>
-      </Box>
+        <Text>{name}</Text>
+      </MenuItemBox>
     </MenuItemButton>
   )
 }
