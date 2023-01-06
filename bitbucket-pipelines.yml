@@ -10,7 +10,7 @@ pipelines:
                variables:
                   USER: $USER
                   SERVER: $SERVER
-                  REMOTE_PATH: '/tmp/'
+                  REMOTE_PATH: '/tmp/messenger-deploy/'
                   LOCAL_PATH: './deploy/*'
                   EXTRA_ARGS: ['-r']
 
@@ -21,7 +21,7 @@ pipelines:
                   SERVER: $SERVER
                   MODE: 'command'
                   COMMAND: > 
-                    /bin/bash /tmp/deploy.sh > $DEPLOY_LOG_FILE
+                    /bin/bash /tmp/messenger-deploy/deploy.sh > $DEPLOY_LOG_FILE
                   ENV_VARS: >-
                     TG_BOT_ID=$TG_BOT_ID
                     TG_CHAT_ID=$TG_CHAT_ID
