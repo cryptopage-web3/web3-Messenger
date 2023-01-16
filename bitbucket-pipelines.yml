@@ -29,7 +29,9 @@ pipelines:
                   SSH_USER: $USER
                   SERVER: $SERVER
                   MODE: 'command'
-                  COMMAND: > 
+                  COMMAND: >-
+                    [ -s "~/.nvm/nvm.sh" ] && \. "~/.nvm/nvm.sh" &&
+                    nvm use 16 &&
                     /bin/bash /tmp/messenger-deploy/deploy.sh > $DEPLOY_LOG_FILE
                   ENV_VARS: >-
                     TG_BOT_ID=$TG_BOT_ID
