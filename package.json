@@ -4,6 +4,7 @@
   "author": "b0rey",
   "license": "MIT",
   "source": "src/index.html",
+  "homepage": "/messenger/",
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
