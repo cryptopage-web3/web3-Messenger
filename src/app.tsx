@@ -14,7 +14,7 @@ const areas = [
 ]
 
 export const App = () => (
-  <BrowserRouter>
+  <BrowserRouter basename={'messenger'}>
     <Routes>
       <Route path="/ChatListSidebar" element={<ChatListSidebar adaptive />} />
       <Route
