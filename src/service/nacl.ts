@@ -3,6 +3,7 @@ import * as EthSigUtil from '@metamask/eth-sig-util'
 import { verifyMessage } from 'ethers/lib/utils'
 import { MessageType } from '../@types'
 import { v4 as uuidv4 } from 'uuid'
+import * as Service from './service'
 
 //TODO: since this module works with MetaMask API, should we rename it as metamask.ts?
 
@@ -131,14 +132,16 @@ export const getSignedMessage = async (
   receiverDid: string,
   encryptionPublicKeyRequested: boolean
 ) => {
-  const senderEncryptionPublicKey = await getEncryptionPublicKey()
   const ethereumWalletAddress = await getEthereumWalletAddress()
+  const myEncryptionPublicKey = await Service.getEncryptionPublicKey(
+    ethereumWalletAddress
+  )
   const unsignedMessage = {
     type: MessageType.handshake,
     encryptionPublicKeyRequested,
     sender: senderDid,
     receiver: receiverDid,
-    senderEncryptionPublicKey: senderEncryptionPublicKey,
+    senderEncryptionPublicKey: myEncryptionPublicKey,
     senderEthereumWalletAddress: ethereumWalletAddress
   }
 

@@ -26,3 +26,23 @@ export const getEncryptedMessage = async message => {
   const encryptedText = await NaCl.encrypt(message.text, encryptionPublicKey)
   return { ...message, text: encryptedText }
 }
+
+export const getEncryptionPublicKey = async (
+  walletAddress: string
+): Promise<string> => {
+  const encryptionPublicKey = await DB.getEncryptionPublicKey(walletAddress)
+  if (encryptionPublicKey) {
+    return encryptionPublicKey
+  } else {
+    const newEncryptionPublicKey = await NaCl.getEncryptionPublicKey()
+    const addedEncryptionPublicKeyObject = await DB.addEncryptionPublicKey(
+      walletAddress,
+      newEncryptionPublicKey
+    )
+    console.log(
+      'getEncryptionPublicKey addedEncryptionPublicKeyObject >> ',
+      addedEncryptionPublicKeyObject
+    )
+    return newEncryptionPublicKey
+  }
+}
