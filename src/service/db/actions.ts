@@ -112,7 +112,67 @@ export const getContactByDid = async (
   }
 }
 
+export const getEncryptionPublicKey = async (
+  walletAddress: string
+): Promise<string> => {
+  const { getByIndex } = useIndexedDB('encryption_public_keys')
+
+  try {
+    const foundEncryptionPublicKeyObject = await getByIndex(
+      'wallet_address',
+      walletAddress
+    )
+
+    if (!foundEncryptionPublicKeyObject)
+      throw Error('No encryption public key with provided wallet address')
+
+    return foundEncryptionPublicKeyObject.encryption_public_key
+  } catch (error) {
+    console.error('error :>> ', error)
+  }
+}
+
+export const addEncryptionPublicKey = async (
+  walletAddress: string,
+  encryptionPublicKey: string
+) => {
+  const { add } = useIndexedDB('encryption_public_keys')
+  try {
+    return await add({
+      wallet_address: walletAddress,
+      encryption_public_key: encryptionPublicKey
+    })
+  } catch (error) {
+    console.error('error updateContact :>> ', error)
+  }
+}
+
 export const updateEncryptionPublicKey = async (
+  //TODO: why do we need it?!
+  walletAddress: string,
+  encryptionPublicKey: string
+) => {
+  const { update, getByIndex } = useIndexedDB('encryption_public_keys')
+
+  try {
+    const foundEncryptionPublicKeyObject = await getByIndex(
+      'wallet_address',
+      walletAddress
+    )
+
+    if (!foundEncryptionPublicKeyObject)
+      throw Error('No encryption public key with provided wallet address')
+
+    await update({
+      ...foundEncryptionPublicKeyObject,
+      encryption_public_key: encryptionPublicKey
+    })
+  } catch (error) {
+    console.error('error updateContact :>> ', error)
+  }
+}
+
+export const updateContactEncryptionPublicKey = async (
   contactDid: string,
   encryptionPublicKey
 ) => {

@@ -40,8 +40,8 @@ const ContactsEventMap = {
     await requestEncryptionPublicKey(message)
   },
   addContact: async message => await addContact(message),
-  updateEncryptionPublicKey: async message => {
-    await DB.updateEncryptionPublicKey(
+  updateContactEncryptionPublicKey: async message => {
+    await DB.updateContactEncryptionPublicKey(
       message.receiver,
       message.encryptionPublicKey
     )
