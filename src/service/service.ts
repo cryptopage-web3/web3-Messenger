@@ -1,6 +1,9 @@
 import * as server from './server'
 import * as DB from './db'
 import * as NaCl from './nacl'
+import * as account from './account'
+
+account.init()
 
 export const subscribe = DID => {
   server.subscribe(DID)
@@ -30,19 +33,12 @@ export const getEncryptedMessage = async message => {
 export const getEncryptionPublicKey = async (
   walletAddress: string
 ): Promise<string> => {
-  const encryptionPublicKey = await DB.getEncryptionPublicKey(walletAddress)
-  if (encryptionPublicKey) {
-    return encryptionPublicKey
-  } else {
-    const newEncryptionPublicKey = await NaCl.getEncryptionPublicKey()
-    const addedEncryptionPublicKeyObject = await DB.addEncryptionPublicKey(
-      walletAddress,
-      newEncryptionPublicKey
-    )
-    console.log(
-      'getEncryptionPublicKey addedEncryptionPublicKeyObject >> ',
-      addedEncryptionPublicKeyObject
-    )
-    return newEncryptionPublicKey
-  }
+  const storedKey = await DB.getEncryptionPublicKey(walletAddress)
+  if (storedKey) return storedKey
+
+  const publicKey = await NaCl.getEncryptionPublicKey()
+  const record = await DB.addEncryptionPublicKey(walletAddress, publicKey)
+  console.debug('getEncryptionPublicKey record >> ', record)
+
+  return publicKey
 }

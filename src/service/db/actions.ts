@@ -114,19 +114,16 @@ export const getContactByDid = async (
 
 export const getEncryptionPublicKey = async (
   walletAddress: string
-): Promise<string> => {
+): Promise<string | undefined> => {
   const { getByIndex } = useIndexedDB('encryption_public_keys')
 
   try {
-    const foundEncryptionPublicKeyObject = await getByIndex(
-      'wallet_address',
-      walletAddress
-    )
+    const record = await getByIndex('wallet_address', walletAddress)
 
-    if (!foundEncryptionPublicKeyObject)
+    if (!record)
       throw Error('No encryption public key with provided wallet address')
 
-    return foundEncryptionPublicKeyObject.encryption_public_key
+    return record.encryption_public_key
   } catch (error) {
     console.error('error :>> ', error)
   }
