@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { getEthereumWalletAddress, signMessage } from '../../../service/nacl'
 
-const message = JSON.stringify('This is a test message')
+const message = 'This is a test message'
 const channel = new BroadcastChannel('peer:onboarding')
 const queryName = 'onboarding'
 
@@ -31,10 +31,13 @@ export const useFunctionalCheck = () => {
 
     signMessage(message)
       .then(async signature => {
-        const signatureAddress = verifyMessage(message, signature)
-        const address = await getEthereumWalletAddress()
+        const signatureAddress = verifyMessage(
+          JSON.stringify(message),
+          signature
+        )
+        const address: string = await getEthereumWalletAddress()
 
-        address === signatureAddress
+        address.toLocaleLowerCase() === signatureAddress.toLocaleLowerCase()
           ? channel.postMessage(success)
           : channel.postMessage(failure)
 
