@@ -1,4 +1,4 @@
-import * as Ipfs from 'ipfs-core'
+//import * as Ipfs from 'ipfs-core'
 import * as Bus from '../bus'
 
 export const decode = data => new TextDecoder().decode(data)
@@ -132,53 +132,53 @@ const config = {
   }
 }
 
-const start = async () => {
-  ipfs = await Ipfs.create(config)
+// const start = async () => {
+//   ipfs = await Ipfs.create(config)
 
-  ipfs.libp2p.on('peer:discovery', (peerId: any) =>
-    console.log(`Found peer ${peerId.toB58String()}`)
-  )
+//   ipfs.libp2p.on('peer:discovery', (peerId: any) =>
+//     console.log(`Found peer ${peerId.toB58String()}`)
+//   )
 
-  ipfs.libp2p.connectionManager.on('peer:connect', (connection: any) =>
-    console.log(`Connected to ${connection.remotePeer.toB58String()}`)
-  )
+//   ipfs.libp2p.connectionManager.on('peer:connect', (connection: any) =>
+//     console.log(`Connected to ${connection.remotePeer.toB58String()}`)
+//   )
 
-  ipfs.libp2p.connectionManager.on('peer:disconnect', (connection: any) =>
-    console.log(`Disconnected from ${connection.remotePeer.toB58String()}`)
-  )
+//   ipfs.libp2p.connectionManager.on('peer:disconnect', (connection: any) =>
+//     console.log(`Disconnected from ${connection.remotePeer.toB58String()}`)
+//   )
 
-  console.log('peer started, ID:', ipfs.libp2p.peerId.toB58String())
+//   console.log('peer started, ID:', ipfs.libp2p.peerId.toB58String())
 
-  // @ts-ignore
-  window.ipfs = ipfs
+//   // @ts-ignore
+//   window.ipfs = ipfs
 
-  //////////////////
-  console.log('!!! start')
+//   //////////////////
+//   console.log('!!! start')
 
-  await dobootstrap(false)
+//   await dobootstrap(false)
 
-  console.log('!!! dobootstrap')
+//   console.log('!!! dobootstrap')
 
-  await subscribe('discochat-' + 'global', msg => console.log('! out msg', msg))
+//   await subscribe('discochat-' + 'global', msg => console.log('! out msg', msg))
 
-  console.log('!!! subscribe 1')
+//   console.log('!!! subscribe 1')
 
-  // publish and subscribe to keepalive to help keep the sockets open
-  await ipfs.pubsub.subscribe('discochat-' + 'keepalive')
-  console.log('!!! subscribe 2')
+//   // publish and subscribe to keepalive to help keep the sockets open
+//   await ipfs.pubsub.subscribe('discochat-' + 'keepalive')
+//   console.log('!!! subscribe 2')
 
-  setInterval(() => publish('1', 'discochat-' + 'keepalive'), 4000)
-  console.log('!!! interval 1')
+//   setInterval(() => publish('1', 'discochat-' + 'keepalive'), 4000)
+//   console.log('!!! interval 1')
 
-  setInterval(checkalive, 1000)
-  console.log('!!! interval 2')
+//   setInterval(checkalive, 1000)
+//   console.log('!!! interval 2')
 
-  // process announcements over the relay network, and publish our own keep-alives to keep the channel alive
-  await ipfs.pubsub.subscribe('announce-circuit', processAnnounce)
-  console.log('!!! subscribe 3')
+//   // process announcements over the relay network, and publish our own keep-alives to keep the channel alive
+//   await ipfs.pubsub.subscribe('announce-circuit', processAnnounce)
+//   console.log('!!! subscribe 3')
 
-  setInterval(() => publish('announce-circuit', 'peer-alive'), 15000)
-  console.log('!!! interval 3')
-}
+//   setInterval(() => publish('announce-circuit', 'peer-alive'), 15000)
+//   console.log('!!! interval 3')
+// }
 
 //start()
