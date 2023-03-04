@@ -38,6 +38,7 @@
   "dependencies": {
     "@metamask/detect-provider": "^2.0.0",
     "@metamask/eth-sig-util": "^4.0.1",
+    "@metamask/providers": "^10.2.1",
     "@self.id/framework": "^0.2.0",
     "@types/ramda": "^0.28.23",
     "@types/react": "^18.0.28",
