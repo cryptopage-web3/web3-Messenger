@@ -6,6 +6,7 @@ import { createGlobalStyle } from 'styled-components'
 import { init as initPersistentService } from './service/PersistentService'
 import { init as initTransferService } from './service/TransferService'
 import { init as initLoggerService } from './service/LoggerService'
+import { init as initTransport } from './transport'
 import { GlobalModal } from './components'
 
 const GlobalStyle = createGlobalStyle`
@@ -27,6 +28,7 @@ const GlobalStyle = createGlobalStyle`
 initPersistentService()
 initTransferService()
 initLoggerService()
+initTransport()
 
 const theme = {
   global: {
