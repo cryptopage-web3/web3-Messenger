@@ -27,7 +27,7 @@ const GlobalStyle = createGlobalStyle`
 initPersistentService()
 initTransferService()
 initLoggerService()
-// initTransport()
+initTransport()
 
 const theme = {
   global: {

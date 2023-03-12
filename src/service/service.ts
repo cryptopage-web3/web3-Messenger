@@ -2,6 +2,8 @@ import * as server from './server'
 import * as DB from './db'
 import * as NaCl from './nacl'
 import * as account from './account'
+import { invite } from '../transport'
+import { Message } from '../@types'
 
 account.init()
 
@@ -10,9 +12,11 @@ export const subscribe = DID => {
   console.log(`message subscribe ${DID}`)
 }
 
-export const publish = message => {
+export const publish = (message: Message) => {
   try {
-    server.publish(message)
+    console.debug('Inviting the address >> ', message.receiver)
+    invite(message.receiver)
+    // server.publish(message)
     console.log('publish message', message)
   } catch (error) {
     console.error('error publish:>> ', error)

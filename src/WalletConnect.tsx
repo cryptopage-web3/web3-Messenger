@@ -1,28 +1,13 @@
-import { EthereumClient, w3mConnectors, w3mProvider } from '@web3modal/ethereum'
 import { Web3Button, Web3Modal } from '@web3modal/react'
-import { configureChains, createClient, useAccount, WagmiConfig } from 'wagmi'
-import { goerli } from 'wagmi/chains'
+import { useAccount, WagmiConfig } from 'wagmi'
 import { Paragraph } from 'grommet'
 import * as Service from './service'
 import { useEffect } from 'react'
 import { Status } from './service/peer'
-
-const chains = [goerli]
-const projectId = '511061f371e850eaaf5d62e930064228' //TODO: how should we store Project ID?!
-
-const { provider } = configureChains(chains, [w3mProvider({ projectId })])
-
-const wagmiClient = createClient({
-  autoConnect: true,
-  connectors: w3mConnectors({ projectId, version: 1, chains }),
-  provider
-})
-
-const ethereumClient = new EthereumClient(wagmiClient, chains)
+import { ethereumClientWagmi, projectId, wagmiClient } from './Wagmi'
 
 export const useDID = () => {
   const { address } = useAccount()
-  console.debug('useDID() address >> ', address)
   return address
 }
 
@@ -49,7 +34,7 @@ export const WalletConnect = () => {
         )}
       </WagmiConfig>
 
-      <Web3Modal projectId={projectId} ethereumClient={ethereumClient} />
+      <Web3Modal projectId={projectId} ethereumClient={ethereumClientWagmi} />
     </>
   )
 }
