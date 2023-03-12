@@ -1,5 +1,5 @@
 import React from 'react'
-import { Grid, Header } from 'grommet'
+import { Grid } from 'grommet'
 import { ChatListSidebar } from '../../../contacts'
 import { WalletConnect } from '../../../WalletConnect'
 import { Chat } from '../../../messenger'
@@ -19,9 +19,7 @@ export const Main = () => {
 
   return (
     <Grid fill rows={rows} columns={columns} areas={areas}>
-      {/*<Header gridArea="header" pad="small">*/}
-      <WalletConnect />
-      {/*</Header>*/}
+      <WalletConnect gridArea="header" />
       <ChatListSidebar gridArea="nav" />
       <Chat gridArea="main" />
     </Grid>
