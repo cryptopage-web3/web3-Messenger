@@ -13,17 +13,16 @@ const areas = [
   { name: 'main', start: [1, 1], end: [1, 1] }
 ]
 
+//TODO: fix the grommet issue with the header
 export const Main = () => {
   useFunctionalCheck()
 
   return (
     <Grid fill rows={rows} columns={columns} areas={areas}>
-      <Header gridArea="header" pad="small">
-        <WalletConnect />
-      </Header>
-
+      {/*<Header gridArea="header" pad="small">*/}
+      <WalletConnect />
+      {/*</Header>*/}
       <ChatListSidebar gridArea="nav" />
-
       <Chat gridArea="main" />
     </Grid>
   )
