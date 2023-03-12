@@ -1,36 +1,24 @@
-import {
-  chain,
-  configureChains,
-  createClient,
-  WagmiConfig,
-  useAccount,
-  useDisconnect
-} from 'wagmi'
-import {
-  EthereumClient,
-  modalConnectors,
-  walletConnectProvider
-} from '@web3modal/ethereum'
-import { Web3Modal, Web3Button } from '@web3modal/react'
+import { EthereumClient, w3mConnectors, w3mProvider } from '@web3modal/ethereum'
+import { Web3Button, Web3Modal } from '@web3modal/react'
+import { configureChains, createClient, useAccount, WagmiConfig } from 'wagmi'
+import { goerli } from 'wagmi/chains'
 import { Paragraph } from 'grommet'
 import * as Service from './service'
 import { useEffect } from 'react'
 import { Status } from './service/peer'
 
-const chains = [chain.mainnet, chain.goerli]
+const chains = [goerli]
 const projectId = '511061f371e850eaaf5d62e930064228' //TODO: how should we store Project ID?!
 
-const { provider } = configureChains(chains, [
-  walletConnectProvider({ projectId })
-])
+const { provider } = configureChains(chains, [w3mProvider({ projectId })])
 
-const client = createClient({
+const wagmiClient = createClient({
   autoConnect: true,
-  connectors: modalConnectors({ appName: 'web3Modal', chains }),
+  connectors: w3mConnectors({ projectId, version: 1, chains }),
   provider
 })
 
-const ethereumClient = new EthereumClient(client, chains)
+const ethereumClient = new EthereumClient(wagmiClient, chains)
 
 export const useDID = () => {
   const { address } = useAccount()
@@ -52,7 +40,7 @@ export const WalletConnect = () => {
 
   return (
     <>
-      <WagmiConfig client={client}>
+      <WagmiConfig client={wagmiClient}>
         <Web3Button />
         {address ? (
           <Paragraph>Connected as {address}</Paragraph>
