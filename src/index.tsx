@@ -1,4 +1,3 @@
-import { Provider } from '@self.id/framework'
 import React, { StrictMode } from 'react'
 import { render } from 'react-dom'
 import { App } from './app'
@@ -28,7 +27,7 @@ const GlobalStyle = createGlobalStyle`
 initPersistentService()
 initTransferService()
 initLoggerService()
-initTransport()
+// initTransport()
 
 const theme = {
   global: {
@@ -66,12 +65,10 @@ const theme = {
 
 render(
   <StrictMode>
-    <Provider ui={{ theme }}>
-      <GlobalModal>
-        <GlobalStyle />
-        <App />
-      </GlobalModal>
-    </Provider>
+    <GlobalModal>
+      <GlobalStyle />
+      <App />
+    </GlobalModal>
   </StrictMode>,
   document.getElementById('root')
 )
