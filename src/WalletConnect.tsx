@@ -1,10 +1,17 @@
 import { Web3Button, Web3Modal } from '@web3modal/react'
 import { useAccount, WagmiConfig } from 'wagmi'
-import { Paragraph } from 'grommet'
+import { Button, Paragraph } from 'grommet'
 import * as Service from './service'
 import { useEffect } from 'react'
 import { Status } from './service/peer'
-import { ethereumClientWagmi, projectId, wagmiClient } from './Wagmi'
+import {
+  ethereumClientWagmi,
+  projectId,
+  signMessageWagmi,
+  wagmiClient
+} from './Wagmi'
+import { confirmInvites, init as initTransport, invite } from './transport'
+import { getEthereumWalletAddress } from './service/nacl'
 
 export const useDID = () => {
   const { address } = useAccount()
@@ -28,7 +35,30 @@ export const WalletConnect = () => {
       <WagmiConfig client={wagmiClient}>
         <Web3Button />
         {address ? (
-          <Paragraph>Connected as {address}</Paragraph>
+          <div>
+            <Paragraph>Connected as {address}</Paragraph>
+            <Button
+              onClick={() => {
+                initTransport(getEthereumWalletAddress, signMessageWagmi)
+              }}
+            >
+              Register
+            </Button>
+            <Button
+              onClick={() => {
+                invite(getEthereumWalletAddress, '')
+              }}
+            >
+              Invite
+            </Button>
+            <Button
+              onClick={() => {
+                confirmInvites(getEthereumWalletAddress)
+              }}
+            >
+              Confirm
+            </Button>
+          </div>
         ) : (
           <Paragraph>Please, connect</Paragraph>
         )}

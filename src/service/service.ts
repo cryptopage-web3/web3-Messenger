@@ -4,6 +4,7 @@ import * as NaCl from './nacl'
 import * as account from './account'
 import { invite } from '../transport'
 import { Message } from '../@types'
+import { getEthereumWalletAddress } from './nacl'
 
 account.init()
 
@@ -14,9 +15,7 @@ export const subscribe = DID => {
 
 export const publish = (message: Message) => {
   try {
-    console.debug('Inviting the address >> ', message.receiver)
-    invite(message.receiver)
-    // server.publish(message)
+    server.publish(message)
     console.log('publish message', message)
   } catch (error) {
     console.error('error publish:>> ', error)
