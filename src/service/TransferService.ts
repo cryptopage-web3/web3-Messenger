@@ -6,6 +6,7 @@ import * as DB from './db'
 
 const contactsChannel = new BroadcastChannel('peer:contacts')
 const messagesChannel = new BroadcastChannel('peer:messages')
+const transportChannel = new BroadcastChannel('peer:transport')
 const naclChannel = new BroadcastChannel('peer:nacl')
 
 const NaclEventMap = {
@@ -215,6 +216,14 @@ const MessagesEventMap = {
 
 const ContactsEventMap = {
   addContact: async message => {
+    if (!message.topic) {
+      transportChannel.postMessage({
+        type: 'sendChatInvite',
+        payload: {
+          address: message.receiver
+        }
+      })
+    }
     await Service.publish({
       type: 'addContact',
       receiver: message.receiver,

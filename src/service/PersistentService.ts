@@ -80,6 +80,9 @@ const ContactsEventMap = {
       type: 'updateMutedContacts',
       payload: message
     })
+  },
+  updateContactTopic: async message => {
+    await DB.updateContactTopic(message.receiver, message.topic)
   }
 }
 

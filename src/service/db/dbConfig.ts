@@ -10,7 +10,8 @@ export const DBConfig = {
         { name: 'sender', keypath: 'sender', options: { unique: false } },
         { name: 'messageId', keypath: 'messageId', options: { unique: true } },
         { name: 'text', keypath: 'text', options: { unique: false } },
-        { name: 'date', keypath: 'date', options: { unique: false } }
+        { name: 'date', keypath: 'date', options: { unique: false } },
+        { name: 'topic', keypath: 'topic', options: { unique: false } }
       ]
     },
     {
@@ -30,6 +31,11 @@ export const DBConfig = {
         {
           name: 'receiver_public_key',
           keypath: 'receiver_public_key',
+          options: { unique: true }
+        },
+        {
+          name: 'topic',
+          keypath: 'topic',
           options: { unique: true }
         }
       ]
