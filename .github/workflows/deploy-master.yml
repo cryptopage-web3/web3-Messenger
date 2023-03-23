@@ -17,8 +17,8 @@ jobs:
     - name: Copy deploy script to server
       uses: garygrossgarten/github-action-scp@release
       with:
-        local: /tmp/messenger-deploy
-        remote: /tmp
+        local: /tmp/messenger-deploy/
+        remote: /tmp/
         host: ${{ secrets.SSH_HOST }}
         username: ${{ vars.SSH_USER }}
         privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -35,4 +35,4 @@ jobs:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ vars.SSH_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
-        script: \[ -s "/home/user/.nvm/nvm.sh" ] && \. "/home/user/.nvm/nvm.sh" && nvm use 16 && /bin/bash /tmp/deploy.sh > "$DEPLOY_LOG_FILE"
+        script: \[ -s "/home/user/.nvm/nvm.sh" ] && \. "/home/user/.nvm/nvm.sh" && nvm use 16 && /bin/bash /tmp/messenger-deploy/deploy.sh > "$DEPLOY_LOG_FILE"
