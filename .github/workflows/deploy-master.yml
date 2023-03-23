@@ -13,11 +13,11 @@ jobs:
     - uses: actions/checkout@v3
     - name: 'Prepare deploy script'
       run: |
-        mkdir /tmp/messenger-deploy && cp -R deploy/ /tmp/messenger-deploy/
+        mkdir -p /tmp/deploy/messenger-deploy && cp -R deploy /tmp/deploy/messenger-deploy/
     - name: Copy deploy script to server
       uses: garygrossgarten/github-action-scp@release
       with:
-        local: /tmp/messenger-deploy/
+        local: /tmp/deploy
         remote: /tmp/
         host: ${{ secrets.SSH_HOST }}
         username: ${{ vars.SSH_USER }}
