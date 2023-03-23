@@ -1,0 +1,38 @@
+name: Remote deploy master
+on:
+  push:
+    branches:
+      - git-workflow
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+    - uses: actions/checkout@v3
+    - name: 'Prepare deploy script'
+      run: |
+        mkdir /tmp/messenger-deploy && cp -R deploy/ /tmp/messenger-deploy/
+    - name: Copy deploy script to server
+      uses: garygrossgarten/github-action-scp@release
+      with:
+        local: /tmp/messenger-deploy
+        remote: /tmp
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ vars.SSH_USER }}
+        privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
+    - name: Executing deploy script on server
+      uses: appleboy/ssh-action@v0.1.8
+      env:
+        DEPLOY_DIR: ${{ vars.DEPLOY_DIR }}
+        TG_TEXT_PREFIX: ${{ vars.TG_TEXT_PREFIX }}
+        TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+        TG_BOT_ID: ${{ secrets.TG_BOT_ID }}
+        DEPLOY_LOG_FILE: ${{ vars.DEPLOY_LOG_FILE }}
+      with:
+        envs: DEPLOY_DIR,TG_TEXT_PREFIX,TG_CHAT_ID,TG_BOT_ID,DEPLOY_LOG_FILE
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ vars.SSH_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: \[ -s "/home/user/.nvm/nvm.sh" ] && \. "/home/user/.nvm/nvm.sh" && nvm use 16 && /bin/bash /tmp/deploy.sh > "$DEPLOY_LOG_FILE"

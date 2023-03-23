@@ -10,8 +10,6 @@
 #unclude utils
 . $(dirname "$0")/utils.sh
 
-echo "log file: ${DEPLOY_LOG_FILE}, ${TG_TEXT_PREFIX}|${TG_CHAT_ID}|${DEPLOY_DIR}|${DEPLOY_PORT}|${RUN_DIR}|${RUN_PORT}|${PM2_NAME}"
-
 deploy_dir=${DEPLOY_DIR}
 
 tg_message "Deploy started"
@@ -48,11 +46,11 @@ exit_if_error "build failed"
 
 tg_message "start update site"
 
-rm -rf /var/www/html/*
+rm -rf /var/www/messenger/*
 
-cp -rf $deploy_dir/dist/* /var/www/html 2>/dev/null
+cp -rf $deploy_dir/dist/* /var/www/messenger 2>/dev/null
 
-chown -R www-data:www-data /var/www/html
+chown -R www-data:www-data /var/www/messenger
 
 tg_message "deploy completed"
 

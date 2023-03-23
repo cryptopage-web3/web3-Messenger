@@ -1,10 +1,14 @@
+version: '3.9'
 services:
   node:
     build: ./.docker/node
-    command: sh -c "yarn && yarn prepare && yarn start"
+    command: sh -c "yarn build"
     working_dir: /app
     volumes:
       - ./:/app
     ports:
       - 1234:1234
       - 9090:9090
+    
+    mem_limit: "3g"
+
