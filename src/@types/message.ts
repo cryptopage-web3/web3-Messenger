@@ -2,6 +2,7 @@ import { MessageType } from './message-type'
 import { Status } from './status'
 
 export type Message = {
+  topic: string
   id?: string
   type: MessageType.message
   status: Status

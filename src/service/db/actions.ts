@@ -80,12 +80,14 @@ export const updateText = async ({
 export const addContact = async (contact: Contact) => {
   const { add } = useIndexedDB('contacts')
 
+  console.debug('addContact >> contact', contact)
   try {
     const _contact = {
       sender_did: contact.sender,
       receiver_did: contact.receiver,
       receiver_public_key: contact.receiverEncryptionPublicKey,
-      muted: false
+      muted: false,
+      topic: contact.topic
     }
 
     return await add(_contact)
@@ -112,7 +114,64 @@ export const getContactByDid = async (
   }
 }
 
+export const getEncryptionPublicKey = async (
+  walletAddress: string
+): Promise<string | undefined> => {
+  const { getByIndex } = useIndexedDB('encryption_public_keys')
+
+  try {
+    const record = await getByIndex('wallet_address', walletAddress)
+
+    if (!record)
+      throw Error('No encryption public key with provided wallet address')
+
+    return record.encryption_public_key
+  } catch (error) {
+    console.error('error :>> ', error)
+  }
+}
+
+export const addEncryptionPublicKey = async (
+  walletAddress: string,
+  encryptionPublicKey: string
+) => {
+  const { add } = useIndexedDB('encryption_public_keys')
+  try {
+    return await add({
+      wallet_address: walletAddress,
+      encryption_public_key: encryptionPublicKey
+    })
+  } catch (error) {
+    console.error('error updateContact :>> ', error)
+  }
+}
+
 export const updateEncryptionPublicKey = async (
+  //TODO: why do we need it?!
+  walletAddress: string,
+  encryptionPublicKey: string
+) => {
+  const { update, getByIndex } = useIndexedDB('encryption_public_keys')
+
+  try {
+    const foundEncryptionPublicKeyObject = await getByIndex(
+      'wallet_address',
+      walletAddress
+    )
+
+    if (!foundEncryptionPublicKeyObject)
+      throw Error('No encryption public key with provided wallet address')
+
+    await update({
+      ...foundEncryptionPublicKeyObject,
+      encryption_public_key: encryptionPublicKey
+    })
+  } catch (error) {
+    console.error('error updateContact :>> ', error)
+  }
+}
+
+export const updateContactEncryptionPublicKey = async (
   contactDid: string,
   encryptionPublicKey
 ) => {
@@ -156,6 +215,22 @@ export const updateContactMuted = async (contactDid, muted) => {
     if (!foundContact) throw Error('No contact with provided did')
 
     await update({ ...foundContact, muted })
+  } catch (error) {
+    console.error('error updateContact :>> ', error)
+  }
+}
+
+export const updateContactTopic = async (contactDid, topic) => {
+  //TODO: is not here we see redundancy?
+  const { update, getByIndex } = useIndexedDB('contacts')
+
+  console.info('updateContactTopic topic :>> ', topic)
+  try {
+    const foundContact = await getByIndex('receiver_did', contactDid)
+
+    if (!foundContact) throw Error('No contact with provided did')
+
+    await update({ ...foundContact, topic })
   } catch (error) {
     console.error('error updateContact :>> ', error)
   }

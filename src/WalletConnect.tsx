@@ -1,40 +1,15 @@
-import {
-  chain,
-  configureChains,
-  createClient,
-  WagmiConfig,
-  useAccount,
-  useDisconnect
-} from 'wagmi'
-import {
-  EthereumClient,
-  modalConnectors,
-  walletConnectProvider
-} from '@web3modal/ethereum'
-import { Web3Modal, Web3Button } from '@web3modal/react'
+import { Web3Button, Web3Modal } from '@web3modal/react'
+import { useAccount, WagmiConfig } from 'wagmi'
 import { Paragraph } from 'grommet'
 import * as Service from './service'
 import { useEffect } from 'react'
 import { Status } from './service/peer'
+import { ethereumClientWagmi, projectId, wagmiClient } from './Wagmi'
 
-const chains = [chain.mainnet, chain.goerli]
-const projectId = '511061f371e850eaaf5d62e930064228' //TODO: how should we store Project ID?!
-
-const { provider } = configureChains(chains, [
-  walletConnectProvider({ projectId })
-])
-
-const client = createClient({
-  autoConnect: true,
-  connectors: modalConnectors({ appName: 'web3Modal', chains }),
-  provider
-})
-
-const ethereumClient = new EthereumClient(client, chains)
+const accountChannel = new BroadcastChannel('peer:account')
 
 export const useDID = () => {
   const { address } = useAccount()
-  console.debug('useDID() address >> ', address)
   return address
 }
 
@@ -45,6 +20,12 @@ export const WalletConnect = () => {
   useEffect(() => {
     console.debug('WalletConnect() address >> ', address)
     if (address) {
+      accountChannel.postMessage({
+        type: 'accountReady',
+        payload: {
+          address
+        }
+      })
       Service.subscribe(address)
       Status.publish(address)
     }
@@ -52,16 +33,18 @@ export const WalletConnect = () => {
 
   return (
     <>
-      <WagmiConfig client={client}>
+      <WagmiConfig client={wagmiClient}>
         <Web3Button />
         {address ? (
-          <Paragraph>Connected as {address}</Paragraph>
+          <div>
+            <Paragraph>Connected as {address}</Paragraph>
+          </div>
         ) : (
           <Paragraph>Please, connect</Paragraph>
         )}
       </WagmiConfig>
 
-      <Web3Modal projectId={projectId} ethereumClient={ethereumClient} />
+      <Web3Modal projectId={projectId} ethereumClient={ethereumClientWagmi} />
     </>
   )
 }
