@@ -3,8 +3,8 @@ tg_message()
     local chat_id="${TG_CHAT_ID}"
     local text="$1"
     local bot_id="${TG_BOT_ID}"
-    local msg_log="/tmp/tg-msg.log"
-    local file_send_log="/tmp/tg-file-send.log"
+    local msg_log=$(dirname "$0")/tg-msg.log
+    local file_send_log=$(dirname "$0")/tg-file-send.log
 
     if [ -z "$bot_id" ]; then
        echo "Empty TG_BOT_ID env variable"
