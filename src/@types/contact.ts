@@ -7,7 +7,6 @@ export type Contact = {
   // did: string
   //alias: string TODO: implement for the case when we search by a Wallet Address  (alias - for user, without prefix; while did - for the app, with prefix), check nicknames of Self.id
   // publicEncryptionKey: string
-  topic?: string
 }
 
 export type DBContact = {
@@ -16,5 +15,4 @@ export type DBContact = {
   receiver_did: string
   muted: boolean
   receiver_public_key?: string
-  topic?: string
 }

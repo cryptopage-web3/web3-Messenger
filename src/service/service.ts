@@ -2,9 +2,6 @@ import * as server from './server'
 import * as DB from './db'
 import * as NaCl from './nacl'
 import * as account from './account'
-import { Message } from '../@types'
-
-const transportChannel = new BroadcastChannel('peer:transport')
 
 account.init()
 
@@ -13,16 +10,10 @@ export const subscribe = DID => {
   console.log(`message subscribe ${DID}`)
 }
 
-export const publish = async (message: Message) => {
+export const publish = message => {
   try {
-    console.debug('sending message :>> ', message)
-    const topic = (await DB.getContactByDid(message.receiver)).topic //TODO: THINK ABOUT BETTER PLACE
-    transportChannel.postMessage({
-      type: 'sendMessage',
-      payload: {
-        message: { ...message, topic }
-      }
-    })
+    server.publish(message)
+    console.log('publish message', message)
   } catch (error) {
     console.error('error publish:>> ', error)
   }

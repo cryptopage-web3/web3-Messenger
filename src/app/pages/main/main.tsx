@@ -1,5 +1,5 @@
 import React from 'react'
-import { Grid } from 'grommet'
+import { Grid, Header } from 'grommet'
 import { ChatListSidebar } from '../../../contacts'
 import { WalletConnect } from '../../../WalletConnect'
 import { Chat } from '../../../messenger'
@@ -13,14 +13,17 @@ const areas = [
   { name: 'main', start: [1, 1], end: [1, 1] }
 ]
 
-//TODO: fix the grommet issue with the header
 export const Main = () => {
   useFunctionalCheck()
 
   return (
     <Grid fill rows={rows} columns={columns} areas={areas}>
-      <WalletConnect gridArea="header" />
+      <Header gridArea="header" pad="small">
+        <WalletConnect />
+      </Header>
+
       <ChatListSidebar gridArea="nav" />
+
       <Chat gridArea="main" />
     </Grid>
   )
